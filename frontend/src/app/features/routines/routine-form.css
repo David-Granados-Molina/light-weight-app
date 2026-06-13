@@ -236,8 +236,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 24px;
+  flex: 0 0 20%;
+  min-width: 44px;
+  align-self: stretch;
+  margin: -13px 0 -13px -15px;
   color: var(--color-text-muted);
   cursor: grab;
   touch-action: none;
