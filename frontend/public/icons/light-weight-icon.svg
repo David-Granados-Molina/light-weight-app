@@ -1,0 +1,37 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="outer">
+      <rect width="512" height="512" rx="128"></rect>
+    </clipPath>
+    <clipPath id="gym">
+      <polygon points="0,0 512,0 0,512"></polygon>
+    </clipPath>
+    <clipPath id="cali">
+      <polygon points="512,0 512,512 0,512"></polygon>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#outer)">
+    
+    <g clip-path="url(#gym)">
+      <rect width="512" height="512" fill="#00E5FF"></rect>
+      
+      <rect x="43" y="128" width="199" height="36" rx="14" fill="#0B0B0B"></rect>
+      
+      <rect x="28" y="78" width="64" height="135" rx="25" fill="#0B0B0B"></rect>
+      
+      <rect x="192" y="78" width="64" height="135" rx="25" fill="#0B0B0B"></rect>
+    </g>
+    
+    <g clip-path="url(#cali)">
+      <rect width="512" height="512" fill="#FF6B00"></rect>
+      
+      <rect x="256" y="299" width="213" height="36" rx="14" fill="#0B0B0B"></rect>
+      
+      <rect x="263" y="335" width="36" height="128" rx="14" fill="#0B0B0B"></rect>
+      
+      <rect x="427" y="335" width="36" height="128" rx="14" fill="#0B0B0B"></rect>
+    </g>
+    
+    <line x1="512" y1="0" x2="0" y2="512" stroke="#0B0B0B" stroke-width="20"></line>
+  </g>
+</svg>

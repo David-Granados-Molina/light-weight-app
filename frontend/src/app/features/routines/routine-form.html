@@ -1,0 +1,151 @@
+<div class="page">
+  <div class="header">
+    <a routerLink="/rutinas" class="back" aria-label="Volver">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <h1 class="title">{{ isEdit() ? 'Editar rutina' : 'Nueva rutina' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="empty">Cargando...</div>
+  } @else {
+    <label class="field-label">Nombre</label>
+    <input class="text-input" type="text" placeholder="Ej. Empuje" [value]="name()" (input)="onNameInput($event)" />
+
+    <label class="field-label">Categoría</label>
+    <div class="category-toggle">
+      <button type="button" class="cat-btn" [class.active]="category() === 'gym'" (click)="selectCategory('gym')">
+        <span class="cat-dot" style="background: var(--color-gym)"></span>Gym
+      </button>
+      <button
+        type="button"
+        class="cat-btn"
+        [class.active]="category() === 'calistenia'"
+        (click)="selectCategory('calistenia')"
+      >
+        <span class="cat-dot" style="background: var(--color-cali)"></span>Calistenia
+      </button>
+    </div>
+
+    <label class="field-label">Ejercicios</label>
+    <div class="search-wrap">
+      <input
+        class="text-input"
+        type="text"
+        placeholder="Buscar ejercicio…"
+        [value]="search()"
+        (input)="onSearchInput($event)"
+      />
+      @if (showResults()) {
+        <div class="search-results">
+          @for (r of searchResults(); track r.id) {
+            <div class="result-item" (click)="addExercise(r)">
+              <span class="result-name">{{ r.name }}</span>
+              <span class="result-type" [style.color]="categoryColor[r.category]">{{ typeLabel[r.type] }}</span>
+            </div>
+          }
+        </div>
+      }
+      @if (showCreateOption()) {
+        <button type="button" class="create-option" (click)="startCreateExercise()">
+          + Crear ejercicio "{{ search() }}"
+        </button>
+      }
+    </div>
+
+    @if (creatingExercise()) {
+      <div class="create-card">
+        <div class="field-label">Tipo de movimiento</div>
+        <div class="mini-chips">
+          @for (type of exerciseTypes; track type) {
+            <button
+              type="button"
+              class="mini-chip"
+              [class.active]="newExerciseType() === type"
+              (click)="selectNewExerciseType(type)"
+            >
+              {{ typeLabel[type] }}
+            </button>
+          }
+        </div>
+        <div class="field-label">Se mide en</div>
+        <div class="mini-chips">
+          @for (inputType of inputTypes; track inputType) {
+            <button
+              type="button"
+              class="mini-chip"
+              [class.active]="newExerciseInputType() === inputType"
+              (click)="selectNewExerciseInputType(inputType)"
+            >
+              {{ inputTypeLabel[inputType] }}
+            </button>
+          }
+        </div>
+        <div class="create-actions">
+          <button type="button" class="ghost-btn" (click)="cancelCreateExercise()">Cancelar</button>
+          <button type="button" class="primary-btn" (click)="confirmCreateExercise()">Crear y añadir</button>
+        </div>
+      </div>
+    }
+
+    <div class="exercise-list">
+      @for (item of exercises(); track item.exerciseId; let i = $index) {
+        <div class="exercise-row" [style.border-left-color]="categoryColor[item.exercise.category]">
+          <div class="reorder">
+            <button
+              type="button"
+              class="reorder-btn"
+              [disabled]="i === 0"
+              (click)="moveExercise(i, -1)"
+              aria-label="Subir ejercicio"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              class="reorder-btn"
+              [disabled]="i === exercises().length - 1"
+              (click)="moveExercise(i, 1)"
+              aria-label="Bajar ejercicio"
+            >
+              ▼
+            </button>
+          </div>
+          <div class="exercise-info">
+            <div class="exercise-name">{{ item.exercise.name }}</div>
+            <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
+              {{ typeLabel[item.exercise.type] }}
+            </div>
+          </div>
+          <div class="targets">
+            <div class="stepper-mini">
+              <span class="stepper-btn" (click)="bumpTarget(i, 'targetSets', -1)">−</span>
+              <span class="stepper-value">{{ item.targetSets }}<small> series</small></span>
+              <span class="stepper-btn" (click)="bumpTarget(i, 'targetSets', 1)">＋</span>
+            </div>
+            <div class="stepper-mini">
+              <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', -1)">−</span>
+              <span class="stepper-value">{{ item.targetReps }}<small> reps</small></span>
+              <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', 1)">＋</span>
+            </div>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeExercise(i)" aria-label="Quitar ejercicio">✕</button>
+        </div>
+      } @empty {
+        <div class="empty">Añade ejercicios a la rutina</div>
+      }
+    </div>
+
+    @if (error()) {
+      <div class="error">{{ error() }}</div>
+    }
+
+    <button type="button" class="save-btn" [disabled]="!canSave()" (click)="save()">
+      {{ saving() ? 'Guardando…' : 'Guardar rutina' }}
+    </button>
+
+    @if (isEdit()) {
+      <button type="button" class="delete-btn" (click)="deleteRoutine()">Eliminar rutina</button>
+    }
+  }
+</div>

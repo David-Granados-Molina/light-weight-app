@@ -1,0 +1,134 @@
+<div class="page">
+  <h1 class="title">Registrar entreno</h1>
+
+  <div class="date-chips app-scroll">
+    @for (chip of dateChips; track chip.iso) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="selectedDate() === chip.iso"
+        (click)="selectDate(chip.iso)"
+      >
+        {{ chip.label }}
+      </button>
+    }
+  </div>
+
+  <div class="category-toggle">
+    <button type="button" class="cat-btn" [class.active]="category() === 'gym'" (click)="selectCategory('gym')">
+      <span class="cat-dot" style="background: var(--color-gym)"></span>Gym
+    </button>
+    <button
+      type="button"
+      class="cat-btn"
+      [class.active]="category() === 'calistenia'"
+      (click)="selectCategory('calistenia')"
+    >
+      <span class="cat-dot" style="background: var(--color-cali)"></span>Calistenia
+    </button>
+  </div>
+
+  <div class="search-wrap">
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Buscar ejercicio…"
+      [value]="search()"
+      (input)="onSearchInput($event)"
+    />
+    @if (showResults()) {
+      <div class="search-results">
+        @for (r of searchResults(); track r.id) {
+          <div class="result-item" (click)="addExercise(r)">
+            <span class="result-name">{{ r.name }}</span>
+            <span class="result-type" [style.color]="categoryColor[r.category]">{{ typeLabel[r.type] }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="added-list">
+    @for (item of added(); track item.exercise.id; let exIndex = $index) {
+      <div class="exercise-card" [style.border-left-color]="categoryColor[item.exercise.category]">
+        <div class="exercise-head">
+          <div>
+            <div class="exercise-name">{{ item.exercise.name }}</div>
+            <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
+              {{ typeLabel[item.exercise.type] }}
+            </div>
+          </div>
+          <button type="button" class="remove-btn" (click)="removeExercise(exIndex)" aria-label="Eliminar ejercicio">
+            ✕
+          </button>
+        </div>
+
+        <div class="sets">
+          @for (set of item.sets; track $index; let setIndex = $index) {
+            <div class="set-row">
+              <span class="set-label">{{ setIndex + 1 }}</span>
+
+              @if (item.exercise.inputType === 'peso') {
+                <div class="stepper">
+                  <span class="stepper-btn dec" (click)="bump(exIndex, setIndex, 'weight', -2.5)">−</span>
+                  <span class="stepper-value">{{ set.weight }}<span class="unit"> kg</span></span>
+                  <span class="stepper-btn inc" (click)="bump(exIndex, setIndex, 'weight', 2.5)">＋</span>
+                </div>
+                <div class="stepper">
+                  <span class="stepper-btn dec" (click)="bump(exIndex, setIndex, 'reps', -1)">−</span>
+                  <span class="stepper-value">{{ set.reps }}<span class="unit"> reps</span></span>
+                  <span class="stepper-btn inc" (click)="bump(exIndex, setIndex, 'reps', 1)">＋</span>
+                </div>
+              } @else if (item.exercise.inputType === 'reps') {
+                <div class="stepper">
+                  <span class="stepper-btn dec" (click)="bump(exIndex, setIndex, 'reps', -1)">−</span>
+                  <span class="stepper-value">{{ set.reps }}<span class="unit"> reps</span></span>
+                  <span class="stepper-btn inc" (click)="bump(exIndex, setIndex, 'reps', 1)">＋</span>
+                </div>
+              } @else {
+                <div class="stepper">
+                  <span class="stepper-btn dec" (click)="bump(exIndex, setIndex, 'time', -5)">−</span>
+                  <span class="stepper-value">{{ set.time }}<span class="unit"> seg</span></span>
+                  <span class="stepper-btn inc" (click)="bump(exIndex, setIndex, 'time', 5)">＋</span>
+                </div>
+              }
+
+              @if (item.sets.length > 1) {
+                <button type="button" class="remove-set-btn" (click)="removeSet(exIndex, setIndex)" aria-label="Eliminar serie">
+                  ✕
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <button type="button" class="add-set-btn" (click)="addSet(exIndex)">+ Añadir serie</button>
+      </div>
+    } @empty {
+      <div class="empty">Busca un ejercicio para empezar</div>
+    }
+  </div>
+
+  @if (added().length > 0) {
+    <div class="summary-bar">
+      <span><strong>{{ totals().series }}</strong> series · <strong>{{ formatVolume(totals().volume) }}</strong></span>
+    </div>
+    <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">
+      {{ saving() ? 'Guardando…' : 'Guardar entreno' }}
+    </button>
+  }
+
+  @if (saved()) {
+    <div class="saved-overlay">
+      <div class="saved-sheet">
+        <div class="saved-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="saved-title">¡Entreno guardado!</div>
+        <div class="saved-summary">{{ savedSummary() }}</div>
+        <button type="button" class="saved-primary" (click)="goHistorial()">Ver en historial</button>
+        <button type="button" class="saved-secondary" (click)="closeSaved()">Seguir aquí</button>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,72 @@
+<div class="page">
+  <div class="brand">
+    <img src="icons/light-weight-icon.svg" width="28" height="28" alt="" class="brand-icon" />
+    <span class="brand-name">Light Weight</span>
+  </div>
+
+  <div class="header">
+    <div>
+      <div class="today">{{ todayLabel }}</div>
+      <div class="greeting">Hola, {{ userName() }}</div>
+    </div>
+    <a routerLink="/rutinas" class="avatar" aria-label="Rutinas y ajustes">{{ userName().charAt(0) }}</a>
+  </div>
+
+  @if (loading()) {
+    <div class="empty">Cargando...</div>
+  } @else if (error()) {
+    <div class="empty">No se ha podido conectar con el servidor.</div>
+  } @else {
+    <div class="section-label">Esta semana</div>
+    <div class="week-stats">
+      <div class="stat stat-accent">
+        <div class="stat-value">{{ weekEntrenos() }}</div>
+        <div class="stat-label">Entrenos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ formatVolume(weekVolumeKg()) }}</div>
+        <div class="stat-label">Volumen levantado</div>
+      </div>
+    </div>
+
+    <div class="card volume-card">
+      <div class="volume-header">
+        <span class="muted-label">Volumen por día</span>
+        <span class="legend">
+          <span class="legend-item"><span class="dot" style="background: var(--color-gym)"></span>Gym</span>
+          <span class="legend-item"><span class="dot" style="background: var(--color-cali)"></span>Cali</span>
+        </span>
+      </div>
+      <div class="bars">
+        @for (bar of weekBars(); track bar.date) {
+          <div class="bar-col">
+            <div class="bar" [style.height.px]="bar.heightPx" [style.background]="bar.color"></div>
+            <span class="bar-label" [class.today]="bar.isToday">{{ bar.letter }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <a routerLink="/registrar" class="cta">+ Registrar entreno de hoy</a>
+
+    <div class="recent-header">
+      <span class="muted-label">Últimos entrenos</span>
+      <a routerLink="/historial" class="see-all">Ver todos</a>
+    </div>
+
+    <div class="recent-list">
+      @for (s of recent(); track s.id) {
+        <div class="session-card" [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'">
+          <div class="session-top">
+            <app-category-tag [category]="s.category" />
+            <span class="muted">{{ relativeDayLabel(s.date) }}</span>
+          </div>
+          <div class="session-type">{{ typeLabel[s.type] }}</div>
+          <div class="session-count">{{ s.exerciseCount }} ejercicios</div>
+        </div>
+      } @empty {
+        <div class="empty">Todavía no has registrado ningún entreno.</div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,26 @@
+.app-shell {
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0, #161616, #0b0b0b 70%);
+  display: flex;
+  justify-content: center;
+}
+
+.app-content {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 24px 18px 110px;
+  position: relative;
+}
+
+.app-content.auth-content {
+  padding-bottom: 24px;
+}
+
+@media (min-width: 600px) {
+  .app-content {
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+  }
+}

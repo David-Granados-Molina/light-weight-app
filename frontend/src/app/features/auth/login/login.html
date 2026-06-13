@@ -1,0 +1,47 @@
+<div class="page">
+  <div class="brand">
+    <img src="icons/light-weight-icon.svg" width="56" height="56" alt="" class="brand-icon" />
+    <span class="brand-name">Light Weight</span>
+  </div>
+
+  <h1 class="title">Iniciar sesión</h1>
+  <p class="subtitle">Accede para registrar tus entrenos</p>
+
+  <label class="field-label">Email</label>
+  <input
+    class="text-input"
+    type="email"
+    placeholder="tucorreo@ejemplo.com"
+    autocomplete="email"
+    [value]="email()"
+    (input)="onEmailInput($event)"
+  />
+
+  <label class="field-label">Contraseña</label>
+  <input
+    class="text-input"
+    type="password"
+    placeholder="••••••••"
+    autocomplete="current-password"
+    [value]="password()"
+    (input)="onPasswordInput($event)"
+    (keydown.enter)="submit()"
+  />
+
+  <a routerLink="/recuperar" class="forgot-link">¿Has olvidado tu contraseña?</a>
+
+  @if (error()) {
+    <div class="error">{{ error() }}</div>
+  }
+
+  <button type="button" class="primary-btn" [disabled]="loading()" (click)="submit()">
+    {{ loading() ? 'Entrando…' : 'Iniciar sesión' }}
+  </button>
+
+  @if (googleAvailable) {
+    <div class="divider">o</div>
+    <div class="google-btn-wrap" #googleBtn></div>
+  }
+
+  <div class="footer-link">¿No tienes cuenta? <a routerLink="/registro">Crear cuenta</a></div>
+</div>

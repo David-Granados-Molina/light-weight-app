@@ -1,0 +1,133 @@
+.page {
+  animation: fadeUp 0.4s ease both;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.chip {
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: #c8c8c8;
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-accent-contrast);
+}
+
+.chip.active.gym {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: var(--color-gym);
+  color: var(--color-gym);
+}
+
+.chip.active.calistenia {
+  background: rgba(255, 107, 0, 0.1);
+  border-color: var(--color-cali);
+  color: var(--color-cali);
+}
+
+.search-input {
+  width: 100%;
+  margin-top: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 13px 14px;
+  color: var(--color-text);
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.session-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 15px;
+  border-left: 3px solid;
+}
+
+.session-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.session-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.session-date {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.session-type {
+  font-weight: 700;
+  font-size: 17px;
+  margin-top: 9px;
+}
+
+.session-exercises {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.session-count {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}

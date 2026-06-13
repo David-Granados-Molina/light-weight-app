@@ -1,0 +1,8 @@
+<div class="app-shell">
+  <main class="app-content" [class.auth-content]="isAuthRoute()">
+    <router-outlet />
+  </main>
+  @if (!isAuthRoute()) {
+    <app-tab-bar />
+  }
+</div>

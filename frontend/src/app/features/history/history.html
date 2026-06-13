@@ -1,0 +1,48 @@
+<div class="page">
+  <h1 class="title">Historial</h1>
+
+  <div class="chips">
+    @for (chip of filterChips; track chip.key) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="filter() === chip.key"
+        [class.gym]="chip.key === 'gym'"
+        [class.calistenia]="chip.key === 'calistenia'"
+        (click)="selectFilter(chip.key)"
+      >
+        {{ chip.label }}
+      </button>
+    }
+  </div>
+
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Buscar por ejercicio…"
+    [value]="search()"
+    (input)="onSearchInput($event)"
+  />
+
+  @if (loading()) {
+    <div class="empty">Cargando...</div>
+  } @else {
+    <div class="session-list">
+      @for (s of rows(); track s.id) {
+        <div class="session-card" [style.border-left-color]="categoryColor[s.category]">
+          <div class="session-top">
+            <span class="session-cat" [style.color]="categoryColor[s.category]">
+              <span class="dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
+            </span>
+            <span class="session-date">{{ s.dateLabel }}</span>
+          </div>
+          <div class="session-type">{{ typeLabel[s.type] }}</div>
+          <div class="session-exercises">{{ s.exercisesText }}</div>
+          <div class="session-count">{{ s.count }}</div>
+        </div>
+      } @empty {
+        <div class="empty">Sin resultados</div>
+      }
+    </div>
+  }
+</div>

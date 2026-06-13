@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  gym
+  calistenia
+}
+
+enum ExerciseType {
+  empuje
+  tiron
+  pierna
+  core
+}
+
+enum InputType {
+  peso
+  reps
+  tiempo
+}
+
+model User {
+  id           String               @id @default(uuid())
+  name         String
+  email        String               @unique
+  passwordHash String?
+  googleId     String?              @unique
+  createdAt    DateTime             @default(now())
+  routines     Routine[]
+  sessions     WorkoutSession[]
+  resetTokens  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Exercise {
+  id               String            @id @default(uuid())
+  name             String            @unique
+  category         Category
+  type             ExerciseType
+  inputType        InputType
+  muscleGroup      String?
+  createdAt        DateTime          @default(now())
+  routineExercises RoutineExercise[]
+  sessionExercises SessionExercise[]
+}
+
+model Routine {
+  id        String            @id @default(uuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  category  Category
+  notes     String?
+  createdAt DateTime          @default(now())
+  exercises RoutineExercise[]
+}
+
+model RoutineExercise {
+  id         String   @id @default(uuid())
+  routineId  String
+  routine    Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  targetSets Int
+  targetReps Int
+  order      Int      @default(0)
+}
+
+model WorkoutSession {
+  id        String            @id @default(uuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime          @default(now())
+  category  Category
+  type      ExerciseType
+  source    String            @default("manual") // manual | whatsapp
+  notes     String?
+  createdAt DateTime          @default(now())
+  exercises SessionExercise[]
+}
+
+model SessionExercise {
+  id         String         @id @default(uuid())
+  sessionId  String
+  session    WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise       @relation(fields: [exerciseId], references: [id])
+  order      Int            @default(0)
+  sets       SessionSet[]
+}
+
+model SessionSet {
+  id                String          @id @default(uuid())
+  sessionExerciseId String
+  sessionExercise   SessionExercise @relation(fields: [sessionExerciseId], references: [id], onDelete: Cascade)
+  setNumber         Int
+  weight            Float?
+  reps              Int?
+  time              Int?
+}

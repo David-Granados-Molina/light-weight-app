@@ -1,0 +1,127 @@
+.page {
+  animation: fadeUp 0.4s ease both;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.chip {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: #c8c8c8;
+  border-radius: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip.active {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: var(--color-accent-contrast);
+}
+
+.metric-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.metric-btn {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  border-radius: 9px;
+  padding: 11px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.metric-btn.active {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  margin-top: 6px;
+  color: var(--color-text);
+}
+
+.stat-value.positive {
+  color: var(--color-accent);
+}
+
+.stat-value.negative {
+  color: var(--color-text-secondary);
+}
+
+.chart-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.chart-title {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.chart-wrap {
+  height: 200px;
+  position: relative;
+}
+
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
