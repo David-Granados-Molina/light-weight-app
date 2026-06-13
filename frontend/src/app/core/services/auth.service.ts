@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { AuthResponse, AuthUser, LoginInput, RegisterInput } from '../models/auth.model';
+import { AuthResponse, AuthUser, LoginInput } from '../models/auth.model';
 
 const TOKEN_KEY = 'lw_token';
 
@@ -26,10 +26,6 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
-  }
-
-  register(input: RegisterInput): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, input).pipe(tap((res) => this.setSession(res)));
   }
 
   login(input: LoginInput): Observable<AuthResponse> {

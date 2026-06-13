@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
-import { Category, Exercise, InputType } from '../../core/models/exercise.model';
+import { Exercise, InputType } from '../../core/models/exercise.model';
 import { SessionInput } from '../../core/models/session.model';
 import { CATEGORY_COLOR, TYPE_LABEL } from '../../core/models/labels';
 import { formatVolume, relativeDayLabel } from '../../core/utils/format';
@@ -42,7 +42,6 @@ export class RegisterWorkout {
   });
 
   readonly catalog = signal<Exercise[]>([]);
-  readonly category = this.draft.category;
   readonly search = this.draft.search;
   readonly added = this.draft.added;
   readonly selectedDate = this.draft.selectedDate;
@@ -54,12 +53,7 @@ export class RegisterWorkout {
     const q = this.search().trim().toLowerCase();
     const addedIds = new Set(this.added().map((a) => a.exercise.id));
     return this.catalog()
-      .filter(
-        (e) =>
-          e.category === this.category() &&
-          !addedIds.has(e.id) &&
-          (q === '' || e.name.toLowerCase().includes(q)),
-      )
+      .filter((e) => !addedIds.has(e.id) && (q === '' || e.name.toLowerCase().includes(q)))
       .slice(0, 5);
   });
 
@@ -86,11 +80,6 @@ export class RegisterWorkout {
 
   selectDate(iso: string): void {
     this.selectedDate.set(iso);
-  }
-
-  selectCategory(cat: Category): void {
-    this.category.set(cat);
-    this.search.set('');
   }
 
   onSearchInput(event: Event): void {
@@ -145,7 +134,7 @@ export class RegisterWorkout {
 
     const input: SessionInput = {
       date: this.selectedDate() ?? this.dateChips[0].iso,
-      category: this.category(),
+      category: added[0].exercise.category,
       type: added[0].exercise.type,
       exercises: added.map((a) => ({
         exerciseId: a.exercise.id,

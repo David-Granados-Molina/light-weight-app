@@ -18,7 +18,7 @@
             <span class="routine-cat" [style.color]="categoryColor[r.category]">
               <span class="dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
             </span>
-            <button type="button" class="remove-btn" (click)="deleteRoutine(r.id, $event)" aria-label="Eliminar rutina">✕</button>
+            <button type="button" class="remove-btn" (click)="askDeleteRoutine(r.id, $event)" aria-label="Eliminar rutina">✕</button>
           </div>
           <div class="routine-name">{{ r.name }}</div>
           @if (r.count) {
@@ -34,3 +34,12 @@
 
   <button type="button" class="logout-btn" (click)="logout()">Cerrar sesión</button>
 </div>
+
+@if (confirmDeleteId() !== null) {
+  <app-confirm-dialog
+    title="Eliminar rutina"
+    message="Esta acción no se puede deshacer. ¿Seguro que quieres eliminar la rutina?"
+    (confirmed)="confirmDeleteRoutine()"
+    (cancelled)="cancelDeleteRoutine()"
+  />
+}

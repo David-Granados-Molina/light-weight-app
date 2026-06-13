@@ -1,4 +1,4 @@
-<div class="page">
+<div class="page" [class.is-loading]="loading()">
   <div class="brand">
     <img src="icons/light-weight-icon.svg" width="56" height="56" alt="" class="brand-icon" />
     <span class="brand-name">Light Weight</span>
@@ -14,6 +14,7 @@
     placeholder="tucorreo@ejemplo.com"
     autocomplete="email"
     [value]="email()"
+    [disabled]="loading()"
     (input)="onEmailInput($event)"
   />
 
@@ -24,6 +25,7 @@
     placeholder="••••••••"
     autocomplete="current-password"
     [value]="password()"
+    [disabled]="loading()"
     (input)="onPasswordInput($event)"
     (keydown.enter)="submit()"
   />
@@ -42,6 +44,11 @@
     <div class="divider">o</div>
     <div class="google-btn-wrap" #googleBtn></div>
   }
-
-  <div class="footer-link">¿No tienes cuenta? <a routerLink="/registro">Crear cuenta</a></div>
 </div>
+
+@if (loading()) {
+  <div class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Iniciando sesión…</div>
+  </div>
+}

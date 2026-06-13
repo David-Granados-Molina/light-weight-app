@@ -14,20 +14,6 @@
     }
   </div>
 
-  <div class="category-toggle">
-    <button type="button" class="cat-btn" [class.active]="category() === 'gym'" (click)="selectCategory('gym')">
-      <span class="cat-dot" style="background: var(--color-gym)"></span>Gym
-    </button>
-    <button
-      type="button"
-      class="cat-btn"
-      [class.active]="category() === 'calistenia'"
-      (click)="selectCategory('calistenia')"
-    >
-      <span class="cat-dot" style="background: var(--color-cali)"></span>Calistenia
-    </button>
-  </div>
-
   <div class="search-wrap">
     <input
       class="search-input"

@@ -1,0 +1,12 @@
+<div class="overlay" (click)="cancelled.emit()">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-title">{{ title() }}</div>
+    @if (message()) {
+      <div class="dialog-message">{{ message() }}</div>
+    }
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="cancelled.emit()">{{ cancelText() }}</button>
+      <button type="button" class="confirm-btn" (click)="confirmed.emit()">{{ confirmText() }}</button>
+    </div>
+  </div>
+</div>

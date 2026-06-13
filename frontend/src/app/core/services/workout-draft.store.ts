@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Category, Exercise } from '../models/exercise.model';
+import { Exercise } from '../models/exercise.model';
 
 export interface SetEntry {
   weight?: number;
@@ -19,7 +19,6 @@ export interface AddedExercise {
  */
 @Injectable({ providedIn: 'root' })
 export class WorkoutDraftStore {
-  readonly category = signal<Category>('gym');
   readonly selectedDate = signal<string | null>(null);
   readonly search = signal('');
   readonly added = signal<AddedExercise[]>([]);

@@ -232,33 +232,28 @@
   border-left: 3px solid;
 }
 
-.reorder {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.reorder-btn {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 6px;
-  color: var(--color-accent);
-  font-size: 10px;
-  line-height: 1;
-  width: 22px;
-  height: 20px;
+.drag-handle {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 0;
+  flex-shrink: 0;
+  width: 24px;
+  color: var(--color-text-muted);
+  cursor: grab;
+  touch-action: none;
 }
 
-.reorder-btn:disabled {
-  color: var(--color-text-muted);
-  opacity: 0.4;
-  cursor: default;
+.exercise-row.cdk-drag-preview {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 14px;
+}
+
+.exercise-row.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.exercise-list.cdk-drop-list-dragging .exercise-row:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .exercise-info {

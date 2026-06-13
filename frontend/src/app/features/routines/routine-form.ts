@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Category, Exercise, ExerciseType, InputType } from '../../core/models/exercise.model';
 import { RoutineInput } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/labels';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -18,7 +20,7 @@ const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo'];
 
 @Component({
   selector: 'app-routine-form',
-  imports: [RouterLink],
+  imports: [RouterLink, CdkDropList, CdkDrag, ConfirmDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routine-form.html',
   styleUrl: './routine-form.css',
@@ -50,6 +52,9 @@ export class RoutineForm {
   readonly creatingExercise = signal(false);
   readonly newExerciseType = signal<ExerciseType>('empuje');
   readonly newExerciseInputType = signal<InputType>('peso');
+
+  readonly removeIndex = signal<number | null>(null);
+  readonly confirmDeleteRoutine = signal(false);
 
   readonly searchResults = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -121,16 +126,25 @@ export class RoutineForm {
     this.search.set('');
   }
 
-  removeExercise(index: number): void {
-    this.exercises.update((list) => list.filter((_, i) => i !== index));
+  askRemoveExercise(index: number): void {
+    this.removeIndex.set(index);
   }
 
-  moveExercise(index: number, direction: -1 | 1): void {
+  cancelRemoveExercise(): void {
+    this.removeIndex.set(null);
+  }
+
+  confirmRemoveExercise(): void {
+    const index = this.removeIndex();
+    if (index === null) return;
+    this.exercises.update((list) => list.filter((_, i) => i !== index));
+    this.removeIndex.set(null);
+  }
+
+  onDrop(event: CdkDragDrop<ExerciseRow[]>): void {
     this.exercises.update((list) => {
-      const target = index + direction;
-      if (target < 0 || target >= list.length) return list;
       const copy = [...list];
-      [copy[index], copy[target]] = [copy[target], copy[index]];
+      moveItemInArray(copy, event.previousIndex, event.currentIndex);
       return copy;
     });
   }
@@ -214,9 +228,18 @@ export class RoutineForm {
     });
   }
 
-  deleteRoutine(): void {
+  askDeleteRoutine(): void {
+    this.confirmDeleteRoutine.set(true);
+  }
+
+  cancelDeleteRoutine(): void {
+    this.confirmDeleteRoutine.set(false);
+  }
+
+  confirmDeleteRoutineAction(): void {
     const id = this.routineId();
     if (!id) return;
+    this.confirmDeleteRoutine.set(false);
     this.routineService.delete(id).subscribe({
       next: () => this.router.navigate(['/rutinas']),
       error: () => this.error.set('No se ha podido eliminar la rutina.'),

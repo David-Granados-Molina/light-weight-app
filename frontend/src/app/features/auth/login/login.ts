@@ -51,10 +51,16 @@ export class Login implements AfterViewInit {
   }
 
   private onGoogleCredential(idToken: string): void {
+    if (this.loading()) return;
+
+    this.loading.set(true);
     this.error.set(null);
     this.authService.loginWithGoogle(idToken).subscribe({
       next: () => this.router.navigateByUrl('/inicio'),
-      error: () => this.error.set('No se ha podido iniciar sesión con Google.'),
+      error: () => {
+        this.loading.set(false);
+        this.error.set('No se ha podido iniciar sesión con Google.');
+      },
     });
   }
 }

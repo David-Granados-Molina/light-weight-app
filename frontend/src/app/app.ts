@@ -4,7 +4,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { TabBar } from './shared/components/tab-bar/tab-bar';
 
-const AUTH_ROUTE_PREFIXES = ['/login', '/registro', '/recuperar', '/restablecer'];
+const AUTH_ROUTE_PREFIXES = ['/login', '/recuperar', '/restablecer'];
 
 @Component({
   selector: 'app-root',

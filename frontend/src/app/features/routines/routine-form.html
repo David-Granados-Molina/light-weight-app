@@ -88,28 +88,11 @@
       </div>
     }
 
-    <div class="exercise-list">
+    <div class="exercise-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
       @for (item of exercises(); track item.exerciseId; let i = $index) {
-        <div class="exercise-row" [style.border-left-color]="categoryColor[item.exercise.category]">
-          <div class="reorder">
-            <button
-              type="button"
-              class="reorder-btn"
-              [disabled]="i === 0"
-              (click)="moveExercise(i, -1)"
-              aria-label="Subir ejercicio"
-            >
-              ▲
-            </button>
-            <button
-              type="button"
-              class="reorder-btn"
-              [disabled]="i === exercises().length - 1"
-              (click)="moveExercise(i, 1)"
-              aria-label="Bajar ejercicio"
-            >
-              ▼
-            </button>
+        <div class="exercise-row" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
+          <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
           </div>
           <div class="exercise-info">
             <div class="exercise-name">{{ item.exercise.name }}</div>
@@ -125,11 +108,11 @@
             </div>
             <div class="stepper-mini">
               <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', -1)">−</span>
-              <span class="stepper-value">{{ item.targetReps }}<small> reps</small></span>
+              <span class="stepper-value">{{ item.targetReps }}<small> {{ item.exercise.inputType === 'tiempo' ? 'seg' : 'reps' }}</small></span>
               <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', 1)">＋</span>
             </div>
           </div>
-          <button type="button" class="remove-btn" (click)="removeExercise(i)" aria-label="Quitar ejercicio">✕</button>
+          <button type="button" class="remove-btn" (click)="askRemoveExercise(i)" aria-label="Quitar ejercicio">✕</button>
         </div>
       } @empty {
         <div class="empty">Añade ejercicios a la rutina</div>
@@ -145,7 +128,25 @@
     </button>
 
     @if (isEdit()) {
-      <button type="button" class="delete-btn" (click)="deleteRoutine()">Eliminar rutina</button>
+      <button type="button" class="delete-btn" (click)="askDeleteRoutine()">Eliminar rutina</button>
     }
   }
 </div>
+
+@if (removeIndex() !== null) {
+  <app-confirm-dialog
+    title="Quitar ejercicio"
+    message="¿Seguro que quieres quitar este ejercicio de la rutina?"
+    (confirmed)="confirmRemoveExercise()"
+    (cancelled)="cancelRemoveExercise()"
+  />
+}
+
+@if (confirmDeleteRoutine()) {
+  <app-confirm-dialog
+    title="Eliminar rutina"
+    message="Esta acción no se puede deshacer. ¿Seguro que quieres eliminar la rutina?"
+    (confirmed)="confirmDeleteRoutineAction()"
+    (cancelled)="cancelDeleteRoutine()"
+  />
+}
