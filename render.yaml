@@ -26,9 +26,9 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: CORS_ORIGIN
-        value: https://app.davidgranadosmolina.es
+        value: https://light-weight-app.onrender.com
       - key: FRONTEND_URL
-        value: https://app.davidgranadosmolina.es
+        value: https://light-weight-app.onrender.com
 
   - type: web
     name: light-weight-app
