@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
@@ -6,8 +6,8 @@ import { RoutineService } from '../../core/services/routine.service';
 import { Exercise, InputType } from '../../core/models/exercise.model';
 import { SessionInput, SessionSet } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
-import { CATEGORY_COLOR, TYPE_LABEL } from '../../core/models/labels';
-import { formatSet, relativeDayLabel } from '../../core/utils/format';
+import { CATEGORY_COLOR, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
+import { formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
 import { SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -26,6 +26,30 @@ function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+const WORSE_MESSAGES = [
+  'Hoy ha costado un poco más, pero lo importante es seguir presentándote. ¡A por el próximo!',
+  'No todos los días se rinde igual. Descansa bien y vuelve con más fuerza.',
+  'Un entreno más flojo no borra todo tu progreso. ¡Sigue adelante!',
+];
+
+const EQUAL_MESSAGES = [
+  '¡Buen trabajo! Has mantenido el nivel de tu último entreno.',
+  'Constancia ante todo, eso también es progreso. ¡Gran entreno!',
+  'Mismo nivel que la última vez. Sigue así de regular.',
+];
+
+const BETTER_MESSAGES = [
+  'Has mejorado conforme al último entreno, ¡muy bien, sigue así!',
+  'Más fuerte que la última vez. ¡Gran trabajo!',
+  'Progreso real. ¡A por el siguiente reto!',
+];
+
+const FIRST_TIME_MESSAGES = ['¡Entreno registrado! A partir de ahora podrás ver aquí tu progreso.'];
+
+function pickRandom(list: string[]): string {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 @Component({
   selector: 'app-register-workout',
   imports: [NumberWheel, ConfirmDialog],
@@ -39,6 +63,7 @@ export class RegisterWorkout {
   private readonly routineService = inject(RoutineService);
   private readonly router = inject(Router);
   private readonly draft = inject(WorkoutDraftStore);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
@@ -59,8 +84,14 @@ export class RegisterWorkout {
   readonly selectedRoutineId = this.draft.selectedRoutineId;
   readonly saving = signal(false);
   readonly saved = signal(false);
+  readonly saveError = signal(false);
   readonly savedSummary = signal('');
+  readonly comparisonMessage = signal('');
+  readonly shareCopied = signal(false);
+  readonly showReminder = signal(false);
   readonly pendingRoutine = signal<Routine | null>(null);
+
+  readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   readonly lastData = signal<Record<string, LastSessionData | null>>({});
 
@@ -76,6 +107,21 @@ export class RegisterWorkout {
 
   readonly totalSeries = computed(() => this.added().reduce((total, a) => total + a.sets.length, 0));
 
+  readonly shareText = computed(() => {
+    const added = this.added();
+    if (!added.length) return '';
+    const date = this.selectedDate() ?? this.dateChips[0].iso;
+    const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    const capitalized = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
+    const type = sessionTypeLabel(added.map((a) => a.exercise.type));
+    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets)}`);
+    return `💪 Entreno · ${capitalized} (${type})\n\n${lines.join('\n')}\n\n— Light Weight`;
+  });
+
   constructor() {
     this.exerciseService.getAll().subscribe((list) => this.catalog.set(list));
     this.routineService.getAll().subscribe((list) => this.routines.set(list));
@@ -85,6 +131,14 @@ export class RegisterWorkout {
     for (const item of this.added()) {
       this.fetchLastSession(item.exercise.id);
     }
+
+    const reminderId = setInterval(() => {
+      if (this.added().length > 0 && !this.saved() && !this.saving()) {
+        this.showReminder.set(true);
+        setTimeout(() => this.showReminder.set(false), 4000);
+      }
+    }, 45_000);
+    this.destroyRef.onDestroy(() => clearInterval(reminderId));
   }
 
   selectDate(iso: string): void {
@@ -187,24 +241,82 @@ export class RegisterWorkout {
     };
 
     this.saving.set(true);
+    this.saveError.set(false);
     this.sessionService.create(input).subscribe({
       next: () => {
         const series = this.totalSeries();
         this.savedSummary.set(series === 1 ? '1 serie guardada' : `${series} series guardadas`);
+        this.comparisonMessage.set(pickRandom(this.comparisonPool()));
         this.saving.set(false);
         this.saved.set(true);
       },
-      error: () => this.saving.set(false),
+      error: () => {
+        this.saving.set(false);
+        this.saveError.set(true);
+      },
     });
   }
 
   closeSaved(): void {
     this.saved.set(false);
+    this.shareCopied.set(false);
     this.draft.reset();
   }
 
   goHistorial(): void {
     this.router.navigate(['/historial']);
+  }
+
+  async shareNative(): Promise<void> {
+    try {
+      await navigator.share({ text: this.shareText() });
+    } catch {
+      // el usuario canceló o el navegador no soporta el share nativo
+    }
+  }
+
+  shareWhatsapp(): void {
+    window.open(`https://wa.me/?text=${encodeURIComponent(this.shareText())}`, '_blank');
+  }
+
+  async copyShareText(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.shareText());
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2000);
+    } catch {
+      // clipboard no disponible
+    }
+  }
+
+  private comparisonPool(): string[] {
+    const lastData = this.lastData();
+    let delta = 0;
+    let comparisons = 0;
+
+    for (const item of this.added()) {
+      const last = lastData[item.exercise.id];
+      if (!last) continue;
+      comparisons++;
+      const todayScore = this.exerciseScore(item.exercise.inputType, item.sets);
+      const lastScore = this.exerciseScore(item.exercise.inputType, last.sets);
+      if (todayScore > lastScore) delta++;
+      else if (todayScore < lastScore) delta--;
+    }
+
+    if (comparisons === 0) return FIRST_TIME_MESSAGES;
+    if (delta > 0) return BETTER_MESSAGES;
+    if (delta < 0) return WORSE_MESSAGES;
+    return EQUAL_MESSAGES;
+  }
+
+  private exerciseScore(
+    inputType: InputType,
+    sets: { weight?: number | null; reps?: number | null; time?: number | null }[],
+  ): number {
+    if (inputType === 'peso') return sets.reduce((sum, s) => sum + (s.weight ?? 0) * (s.reps ?? 0), 0);
+    if (inputType === 'reps') return sets.reduce((sum, s) => sum + (s.reps ?? 0), 0);
+    return sets.reduce((sum, s) => sum + (s.time ?? 0), 0);
   }
 
   lastSummary(exerciseId: string): { sets: string; when: string } | null {

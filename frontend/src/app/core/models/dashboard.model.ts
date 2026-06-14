@@ -19,7 +19,6 @@ export interface RecentSession {
 
 export interface DashboardSummary {
   weekEntrenos: number;
-  weekSets: number;
   weekBars: WeekBar[];
   recent: RecentSession[];
 }

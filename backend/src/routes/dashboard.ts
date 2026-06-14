@@ -20,11 +20,6 @@ dashboardRouter.get('/', async (req, res) => {
     include: { exercises: { include: { sets: true } } },
   });
 
-  const weekSets = weekSessions.reduce(
-    (total, session) => total + session.exercises.reduce((s, ex) => s + ex.sets.length, 0),
-    0,
-  );
-
   const weekBars = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(weekStart, i);
     const sessionsOfDay = weekSessions.filter((s) => isSameDay(s.date, day));
@@ -70,7 +65,6 @@ dashboardRouter.get('/', async (req, res) => {
 
   res.json({
     weekEntrenos: weekSessions.length,
-    weekSets,
     weekBars,
     recent,
   });

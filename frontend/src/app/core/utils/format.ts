@@ -3,9 +3,9 @@ export function formatNumber(value: number): string {
 }
 
 interface SetLike {
-  weight: number | null | undefined;
-  reps: number | null | undefined;
-  time: number | null | undefined;
+  weight?: number | null;
+  reps?: number | null;
+  time?: number | null;
 }
 
 /** "20kg×8", "12 reps" o "45s" según el tipo de serie. */

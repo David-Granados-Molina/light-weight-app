@@ -34,9 +34,11 @@
         <div class="stat-value">{{ weekEntrenos() }}</div>
         <div class="stat-label">Entrenos</div>
       </div>
-      <div class="stat">
-        <div class="stat-value">{{ weekSets() }}</div>
-        <div class="stat-label">Series totales</div>
+      <div class="stat stat-tip">
+        <div class="tip-icon">💡</div>
+        @for (tip of [currentTip()]; track tipIndex()) {
+          <div class="tip-text">{{ tip }}</div>
+        }
       </div>
     </div>
 
@@ -76,7 +78,7 @@
             <app-category-tag [category]="s.category" />
             <span class="muted">{{ relativeDayLabel(s.date) }}</span>
           </div>
-          <div class="session-type">{{ typeLabel[s.type] }}</div>
+          <div class="session-type">{{ s.typeLabel }}</div>
           <div class="session-count">{{ s.exerciseCount }} ejercicios</div>
           @if (expandedId() === s.id) {
             <div class="session-details">

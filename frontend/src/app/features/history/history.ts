@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { SessionService } from '../../core/services/session.service';
 import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
-import { CATEGORY_COLOR, CATEGORY_LABEL, TYPE_LABEL } from '../../core/models/labels';
+import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
 import { formatSets, relativeDayLabel } from '../../core/utils/format';
 
 type HistFilter = 'todos' | Category;
@@ -19,7 +19,6 @@ export class History {
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly categoryLabel = CATEGORY_LABEL;
-  readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
   readonly formatSets = formatSets;
 
@@ -39,7 +38,7 @@ export class History {
     this.sessions().map((s) => ({
       id: s.id,
       category: s.category,
-      type: s.type,
+      typeLabel: sessionTypeLabel(s.exercises.map((e) => e.exercise.type)),
       dateLabel: relativeDayLabel(s.date),
       exercisesText: s.exercises.map((e) => e.exercise.name).join(' · '),
       count: `${s.exercises.length} ejercicios`,

@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
-import { TYPE_LABEL } from '../../core/models/labels';
+import { sessionTypeLabel } from '../../core/models/labels';
 import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
 interface WeekBarView extends WeekBar {
@@ -12,6 +12,19 @@ interface WeekBarView extends WeekBar {
   color: string;
   letter: string;
 }
+
+const TIPS = [
+  '💧 Bebe agua antes, durante y después de entrenar.',
+  '🔥 Calienta siempre antes de empezar, tus músculos te lo agradecerán.',
+  '😴 El descanso es donde se construye el músculo. Duerme bien.',
+  '📈 Pequeños incrementos de peso o reps marcan grandes diferencias a largo plazo.',
+  '🥗 La alimentación es la mitad del progreso. Cuida lo que comes.',
+  '🧘 Estira después de entrenar para mejorar la movilidad.',
+  '🎯 La constancia gana siempre a la intensidad puntual.',
+  '💪 Cada entreno cuenta, aunque sea un día flojo.',
+  '🧠 La técnica correcta antes que el peso. Siempre.',
+  '🚀 Compárate solo con tu yo de ayer.',
+];
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +36,11 @@ interface WeekBarView extends WeekBar {
 export class Dashboard {
   private readonly dashboardService = inject(DashboardService);
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
   readonly avatarUrl = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
   readonly todayLabel = todayLabel();
-  readonly typeLabel = TYPE_LABEL;
   readonly formatSets = formatSets;
   readonly relativeDayLabel = relativeDayLabel;
 
@@ -36,9 +49,16 @@ export class Dashboard {
   readonly error = signal(false);
   readonly expandedId = signal<string | null>(null);
 
+  readonly tipIndex = signal(0);
+  readonly currentTip = computed(() => TIPS[this.tipIndex()]);
+
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
-  readonly weekSets = computed(() => this.summary()?.weekSets ?? 0);
-  readonly recent = computed(() => this.summary()?.recent ?? []);
+  readonly recent = computed(() =>
+    (this.summary()?.recent ?? []).map((s) => ({
+      ...s,
+      typeLabel: sessionTypeLabel(s.exercises.map((e) => e.exercise.type)),
+    })),
+  );
 
   readonly weekBars = computed<WeekBarView[]>(() => {
     const bars = this.summary()?.weekBars ?? [];
@@ -66,5 +86,10 @@ export class Dashboard {
         this.loading.set(false);
       },
     });
+
+    const tipId = setInterval(() => {
+      this.tipIndex.update((i) => (i + 1) % TIPS.length);
+    }, 5000);
+    this.destroyRef.onDestroy(() => clearInterval(tipId));
   }
 }

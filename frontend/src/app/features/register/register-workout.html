@@ -1,3 +1,7 @@
+@if (showReminder()) {
+  <div class="reminder-toast">⏳ Entreno sin guardar — pulsa "Guardar entreno" al final de la página</div>
+}
+
 <div class="page">
   <h1 class="title">Registrar entreno</h1>
 
@@ -128,8 +132,23 @@
 
   @if (added().length > 0) {
     <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">
-      {{ saving() ? 'Guardando…' : 'Guardar entreno' }}
+      Guardar entreno
     </button>
+    @if (saveError()) {
+      <div class="save-error">No se ha podido guardar el entreno. Comprueba tu conexión e inténtalo de nuevo.</div>
+    }
+  }
+
+  @if (saving()) {
+    <div class="saving-overlay">
+      <div class="saving-sheet">
+        <div class="saving-spinner"></div>
+        <div class="saving-title">Guardando entreno…</div>
+        <div class="saving-text">
+          No salgas de aquí hasta que se confirme que el entreno se ha guardado. Puede tardar unos segundos.
+        </div>
+      </div>
+    </div>
   }
 
   @if (saved()) {
@@ -140,6 +159,32 @@
         </div>
         <div class="saved-title">¡Entreno guardado!</div>
         <div class="saved-summary">{{ savedSummary() }}</div>
+
+        @if (comparisonMessage()) {
+          <div class="saved-comparison">{{ comparisonMessage() }}</div>
+        }
+
+        <div class="share-row">
+          @if (canShareNative) {
+            <button type="button" class="share-btn" (click)="shareNative()" aria-label="Compartir">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+              Compartir
+            </button>
+          }
+          <button type="button" class="share-btn whatsapp" (click)="shareWhatsapp()" aria-label="Compartir en WhatsApp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.3-.6-2.2-1.1-3.1-2.6-.2-.3 0-.5.1-.6.2-.2.4-.5.6-.7.1-.2.1-.4 0-.6-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4-.2 0-.4 0-.6.1-.2.1-.9.4-.9 1.6 0 1.2.9 2.4 1 2.6.1.2 1.7 2.7 4.2 3.7 2 .8 2.4.6 2.8.6.4 0 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.5-.2zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z"/></svg>
+            WhatsApp
+          </button>
+          <button type="button" class="share-btn" (click)="copyShareText()" aria-label="Copiar resumen">
+            @if (shareCopied()) {
+              ✓ Copiado
+            } @else {
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copiar
+            }
+          </button>
+        </div>
+
         <button type="button" class="saved-primary" (click)="goHistorial()">Ver en historial</button>
         <button type="button" class="saved-secondary" (click)="closeSaved()">Seguir aquí</button>
       </div>

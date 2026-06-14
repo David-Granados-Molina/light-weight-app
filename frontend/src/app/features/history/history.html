@@ -36,7 +36,7 @@
             </span>
             <span class="session-date">{{ s.dateLabel }}</span>
           </div>
-          <div class="session-type">{{ typeLabel[s.type] }}</div>
+          <div class="session-type">{{ s.typeLabel }}</div>
           @if (expandedId() === s.id) {
             <div class="session-details">
               @for (e of s.exercises; track e.id) {
