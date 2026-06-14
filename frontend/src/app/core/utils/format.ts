@@ -2,12 +2,22 @@ export function formatNumber(value: number): string {
   return value.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 }
 
-/** Formatea kg, pasando a toneladas cuando es >= 1000 (ej. "12,4 t"). */
-export function formatVolume(kg: number): string {
-  if (kg >= 1000) {
-    return (kg / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' t';
-  }
-  return formatNumber(Math.round(kg)) + ' kg';
+interface SetLike {
+  weight: number | null | undefined;
+  reps: number | null | undefined;
+  time: number | null | undefined;
+}
+
+/** "20kg×8", "12 reps" o "45s" según el tipo de serie. */
+export function formatSet(s: SetLike): string {
+  if (s.time !== null && s.time !== undefined) return `${s.time}s`;
+  if (s.weight !== null && s.weight !== undefined && s.weight > 0) return `${s.weight}kg×${s.reps ?? 0}`;
+  return `${s.reps ?? 0}`;
+}
+
+/** Une las series de un ejercicio, ej. "20kg×8 · 20kg×8 · 18kg×6". */
+export function formatSets(sets: SetLike[]): string {
+  return sets.map(formatSet).join(' · ');
 }
 
 const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];

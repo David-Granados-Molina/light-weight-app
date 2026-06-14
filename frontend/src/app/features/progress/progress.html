@@ -19,14 +19,16 @@
       }
     </div>
 
-    <div class="metric-toggle">
-      <button type="button" class="metric-btn" [class.active]="metric() === 'peso'" (click)="selectMetric('peso')">
-        {{ metricLabel() }}
-      </button>
-      <button type="button" class="metric-btn" [class.active]="metric() === 'volumen'" (click)="selectMetric('volumen')">
-        Volumen total
-      </button>
-    </div>
+    @if (data()?.exercise?.inputType !== 'peso') {
+      <div class="metric-toggle">
+        <button type="button" class="metric-btn" [class.active]="metric() === 'peso'" (click)="selectMetric('peso')">
+          {{ metricLabel() }}
+        </button>
+        <button type="button" class="metric-btn" [class.active]="metric() === 'volumen'" (click)="selectMetric('volumen')">
+          Volumen total
+        </button>
+      </div>
+    }
 
     <div class="stats">
       <div class="stat-card">

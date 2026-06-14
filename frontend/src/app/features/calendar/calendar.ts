@@ -4,6 +4,7 @@ import { SessionService } from '../../core/services/session.service';
 import { WorkoutSession } from '../../core/models/session.model';
 import { Category } from '../../core/models/exercise.model';
 import { CATEGORY_COLOR, TYPE_LABEL } from '../../core/models/labels';
+import { formatSets } from '../../core/utils/format';
 
 interface DayCell {
   iso: string;
@@ -39,6 +40,7 @@ export class Calendar {
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
   readonly weekdayHeaders = WEEKDAY_HEADERS;
+  readonly formatSets = formatSets;
 
   readonly monthDate = signal(startOfMonth(new Date()));
   readonly sessions = signal<WorkoutSession[]>([]);

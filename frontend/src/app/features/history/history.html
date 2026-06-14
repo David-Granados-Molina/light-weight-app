@@ -29,7 +29,7 @@
   } @else {
     <div class="session-list">
       @for (s of rows(); track s.id) {
-        <div class="session-card" [style.border-left-color]="categoryColor[s.category]">
+        <div class="session-card" [style.border-left-color]="categoryColor[s.category]" (click)="toggleExpand(s.id)">
           <div class="session-top">
             <span class="session-cat" [style.color]="categoryColor[s.category]">
               <span class="dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
@@ -37,8 +37,19 @@
             <span class="session-date">{{ s.dateLabel }}</span>
           </div>
           <div class="session-type">{{ typeLabel[s.type] }}</div>
-          <div class="session-exercises">{{ s.exercisesText }}</div>
-          <div class="session-count">{{ s.count }}</div>
+          @if (expandedId() === s.id) {
+            <div class="session-details">
+              @for (e of s.exercises; track e.id) {
+                <div class="session-exercise">
+                  <span class="session-exercise-name">{{ e.exercise.name }}</span>
+                  <span class="session-exercise-sets">{{ formatSets(e.sets) }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="session-exercises">{{ s.exercisesText }}</div>
+            <div class="session-count">{{ s.count }}</div>
+          }
         </div>
       } @empty {
         <div class="empty">Sin resultados</div>

@@ -51,9 +51,14 @@
     <div class="day-summary">
       <div class="summary-title">{{ selectedDayLabel() }}</div>
       @for (s of selectedSessions(); track s.id) {
-        <div class="summary-row" [style.border-left-color]="categoryColor[s.category]">
-          <span class="summary-type">{{ typeLabel[s.type] }}</span>
-          <span class="summary-count">{{ s.exercises.length }} ejercicios</span>
+        <div class="summary-session" [style.border-left-color]="categoryColor[s.category]">
+          <div class="summary-type">{{ typeLabel[s.type] }}</div>
+          @for (e of s.exercises; track e.id) {
+            <div class="summary-exercise">
+              <span class="summary-exercise-name">{{ e.exercise.name }}</span>
+              <span class="summary-exercise-sets">{{ formatSets(e.sets) }}</span>
+            </div>
+          }
         </div>
       }
     </div>

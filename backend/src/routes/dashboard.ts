@@ -20,9 +20,8 @@ dashboardRouter.get('/', async (req, res) => {
     include: { exercises: { include: { sets: true } } },
   });
 
-  const weekVolumeKg = weekSessions.reduce(
-    (total, session) =>
-      total + session.exercises.reduce((s, ex) => s + ex.sets.reduce((ss, set) => ss + setVolume(set), 0), 0),
+  const weekSets = weekSessions.reduce(
+    (total, session) => total + session.exercises.reduce((s, ex) => s + ex.sets.length, 0),
     0,
   );
 
@@ -46,7 +45,12 @@ dashboardRouter.get('/', async (req, res) => {
     where: { userId },
     orderBy: { date: 'desc' },
     take: 3,
-    include: { exercises: true },
+    include: {
+      exercises: {
+        orderBy: { order: 'asc' },
+        include: { exercise: true, sets: { orderBy: { setNumber: 'asc' } } },
+      },
+    },
   });
 
   const recent = recentSessions.map((s) => ({
@@ -55,11 +59,18 @@ dashboardRouter.get('/', async (req, res) => {
     category: s.category,
     type: s.type,
     exerciseCount: s.exercises.length,
+    exercises: s.exercises.map((e) => ({
+      id: e.id,
+      exerciseId: e.exerciseId,
+      exercise: e.exercise,
+      order: e.order,
+      sets: e.sets,
+    })),
   }));
 
   res.json({
     weekEntrenos: weekSessions.length,
-    weekVolumeKg,
+    weekSets,
     weekBars,
     recent,
   });

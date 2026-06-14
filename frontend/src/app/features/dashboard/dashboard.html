@@ -35,8 +35,8 @@
         <div class="stat-label">Entrenos</div>
       </div>
       <div class="stat">
-        <div class="stat-value">{{ formatVolume(weekVolumeKg()) }}</div>
-        <div class="stat-label">Volumen levantado</div>
+        <div class="stat-value">{{ weekSets() }}</div>
+        <div class="stat-label">Series totales</div>
       </div>
     </div>
 
@@ -67,13 +67,27 @@
 
     <div class="recent-list">
       @for (s of recent(); track s.id) {
-        <div class="session-card" [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'">
+        <div
+          class="session-card"
+          [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'"
+          (click)="toggleExpand(s.id)"
+        >
           <div class="session-top">
             <app-category-tag [category]="s.category" />
             <span class="muted">{{ relativeDayLabel(s.date) }}</span>
           </div>
           <div class="session-type">{{ typeLabel[s.type] }}</div>
           <div class="session-count">{{ s.exerciseCount }} ejercicios</div>
+          @if (expandedId() === s.id) {
+            <div class="session-details">
+              @for (e of s.exercises; track e.id) {
+                <div class="session-exercise">
+                  <span class="session-exercise-name">{{ e.exercise.name }}</span>
+                  <span class="session-exercise-sets">{{ formatSets(e.sets) }}</span>
+                </div>
+              }
+            </div>
+          }
         </div>
       } @empty {
         <div class="empty">Todavía no has registrado ningún entreno.</div>

@@ -3,7 +3,7 @@ import { SessionService } from '../../core/services/session.service';
 import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, TYPE_LABEL } from '../../core/models/labels';
-import { relativeDayLabel } from '../../core/utils/format';
+import { formatSets, relativeDayLabel } from '../../core/utils/format';
 
 type HistFilter = 'todos' | Category;
 
@@ -21,11 +21,13 @@ export class History {
   readonly categoryLabel = CATEGORY_LABEL;
   readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
+  readonly formatSets = formatSets;
 
   readonly filter = signal<HistFilter>('todos');
   readonly search = signal('');
   readonly sessions = signal<WorkoutSession[]>([]);
   readonly loading = signal(true);
+  readonly expandedId = signal<string | null>(null);
 
   readonly filterChips: { key: HistFilter; label: string }[] = [
     { key: 'todos', label: 'Todos' },
@@ -41,11 +43,16 @@ export class History {
       dateLabel: relativeDayLabel(s.date),
       exercisesText: s.exercises.map((e) => e.exercise.name).join(' · '),
       count: `${s.exercises.length} ejercicios`,
+      exercises: s.exercises,
     })),
   );
 
   constructor() {
     this.load();
+  }
+
+  toggleExpand(id: string): void {
+    this.expandedId.update((current) => (current === id ? null : id));
   }
 
   selectFilter(key: HistFilter): void {

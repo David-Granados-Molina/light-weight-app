@@ -5,7 +5,7 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { TYPE_LABEL } from '../../core/models/labels';
-import { dayLetter, formatNumber, formatVolume, relativeDayLabel, todayLabel } from '../../core/utils/format';
+import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
 interface WeekBarView extends WeekBar {
   heightPx: number;
@@ -28,16 +28,16 @@ export class Dashboard {
   readonly avatarUrl = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
   readonly todayLabel = todayLabel();
   readonly typeLabel = TYPE_LABEL;
-  readonly formatVolume = formatVolume;
-  readonly formatNumber = formatNumber;
+  readonly formatSets = formatSets;
   readonly relativeDayLabel = relativeDayLabel;
 
   private readonly summary = signal<DashboardSummary | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly expandedId = signal<string | null>(null);
 
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
-  readonly weekVolumeKg = computed(() => this.summary()?.weekVolumeKg ?? 0);
+  readonly weekSets = computed(() => this.summary()?.weekSets ?? 0);
   readonly recent = computed(() => this.summary()?.recent ?? []);
 
   readonly weekBars = computed<WeekBarView[]>(() => {
@@ -50,6 +50,10 @@ export class Dashboard {
       letter: dayLetter(i),
     }));
   });
+
+  toggleExpand(id: string): void {
+    this.expandedId.update((current) => (current === id ? null : id));
+  }
 
   constructor() {
     this.dashboardService.getSummary().subscribe({

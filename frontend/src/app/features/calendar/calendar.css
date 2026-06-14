@@ -138,29 +138,41 @@
   margin-bottom: 10px;
 }
 
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.summary-session {
   border-left: 3px solid;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 8px;
   background: var(--color-bg);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.summary-row:last-child {
+.summary-session:last-child {
   margin-bottom: 0;
 }
 
 .summary-type {
   font-weight: 700;
   font-size: 14px;
+  margin-bottom: 6px;
 }
 
-.summary-count {
-  font-size: 12px;
+.summary-exercise {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.summary-exercise-name {
+  font-weight: 600;
+}
+
+.summary-exercise-sets {
   color: var(--color-text-secondary);
+  text-align: right;
+  font-size: 12px;
 }
 
 .hint {

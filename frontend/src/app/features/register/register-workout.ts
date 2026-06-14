@@ -7,7 +7,7 @@ import { Exercise, InputType } from '../../core/models/exercise.model';
 import { SessionInput, SessionSet } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, TYPE_LABEL } from '../../core/models/labels';
-import { formatVolume, relativeDayLabel } from '../../core/utils/format';
+import { formatSet, relativeDayLabel } from '../../core/utils/format';
 import { SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -42,7 +42,6 @@ export class RegisterWorkout {
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
-  readonly formatVolume = formatVolume;
   readonly relativeDayLabel = relativeDayLabel;
 
   readonly dateChips: DateChip[] = Array.from({ length: 4 }, (_, i) => {
@@ -75,17 +74,7 @@ export class RegisterWorkout {
 
   readonly showResults = computed(() => this.search().trim() !== '' && this.searchResults().length > 0);
 
-  readonly totals = computed(() => {
-    let series = 0;
-    let volume = 0;
-    for (const a of this.added()) {
-      for (const s of a.sets) {
-        series++;
-        if (s.weight !== undefined && s.reps !== undefined) volume += s.weight * s.reps;
-      }
-    }
-    return { series, volume };
-  });
+  readonly totalSeries = computed(() => this.added().reduce((total, a) => total + a.sets.length, 0));
 
   constructor() {
     this.exerciseService.getAll().subscribe((list) => this.catalog.set(list));
@@ -200,8 +189,8 @@ export class RegisterWorkout {
     this.saving.set(true);
     this.sessionService.create(input).subscribe({
       next: () => {
-        const totals = this.totals();
-        this.savedSummary.set(`${totals.series} series · ${formatVolume(Math.round(totals.volume))}`);
+        const series = this.totalSeries();
+        this.savedSummary.set(series === 1 ? '1 serie guardada' : `${series} series guardadas`);
         this.saving.set(false);
         this.saved.set(true);
       },
@@ -222,15 +211,9 @@ export class RegisterWorkout {
     const data = this.lastData()[exerciseId];
     if (!data) return null;
     return {
-      sets: data.sets.map((s) => this.formatSet(s)).join(' · '),
+      sets: data.sets.map((s) => formatSet(s)).join(' · '),
       when: relativeDayLabel(data.date),
     };
-  }
-
-  private formatSet(s: SessionSet): string {
-    if (s.time !== null && s.time !== undefined) return `${s.time}s`;
-    if (s.weight !== null && s.weight !== undefined && s.weight > 0) return `${s.weight}kg×${s.reps ?? 0}`;
-    return `${s.reps ?? 0}`;
   }
 
   private fetchLastSession(exerciseId: string): void {

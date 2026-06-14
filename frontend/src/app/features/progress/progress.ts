@@ -4,7 +4,7 @@ import { ProgressService } from '../../core/services/progress.service';
 import { Exercise } from '../../core/models/exercise.model';
 import { ProgressData, ProgressMetric } from '../../core/models/progress.model';
 import { INPUT_TYPE_UNIT } from '../../core/models/labels';
-import { formatNumber, formatVolume, shortDateLabel } from '../../core/utils/format';
+import { formatNumber, shortDateLabel } from '../../core/utils/format';
 
 @Component({
   selector: 'app-progress',
@@ -132,6 +132,10 @@ export class Progress {
   selectExercise(id: string): void {
     if (id === this.selectedExerciseId()) return;
     this.selectedExerciseId.set(id);
+    const exercise = this.exercises().find((e) => e.id === id);
+    if (exercise?.inputType === 'peso' && this.metric() === 'volumen') {
+      this.metric.set('peso');
+    }
     this.loadProgress();
   }
 
@@ -157,7 +161,6 @@ export class Progress {
   private formatValue(value: number): string {
     const exercise = this.data()?.exercise;
     if (!exercise) return formatNumber(value);
-    if (this.metric() === 'volumen' && exercise.inputType === 'peso') return formatVolume(value);
     const unit = INPUT_TYPE_UNIT[exercise.inputType];
     return `${formatNumber(value)} ${unit}`;
   }
