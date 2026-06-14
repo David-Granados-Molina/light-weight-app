@@ -32,10 +32,10 @@ const include = {
   },
 };
 
-// GET /api/sessions?category=gym|calistenia&q=texto&limit=20
+// GET /api/sessions?category=gym|calistenia&q=texto&exerciseId=...&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=20
 sessionsRouter.get('/', async (req, res) => {
   const userId = req.userId!;
-  const { category, q, limit } = req.query;
+  const { category, q, exerciseId, from, to, limit } = req.query;
 
   const sessions = await prisma.workoutSession.findMany({
     where: {
@@ -45,6 +45,15 @@ sessionsRouter.get('/', async (req, res) => {
         ? {
             exercises: {
               some: { exercise: { name: { contains: String(q) } } },
+            },
+          }
+        : {}),
+      ...(exerciseId ? { exercises: { some: { exerciseId: String(exerciseId) } } } : {}),
+      ...(from || to
+        ? {
+            date: {
+              ...(from ? { gte: new Date(String(from)) } : {}),
+              ...(to ? { lte: new Date(String(to)) } : {}),
             },
           }
         : {}),

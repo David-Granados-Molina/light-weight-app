@@ -101,16 +101,24 @@
             </div>
           </div>
           <div class="targets">
-            <div class="stepper-mini">
-              <span class="stepper-btn" (click)="bumpTarget(i, 'targetSets', -1)">−</span>
-              <span class="stepper-value">{{ item.targetSets }}<small> series</small></span>
-              <span class="stepper-btn" (click)="bumpTarget(i, 'targetSets', 1)">＋</span>
-            </div>
-            <div class="stepper-mini">
-              <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', -1)">−</span>
-              <span class="stepper-value">{{ item.targetReps }}<small> {{ item.exercise.inputType === 'tiempo' ? 'seg' : 'reps' }}</small></span>
-              <span class="stepper-btn" (click)="bumpTarget(i, 'targetReps', 1)">＋</span>
-            </div>
+            <app-number-wheel
+              compact
+              [min]="1"
+              [max]="20"
+              [step]="1"
+              unit="series"
+              [value]="item.targetSets"
+              (valueChange)="setTarget(i, 'targetSets', $event)"
+            />
+            <app-number-wheel
+              compact
+              [min]="1"
+              [max]="200"
+              [step]="1"
+              [unit]="item.exercise.inputType === 'tiempo' ? 'seg' : 'reps'"
+              [value]="item.targetReps"
+              (valueChange)="setTarget(i, 'targetReps', $event)"
+            />
           </div>
           <button type="button" class="remove-btn" (click)="askRemoveExercise(i)" aria-label="Quitar ejercicio">✕</button>
         </div>

@@ -11,8 +11,8 @@ export const authRouter = Router();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-function toPublicUser(user: { id: string; name: string; email: string }) {
-  return { id: user.id, name: user.name, email: user.email };
+function toPublicUser(user: { id: string; name: string; email: string; avatarUrl?: string | null }) {
+  return { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl ?? null };
 }
 
 const registerSchema = z.object({
@@ -154,5 +154,23 @@ authRouter.post('/reset-password', async (req, res) => {
 authRouter.get('/me', requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId! } });
   if (!user) return res.status(401).json({ error: 'No autenticado' });
+  res.json(toPublicUser(user));
+});
+
+const updateMeSchema = z.object({
+  name: z.string().min(2).max(60).optional(),
+  avatarUrl: z
+    .string()
+    .max(500_000)
+    .regex(/^data:image\/(png|jpeg|webp);base64,/)
+    .nullable()
+    .optional(),
+});
+
+authRouter.patch('/me', requireAuth, async (req, res) => {
+  const parsed = updateMeSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const user = await prisma.user.update({ where: { id: req.userId! }, data: parsed.data });
   res.json(toPublicUser(user));
 });

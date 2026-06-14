@@ -1,0 +1,63 @@
+<div class="page">
+  <div class="header">
+    <a routerLink="/inicio" class="back" aria-label="Volver">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <h1 class="title">Calendario</h1>
+  </div>
+
+  <div class="month-nav">
+    <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="Mes anterior">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="month-label">{{ monthLabel() }}</span>
+    <button type="button" class="nav-btn" (click)="nextMonth()" aria-label="Mes siguiente">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="weekday-row">
+    @for (h of weekdayHeaders; track h) {
+      <span class="weekday">{{ h }}</span>
+    }
+  </div>
+
+  <div class="month-grid">
+    @for (week of weeks(); track $index) {
+      @for (cell of week; track cell.iso) {
+        <button
+          type="button"
+          class="day-cell"
+          [class.out]="!cell.inMonth"
+          [class.today]="cell.isToday"
+          [class.selected]="selectedDay() === cell.iso"
+          [class.has-data]="cell.categories.length > 0"
+          (click)="selectDay(cell)"
+        >
+          <span class="day-number">{{ cell.day }}</span>
+          @if (cell.categories.length > 0) {
+            <span class="day-dots">
+              @for (cat of cell.categories; track cat) {
+                <span class="dot" [style.background]="categoryColor[cat]"></span>
+              }
+            </span>
+          }
+        </button>
+      }
+    }
+  </div>
+
+  @if (selectedDay()) {
+    <div class="day-summary">
+      <div class="summary-title">{{ selectedDayLabel() }}</div>
+      @for (s of selectedSessions(); track s.id) {
+        <div class="summary-row" [style.border-left-color]="categoryColor[s.category]">
+          <span class="summary-type">{{ typeLabel[s.type] }}</span>
+          <span class="summary-count">{{ s.exercises.length }} ejercicios</span>
+        </div>
+      }
+    </div>
+  } @else if (!loading()) {
+    <div class="hint">Toca un día con entreno para ver el resumen.</div>
+  }
+</div>

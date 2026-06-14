@@ -123,15 +123,3 @@
   color: var(--color-text-muted);
   font-size: 15px;
 }
-
-.logout-btn {
-  width: 100%;
-  font-weight: 600;
-  font-size: 14px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: none;
-  padding: 14px;
-  margin-top: 22px;
-  cursor: pointer;
-}

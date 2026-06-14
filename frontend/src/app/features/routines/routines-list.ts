@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../core/models/labels';
@@ -15,7 +14,6 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
 })
 export class RoutinesList {
   private readonly routineService = inject(RoutineService);
-  private readonly authService = inject(AuthService);
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly categoryLabel = CATEGORY_LABEL;
@@ -36,10 +34,6 @@ export class RoutinesList {
 
   constructor() {
     this.load();
-  }
-
-  logout(): void {
-    this.authService.logout();
   }
 
   askDeleteRoutine(id: string, event: Event): void {

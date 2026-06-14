@@ -36,6 +36,33 @@
   color: var(--color-accent-contrast);
 }
 
+.section-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 18px 0 10px;
+}
+
+.routine-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.routine-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.clear-chip {
+  color: var(--color-text-muted);
+}
+
 .search-wrap {
   position: relative;
   margin-top: 12px;
@@ -141,6 +168,18 @@
   margin-top: 14px;
 }
 
+.last-session {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.last-label {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
 .set-row {
   display: flex;
   align-items: center;
@@ -157,44 +196,16 @@
   text-align: center;
 }
 
-.stepper {
+.wheels {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 10px;
-  padding: 7px 12px;
+  gap: 8px;
+  min-width: 0;
 }
 
-.stepper-value {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-}
-
-.unit {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  font-family: var(--font-body);
-  font-weight: 400;
-}
-
-.stepper-btn {
-  font-size: 22px;
-  cursor: pointer;
-  width: 22px;
-  text-align: center;
-  user-select: none;
-}
-
-.stepper-btn.dec {
-  color: var(--color-text-muted);
-}
-
-.stepper-btn.inc {
-  color: var(--color-accent);
+.wheels app-number-wheel {
+  flex: 1;
+  min-width: 0;
 }
 
 .remove-set-btn {
@@ -225,24 +236,6 @@
   padding: 40px 20px;
   color: var(--color-text-muted);
   font-size: 15px;
-}
-
-.summary-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 18px;
-  padding: 14px 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.summary-bar strong {
-  color: var(--color-text);
-  font-family: var(--font-display);
 }
 
 .save-btn {

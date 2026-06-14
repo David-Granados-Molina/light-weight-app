@@ -25,6 +25,7 @@ export class Dashboard {
   private readonly authService = inject(AuthService);
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
+  readonly avatarUrl = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
   readonly todayLabel = todayLabel();
   readonly typeLabel = TYPE_LABEL;
   readonly formatVolume = formatVolume;

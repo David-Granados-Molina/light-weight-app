@@ -22,9 +22,11 @@ export class WorkoutDraftStore {
   readonly selectedDate = signal<string | null>(null);
   readonly search = signal('');
   readonly added = signal<AddedExercise[]>([]);
+  readonly selectedRoutineId = signal<string | null>(null);
 
   reset(): void {
     this.added.set([]);
     this.search.set('');
+    this.selectedRoutineId.set(null);
   }
 }

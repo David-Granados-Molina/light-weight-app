@@ -10,10 +10,20 @@ export class SessionService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/sessions`;
 
-  getAll(filters?: { category?: Category; q?: string; limit?: number }): Observable<WorkoutSession[]> {
+  getAll(filters?: {
+    category?: Category;
+    q?: string;
+    exerciseId?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+  }): Observable<WorkoutSession[]> {
     const params: Record<string, string> = {};
     if (filters?.category) params['category'] = filters.category;
     if (filters?.q) params['q'] = filters.q;
+    if (filters?.exerciseId) params['exerciseId'] = filters.exerciseId;
+    if (filters?.from) params['from'] = filters.from;
+    if (filters?.to) params['to'] = filters.to;
     if (filters?.limit) params['limit'] = String(filters.limit);
     return this.http.get<WorkoutSession[]>(this.baseUrl, { params });
   }

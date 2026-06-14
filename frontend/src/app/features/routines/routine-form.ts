@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Category, Exercise, ExerciseType, InputType } from '../../core/models/exercise.model';
 import { RoutineInput } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/labels';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -20,7 +21,7 @@ const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo'];
 
 @Component({
   selector: 'app-routine-form',
-  imports: [RouterLink, CdkDropList, CdkDrag, ConfirmDialog],
+  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routine-form.html',
   styleUrl: './routine-form.css',
@@ -149,16 +150,8 @@ export class RoutineForm {
     });
   }
 
-  bumpTarget(index: number, field: 'targetSets' | 'targetReps', delta: number): void {
-    const min = 1;
-    const max = field === 'targetSets' ? 20 : 200;
-    this.exercises.update((list) =>
-      list.map((row, i) => {
-        if (i !== index) return row;
-        const value = Math.min(max, Math.max(min, row[field] + delta));
-        return { ...row, [field]: value };
-      }),
-    );
+  setTarget(index: number, field: 'targetSets' | 'targetReps', value: number): void {
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
   }
 
   startCreateExercise(): void {

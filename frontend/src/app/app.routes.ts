@@ -39,6 +39,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/progress/progress').then((m) => m.Progress),
   },
   {
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+  },
+  {
+    path: 'calendario',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/calendar/calendar').then((m) => m.Calendar),
+  },
+  {
     path: 'rutinas',
     canActivate: [authGuard],
     loadComponent: () => import('./features/routines/routines-list').then((m) => m.RoutinesList),

@@ -13,7 +13,7 @@ import { requireAuth } from './middleware/requireAuth';
 const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:4200' }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));

@@ -56,6 +56,13 @@
   color: var(--color-accent);
   text-decoration: none;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .avatar:focus-visible {
@@ -75,6 +82,29 @@
 
 .section-label {
   margin: 26px 0 12px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-header .section-label {
+  margin: 26px 0;
+}
+
+.calendar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  text-decoration: none;
 }
 
 .week-stats {

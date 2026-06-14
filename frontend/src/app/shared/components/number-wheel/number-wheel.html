@@ -1,0 +1,14 @@
+<div class="wheel" [class.compact]="compact()">
+  <div class="wheel-fade wheel-fade-top"></div>
+  <div class="wheel-fade wheel-fade-bottom"></div>
+  <div class="wheel-highlight"></div>
+  <div class="wheel-scroller" #scroller (scroll)="onScroll()">
+    <div class="wheel-spacer"></div>
+    @for (v of values(); track v) {
+      <div class="wheel-item" [class.active]="v === value()">
+        {{ formatValue(v) }}@if (unit()) {<span class="wheel-unit"> {{ unit() }}</span>}
+      </div>
+    }
+    <div class="wheel-spacer"></div>
+  </div>
+</div>

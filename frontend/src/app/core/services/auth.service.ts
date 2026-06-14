@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { AuthResponse, AuthUser, LoginInput } from '../models/auth.model';
+import { AuthResponse, AuthUser, LoginInput, UpdateProfileInput } from '../models/auth.model';
 
 const TOKEN_KEY = 'lw_token';
 
@@ -44,6 +44,12 @@ export class AuthService {
 
   resetPassword(token: string, password: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.baseUrl}/reset-password`, { token, password });
+  }
+
+  updateProfile(input: UpdateProfileInput): Observable<AuthUser> {
+    return this.http
+      .patch<AuthUser>(`${this.baseUrl}/me`, input)
+      .pipe(tap((user) => this.currentUser.set(user)));
   }
 
   logout(): void {

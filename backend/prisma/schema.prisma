@@ -31,6 +31,7 @@ model User {
   email        String               @unique
   passwordHash String?
   googleId     String?              @unique
+  avatarUrl    String?
   createdAt    DateTime             @default(now())
   routines     Routine[]
   sessions     WorkoutSession[]
