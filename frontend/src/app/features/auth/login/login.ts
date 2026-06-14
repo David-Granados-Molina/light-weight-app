@@ -2,10 +2,11 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, inject, 
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
+import { ExerciseLoader } from '../../../shared/components/exercise-loader/exercise-loader';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink],
+  imports: [RouterLink, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login.html',
   styleUrl: './login.css',
@@ -45,7 +46,8 @@ export class Login implements AfterViewInit {
       next: () => this.router.navigateByUrl('/inicio'),
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.error ?? 'No se ha podido iniciar sesión.');
+        const apiError = err.error?.error;
+        this.error.set(typeof apiError === 'string' ? apiError : 'Email o contraseña no válidos.');
       },
     });
   }

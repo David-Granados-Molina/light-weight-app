@@ -51,7 +51,7 @@ const loginSchema = z.object({
 
 authRouter.post('/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.success) return res.status(400).json({ error: 'Email o contraseña no válidos.' });
 
   const { email, password } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });

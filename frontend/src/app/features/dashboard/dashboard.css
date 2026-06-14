@@ -14,6 +14,12 @@
   display: block;
 }
 
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .brand-name {
   font-family: var(--font-display);
   font-weight: 700;
@@ -21,6 +27,11 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--color-text-secondary);
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .header {
@@ -130,11 +141,6 @@
   overflow: hidden;
 }
 
-.tip-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-
 .tip-text {
   font-size: 13px;
   line-height: 1.45;
@@ -142,9 +148,40 @@
   animation: fadeUp 0.4s ease both;
 }
 
+.tip-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.tip-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  animation-name: tip-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes tip-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 .stat-accent {
   background: var(--color-accent);
   border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .stat-value {

@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
+import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { sessionTypeLabel } from '../../core/models/labels';
 import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
@@ -14,21 +15,23 @@ interface WeekBarView extends WeekBar {
 }
 
 const TIPS = [
-  '💧 Bebe agua antes, durante y después de entrenar.',
-  '🔥 Calienta siempre antes de empezar, tus músculos te lo agradecerán.',
-  '😴 El descanso es donde se construye el músculo. Duerme bien.',
-  '📈 Pequeños incrementos de peso o reps marcan grandes diferencias a largo plazo.',
-  '🥗 La alimentación es la mitad del progreso. Cuida lo que comes.',
-  '🧘 Estira después de entrenar para mejorar la movilidad.',
-  '🎯 La constancia gana siempre a la intensidad puntual.',
-  '💪 Cada entreno cuenta, aunque sea un día flojo.',
-  '🧠 La técnica correcta antes que el peso. Siempre.',
-  '🚀 Compárate solo con tu yo de ayer.',
+  'Bebe agua antes, durante y después de entrenar.',
+  'Calienta siempre antes de empezar, tus músculos te lo agradecerán.',
+  'El descanso es donde se construye el músculo. Duerme bien.',
+  'Pequeños incrementos de peso o reps marcan grandes diferencias a largo plazo.',
+  'La alimentación es la mitad del progreso. Cuida lo que comes.',
+  'Estira después de entrenar para mejorar la movilidad.',
+  'La constancia gana siempre a la intensidad puntual.',
+  'Cada entreno cuenta, aunque sea un día flojo.',
+  'La técnica correcta antes que el peso. Siempre.',
+  'Compárate solo con tu yo de ayer.',
 ];
+
+const TIP_DURATION_MS = 10_000;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CategoryTag],
+  imports: [RouterLink, CategoryTag, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -51,6 +54,7 @@ export class Dashboard {
 
   readonly tipIndex = signal(0);
   readonly currentTip = computed(() => TIPS[this.tipIndex()]);
+  readonly tipDurationMs = TIP_DURATION_MS;
 
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
   readonly recent = computed(() =>
@@ -89,7 +93,7 @@ export class Dashboard {
 
     const tipId = setInterval(() => {
       this.tipIndex.update((i) => (i + 1) % TIPS.length);
-    }, 5000);
+    }, TIP_DURATION_MS);
     this.destroyRef.onDestroy(() => clearInterval(tipId));
   }
 }

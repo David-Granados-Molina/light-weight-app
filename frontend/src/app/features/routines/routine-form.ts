@@ -7,6 +7,7 @@ import { Category, Exercise, ExerciseType, InputType } from '../../core/models/e
 import { RoutineInput } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/labels';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 
 interface ExerciseRow {
@@ -21,7 +22,7 @@ const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo'];
 
 @Component({
   selector: 'app-routine-form',
-  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel],
+  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routine-form.html',
   styleUrl: './routine-form.css',

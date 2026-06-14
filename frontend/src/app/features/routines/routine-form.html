@@ -7,7 +7,7 @@
   </div>
 
   @if (loading()) {
-    <div class="empty">Cargando...</div>
+    <app-exercise-loader />
   } @else {
     <label class="field-label">Nombre</label>
     <input class="text-input" type="text" placeholder="Ej. Empuje" [value]="name()" (input)="onNameInput($event)" />

@@ -4,10 +4,11 @@ import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../core/models/labels';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 @Component({
   selector: 'app-routines-list',
-  imports: [RouterLink, ConfirmDialog],
+  imports: [RouterLink, ConfirmDialog, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routines-list.html',
   styleUrl: './routines-list.css',

@@ -2,7 +2,7 @@
   <h1 class="title">Progresión</h1>
 
   @if (loading() && !data()) {
-    <div class="empty">Cargando...</div>
+    <app-exercise-loader />
   } @else if (!exercises().length) {
     <div class="empty">Todavía no hay datos suficientes para mostrar progresión.</div>
   } @else {

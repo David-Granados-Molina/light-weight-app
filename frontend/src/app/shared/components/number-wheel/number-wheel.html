@@ -1,14 +1,30 @@
-<div class="wheel" [class.compact]="compact()">
-  <div class="wheel-fade wheel-fade-top"></div>
-  <div class="wheel-fade wheel-fade-bottom"></div>
-  <div class="wheel-highlight"></div>
-  <div class="wheel-scroller" #scroller (scroll)="onScroll()">
-    <div class="wheel-spacer"></div>
-    @for (v of values(); track v) {
-      <div class="wheel-item" [class.active]="v === value()">
-        {{ formatValue(v) }}@if (unit()) {<span class="wheel-unit"> {{ unit() }}</span>}
-      </div>
+<div class="stepper" [class.compact]="compact()">
+  <button type="button" class="step-btn" (click)="decrement()" [disabled]="value() <= min()" aria-label="Disminuir">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  </button>
+
+  <div class="value-box">
+    <input
+      class="value-input"
+      type="text"
+      inputmode="decimal"
+      [value]="displayValue()"
+      (focus)="onFocus()"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+      (keydown.enter)="onEnter($event)"
+    />
+    @if (unit()) {
+      <span class="value-unit">{{ unit() }}</span>
     }
-    <div class="wheel-spacer"></div>
   </div>
+
+  <button type="button" class="step-btn" (click)="increment()" [disabled]="value() >= max()" aria-label="Aumentar">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="12" y1="5" x2="12" y2="19" />
+    </svg>
+  </button>
 </div>

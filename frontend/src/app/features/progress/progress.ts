@@ -5,10 +5,11 @@ import { Exercise } from '../../core/models/exercise.model';
 import { ProgressData, ProgressMetric } from '../../core/models/progress.model';
 import { INPUT_TYPE_UNIT } from '../../core/models/labels';
 import { formatNumber, shortDateLabel } from '../../core/utils/format';
+import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 @Component({
   selector: 'app-progress',
-  imports: [ChartModule],
+  imports: [ChartModule, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './progress.html',
   styleUrl: './progress.css',

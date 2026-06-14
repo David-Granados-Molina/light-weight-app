@@ -11,6 +11,7 @@ import { formatSet, formatSets, relativeDayLabel } from '../../core/utils/format
 import { SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 interface DateChip {
   iso: string;
@@ -52,7 +53,7 @@ function pickRandom(list: string[]): string {
 
 @Component({
   selector: 'app-register-workout',
-  imports: [NumberWheel, ConfirmDialog],
+  imports: [NumberWheel, ConfirmDialog, ExerciseLoader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './register-workout.html',
   styleUrl: './register-workout.css',
@@ -89,6 +90,7 @@ export class RegisterWorkout {
   readonly comparisonMessage = signal('');
   readonly shareCopied = signal(false);
   readonly showReminder = signal(false);
+  readonly reminderDismissed = signal(false);
   readonly pendingRoutine = signal<Routine | null>(null);
 
   readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
@@ -133,12 +135,16 @@ export class RegisterWorkout {
     }
 
     const reminderId = setInterval(() => {
-      if (this.added().length > 0 && !this.saved() && !this.saving()) {
+      if (this.added().length > 0 && !this.saved() && !this.saving() && !this.reminderDismissed()) {
         this.showReminder.set(true);
-        setTimeout(() => this.showReminder.set(false), 4000);
       }
     }, 45_000);
     this.destroyRef.onDestroy(() => clearInterval(reminderId));
+  }
+
+  closeReminder(): void {
+    this.showReminder.set(false);
+    this.reminderDismissed.set(true);
   }
 
   selectDate(iso: string): void {
@@ -249,6 +255,8 @@ export class RegisterWorkout {
         this.comparisonMessage.set(pickRandom(this.comparisonPool()));
         this.saving.set(false);
         this.saved.set(true);
+        this.showReminder.set(false);
+        this.reminderDismissed.set(false);
       },
       error: () => {
         this.saving.set(false);

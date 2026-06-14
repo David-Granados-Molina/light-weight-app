@@ -1,16 +1,4 @@
-import {
-  booleanAttribute,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  input,
-  model,
-  viewChild,
-} from '@angular/core';
-
-const ITEM_HEIGHT = 36;
+import { booleanAttribute, ChangeDetectionStrategy, Component, effect, input, model, signal } from '@angular/core';
 
 @Component({
   selector: 'app-number-wheel',
@@ -27,33 +15,15 @@ export class NumberWheel {
   readonly compact = input(false, { transform: booleanAttribute });
   readonly value = model(0);
 
-  readonly scroller = viewChild<ElementRef<HTMLDivElement>>('scroller');
-
-  readonly itemHeight = ITEM_HEIGHT;
-
-  private snapTimeout: ReturnType<typeof setTimeout> | null = null;
-  private didInitialScroll = false;
-
-  readonly values = computed(() => {
-    const min = this.min();
-    const max = this.max();
-    const step = this.step();
-    const factor = 10 ** this.decimals();
-    const list: number[] = [];
-    for (let v = min; v <= max + step / 2; v += step) {
-      list.push(Math.round(v * factor) / factor);
-    }
-    return list;
-  });
+  readonly displayValue = signal('');
+  private focused = false;
 
   constructor() {
     effect(() => {
       const value = this.value();
-      const scroller = this.scroller();
-      if (!scroller) return;
-      const behavior: ScrollBehavior = this.didInitialScroll ? 'smooth' : 'instant';
-      this.scrollToValue(scroller.nativeElement, value, behavior);
-      this.didInitialScroll = true;
+      if (!this.focused) {
+        this.displayValue.set(this.formatValue(value));
+      }
     });
   }
 
@@ -61,33 +31,50 @@ export class NumberWheel {
     return v.toLocaleString('es-ES', { minimumFractionDigits: this.decimals(), maximumFractionDigits: this.decimals() });
   }
 
-  onScroll(): void {
-    if (this.snapTimeout) clearTimeout(this.snapTimeout);
-    this.snapTimeout = setTimeout(() => this.commitScroll(), 100);
+  onFocus(): void {
+    this.focused = true;
   }
 
-  private commitScroll(): void {
-    const scroller = this.scroller();
-    if (!scroller) return;
+  onInput(event: Event): void {
+    this.displayValue.set((event.target as HTMLInputElement).value);
+  }
 
-    const values = this.values();
-    const index = Math.round(scroller.nativeElement.scrollTop / this.itemHeight);
-    const clamped = Math.min(Math.max(index, 0), values.length - 1);
-    const newValue = values[clamped];
+  onBlur(): void {
+    this.focused = false;
+    this.commit();
+  }
 
-    if (newValue !== this.value()) {
-      this.value.set(newValue);
+  onEnter(event: Event): void {
+    (event.target as HTMLInputElement).blur();
+  }
+
+  increment(): void {
+    this.focused = false;
+    this.value.set(this.clamp(this.roundToStep(this.value() + this.step())));
+  }
+
+  decrement(): void {
+    this.focused = false;
+    this.value.set(this.clamp(this.roundToStep(this.value() - this.step())));
+  }
+
+  private commit(): void {
+    const raw = this.displayValue().replace(',', '.').trim();
+    const parsed = parseFloat(raw);
+    const num = Number.isNaN(parsed) ? this.value() : this.clamp(this.roundToStep(parsed));
+    if (num === this.value()) {
+      this.displayValue.set(this.formatValue(num));
     } else {
-      this.scrollToValue(scroller.nativeElement, newValue, 'smooth');
+      this.value.set(num);
     }
   }
 
-  private scrollToValue(el: HTMLDivElement, value: number, behavior: ScrollBehavior): void {
-    const values = this.values();
-    let index = values.findIndex((v) => v === value);
-    if (index === -1) {
-      index = values.reduce((best, v, i) => (Math.abs(v - value) < Math.abs(values[best] - value) ? i : best), 0);
-    }
-    el.scrollTo({ top: index * this.itemHeight, behavior });
+  private roundToStep(v: number): number {
+    const factor = 10 ** this.decimals();
+    return Math.round(v * factor) / factor;
+  }
+
+  private clamp(v: number): number {
+    return Math.min(Math.max(v, this.min()), this.max());
   }
 }

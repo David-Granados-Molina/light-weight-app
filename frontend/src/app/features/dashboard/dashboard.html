@@ -1,7 +1,10 @@
 <div class="page">
   <div class="brand">
     <img src="icons/light-weight-icon.svg" width="28" height="28" alt="" class="brand-icon" />
-    <span class="brand-name">Light Weight</span>
+    <div class="brand-text">
+      <span class="brand-name">Light Weight</span>
+      <span class="brand-subtitle">Tu registro personal de ejercicio</span>
+    </div>
   </div>
 
   <div class="header">
@@ -19,7 +22,7 @@
   </div>
 
   @if (loading()) {
-    <div class="empty">Cargando...</div>
+    <app-exercise-loader />
   } @else if (error()) {
     <div class="empty">No se ha podido conectar con el servidor.</div>
   } @else {
@@ -35,9 +38,11 @@
         <div class="stat-label">Entrenos</div>
       </div>
       <div class="stat stat-tip">
-        <div class="tip-icon">💡</div>
         @for (tip of [currentTip()]; track tipIndex()) {
           <div class="tip-text">{{ tip }}</div>
+          <div class="tip-progress">
+            <div class="tip-progress-bar" [style.animation-duration.ms]="tipDurationMs"></div>
+          </div>
         }
       </div>
     </div>

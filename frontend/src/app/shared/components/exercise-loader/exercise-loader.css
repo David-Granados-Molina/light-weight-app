@@ -1,0 +1,192 @@
+:host {
+  display: block;
+}
+
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 0;
+}
+
+.figure {
+  width: 92px;
+  height: 92px;
+  overflow: visible;
+}
+
+.loader.compact {
+  padding: 0;
+  gap: 8px;
+}
+
+.loader.compact .figure {
+  width: 64px;
+  height: 64px;
+}
+
+.part {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.head {
+  fill: var(--color-text-secondary);
+  stroke: none;
+}
+
+.bar,
+.floor {
+  stroke: var(--color-border-strong);
+}
+
+.loader-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* bench press */
+.bench-press {
+  transform-origin: 50px 34px;
+  animation: bench-press 1.3s ease-in-out infinite;
+}
+
+@keyframes bench-press {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(14px);
+  }
+}
+
+/* bicep curl */
+.curl-arm {
+  transform-origin: 55px 36px;
+  animation: curl-arm 1.4s ease-in-out infinite;
+}
+
+.curl-forearm {
+  transform-origin: 68px 60px;
+  animation: curl-forearm 1.4s ease-in-out infinite;
+}
+
+@keyframes curl-arm {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes curl-forearm {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-150deg);
+  }
+}
+
+/* squat */
+.squat-body {
+  animation: squat-body 1.4s ease-in-out infinite;
+}
+
+.squat-leg-l,
+.squat-leg-r {
+  transform-origin: 50px 50px;
+}
+
+.squat-leg-l {
+  animation: squat-leg-l 1.4s ease-in-out infinite;
+}
+
+.squat-leg-r {
+  animation: squat-leg-r 1.4s ease-in-out infinite;
+}
+
+@keyframes squat-body {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(14px);
+  }
+}
+
+@keyframes squat-leg-l {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes squat-leg-r {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+/* pull-up */
+.pullup-body {
+  animation: pullup-body 1.4s ease-in-out infinite;
+}
+
+@keyframes pullup-body {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* push-up */
+.pushup-body {
+  animation: pushup-body 1.3s ease-in-out infinite;
+}
+
+@keyframes pushup-body {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* dips */
+.dips-body {
+  animation: dips-body 1.4s ease-in-out infinite;
+}
+
+@keyframes dips-body {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(12px);
+  }
+}

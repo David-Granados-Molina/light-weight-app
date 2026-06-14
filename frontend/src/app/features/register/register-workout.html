@@ -1,5 +1,8 @@
 @if (showReminder()) {
-  <div class="reminder-toast">⏳ Entreno sin guardar — pulsa "Guardar entreno" al final de la página</div>
+  <div class="reminder-toast">
+    <span class="reminder-text">Entreno sin guardar — pulsa "Guardar entreno" al final de la página</span>
+    <button type="button" class="reminder-close" (click)="closeReminder()" aria-label="Cerrar aviso">✕</button>
+  </div>
 }
 
 <div class="page">
@@ -142,7 +145,7 @@
   @if (saving()) {
     <div class="saving-overlay">
       <div class="saving-sheet">
-        <div class="saving-spinner"></div>
+        <app-exercise-loader text="" compact />
         <div class="saving-title">Guardando entreno…</div>
         <div class="saving-text">
           No salgas de aquí hasta que se confirme que el entreno se ha guardado. Puede tardar unos segundos.

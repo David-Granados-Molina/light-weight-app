@@ -9,7 +9,7 @@
   <a routerLink="/rutinas/nueva" class="cta">+ Nueva rutina</a>
 
   @if (loading()) {
-    <div class="empty">Cargando...</div>
+    <app-exercise-loader />
   } @else {
     <div class="routine-list">
       @for (r of rows(); track r.id) {
