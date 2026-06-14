@@ -181,11 +181,11 @@ export class RegisterWorkout {
     );
   }
 
-  setValue(exIndex: number, setIndex: number, field: 'weight' | 'reps' | 'time', value: number): void {
+  setValue(exIndex: number, setIndex: number, field: 'weight' | 'reps' | 'time', value: number | null): void {
     this.added.update((list) =>
       list.map((a, i) => {
         if (i !== exIndex) return a;
-        return { ...a, sets: a.sets.map((s, j) => (j === setIndex ? { ...s, [field]: value } : s)) };
+        return { ...a, sets: a.sets.map((s, j) => (j === setIndex ? { ...s, [field]: value ?? undefined } : s)) };
       }),
     );
   }
@@ -217,7 +217,7 @@ export class RegisterWorkout {
   private loadRoutine(routine: Routine): void {
     const added = routine.exercises.map((re) => ({
       exercise: re.exercise,
-      sets: Array.from({ length: re.targetSets }, () => this.defaultSet(re.exercise.inputType, re.targetReps)),
+      sets: Array.from({ length: re.targetSets }, () => this.emptySet()),
     }));
     this.added.set(added);
     this.selectedRoutineId.set(routine.id);
@@ -350,5 +350,9 @@ export class RegisterWorkout {
     if (inputType === 'peso') return { weight: 40, reps: targetReps ?? 8 };
     if (inputType === 'reps') return { reps: targetReps ?? 10, weight: 0 };
     return { time: targetReps ?? 30 };
+  }
+
+  private emptySet(): SetEntry {
+    return {};
   }
 }

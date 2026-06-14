@@ -40,9 +40,18 @@
   stroke: none;
 }
 
-.bar,
 .floor {
   stroke: var(--color-border-strong);
+}
+
+.plate-bar {
+  stroke: var(--color-border-strong);
+  stroke-width: 5;
+}
+
+.plate {
+  fill: var(--color-border-strong);
+  stroke: none;
 }
 
 .loader-text {
@@ -51,40 +60,57 @@
   color: var(--color-text-secondary);
 }
 
-/* bench press */
-.bench-press {
-  transform-origin: 50px 34px;
-  animation: bench-press 1.3s ease-in-out infinite;
+/* bench press: shoulder sways slightly, forearm extends the bar up and down */
+.bench-upper-arm {
+  transform-origin: 27px 70px;
+  animation: bench-upper-arm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
-@keyframes bench-press {
+.bench-forearm {
+  transform-origin: 22px 52px;
+  animation: bench-forearm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes bench-upper-arm {
   0%,
   100% {
-    transform: translateY(0);
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(14px);
+  45%,
+  55% {
+    transform: rotate(6deg);
   }
 }
 
-/* bicep curl */
-.curl-arm {
-  transform-origin: 55px 36px;
-  animation: curl-arm 1.4s ease-in-out infinite;
+@keyframes bench-forearm {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45%,
+  55% {
+    transform: rotate(-120deg);
+  }
+}
+
+/* bicep curl: upper arm steady, forearm + dumbbell curl up to the shoulder */
+.curl-upper-arm {
+  transform-origin: 50px 24px;
+  animation: curl-upper-arm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
 .curl-forearm {
-  transform-origin: 68px 60px;
-  animation: curl-forearm 1.4s ease-in-out infinite;
+  transform-origin: 50px 46px;
+  animation: curl-forearm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
-@keyframes curl-arm {
+@keyframes curl-upper-arm {
   0%,
   100% {
     transform: rotate(0deg);
   }
   50% {
-    transform: rotate(-8deg);
+    transform: rotate(-6deg);
   }
 }
 
@@ -93,27 +119,25 @@
   100% {
     transform: rotate(0deg);
   }
-  50% {
-    transform: rotate(-150deg);
+  45%,
+  55% {
+    transform: rotate(-143deg);
   }
 }
 
-/* squat */
+/* squat: whole body sinks while thigh and shin fold at the knee */
 .squat-body {
-  animation: squat-body 1.4s ease-in-out infinite;
+  animation: squat-body 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
-.squat-leg-l,
-.squat-leg-r {
-  transform-origin: 50px 50px;
+.squat-thigh {
+  transform-origin: 50px 42px;
+  animation: squat-thigh 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
-.squat-leg-l {
-  animation: squat-leg-l 1.4s ease-in-out infinite;
-}
-
-.squat-leg-r {
-  animation: squat-leg-r 1.4s ease-in-out infinite;
+.squat-shin {
+  transform-origin: 50px 64px;
+  animation: squat-shin 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
 }
 
 @keyframes squat-body {
@@ -121,34 +145,42 @@
   100% {
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(14px);
+  45%,
+  55% {
+    transform: translateY(13px);
   }
 }
 
-@keyframes squat-leg-l {
+@keyframes squat-thigh {
   0%,
   100% {
     transform: rotate(0deg);
   }
-  50% {
-    transform: rotate(-8deg);
+  45%,
+  55% {
+    transform: rotate(35deg);
   }
 }
 
-@keyframes squat-leg-r {
+@keyframes squat-shin {
   0%,
   100% {
     transform: rotate(0deg);
   }
-  50% {
-    transform: rotate(8deg);
+  45%,
+  55% {
+    transform: rotate(-60deg);
   }
 }
 
-/* pull-up */
+/* pull-up: body rises toward the bar, legs sway slightly */
 .pullup-body {
-  animation: pullup-body 1.4s ease-in-out infinite;
+  animation: pullup-body 1.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.pullup-legs {
+  transform-origin: 50px 68px;
+  animation: pullup-legs 1.5s ease-in-out infinite;
 }
 
 @keyframes pullup-body {
@@ -156,29 +188,47 @@
   100% {
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-12px);
+  45%,
+  55% {
+    transform: translateY(-9px);
   }
 }
 
-/* push-up */
-.pushup-body {
-  animation: pushup-body 1.3s ease-in-out infinite;
-}
-
-@keyframes pushup-body {
+@keyframes pullup-legs {
   0%,
   100% {
-    transform: translateY(-3px);
+    transform: rotate(0deg);
   }
   50% {
-    transform: translateY(5px);
+    transform: rotate(6deg);
   }
 }
 
-/* dips */
+/* push-up: arm bends at the planted hand, lowering the body toward the floor */
+.pushup-arm {
+  transform-origin: 40px 70px;
+  animation: pushup-arm 1.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes pushup-arm {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45%,
+  55% {
+    transform: rotate(-22deg);
+  }
+}
+
+/* dips: body slides down between the bars, legs sway slightly */
 .dips-body {
-  animation: dips-body 1.4s ease-in-out infinite;
+  animation: dips-body 1.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.dips-legs {
+  transform-origin: 50px 55px;
+  animation: dips-legs 1.5s ease-in-out infinite;
 }
 
 @keyframes dips-body {
@@ -186,7 +236,18 @@
   100% {
     transform: translateY(0);
   }
+  45%,
+  55% {
+    transform: translateY(11px);
+  }
+}
+
+@keyframes dips-legs {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
   50% {
-    transform: translateY(12px);
+    transform: rotate(-4deg);
   }
 }

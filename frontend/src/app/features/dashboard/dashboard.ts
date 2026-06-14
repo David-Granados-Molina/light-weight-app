@@ -54,7 +54,6 @@ export class Dashboard {
 
   readonly tipIndex = signal(0);
   readonly currentTip = computed(() => TIPS[this.tipIndex()]);
-  readonly tipDurationMs = TIP_DURATION_MS;
 
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
   readonly recent = computed(() =>

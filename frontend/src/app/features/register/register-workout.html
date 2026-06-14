@@ -93,17 +93,17 @@
                     [max]="600"
                     [step]="5"
                     unit="seg"
-                    [value]="set.time ?? 0"
+                    [value]="set.time ?? null"
                     (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
                   />
                 } @else {
                   <app-number-wheel
                     [min]="0"
                     [max]="300"
-                    [step]="2.5"
+                    [step]="0.5"
                     [decimals]="1"
                     unit="kg"
-                    [value]="set.weight ?? 0"
+                    [value]="set.weight ?? null"
                     (valueChange)="setValue(exIndex, setIndex, 'weight', $event)"
                   />
                   <app-number-wheel
@@ -111,7 +111,7 @@
                     [max]="100"
                     [step]="1"
                     unit="reps"
-                    [value]="set.reps ?? 0"
+                    [value]="set.reps ?? null"
                     (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
                   />
                 }

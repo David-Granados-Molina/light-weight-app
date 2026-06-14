@@ -13,7 +13,7 @@ export class NumberWheel {
   readonly decimals = input(0);
   readonly unit = input('');
   readonly compact = input(false, { transform: booleanAttribute });
-  readonly value = model(0);
+  readonly value = model<number | null>(0);
 
   readonly displayValue = signal('');
   private focused = false;
@@ -27,7 +27,8 @@ export class NumberWheel {
     });
   }
 
-  formatValue(v: number): string {
+  formatValue(v: number | null): string {
+    if (v === null) return '';
     return v.toLocaleString('es-ES', { minimumFractionDigits: this.decimals(), maximumFractionDigits: this.decimals() });
   }
 
@@ -50,16 +51,22 @@ export class NumberWheel {
 
   increment(): void {
     this.focused = false;
-    this.value.set(this.clamp(this.roundToStep(this.value() + this.step())));
+    const base = this.value() ?? this.min() - this.step();
+    this.value.set(this.clamp(this.roundToStep(base + this.step())));
   }
 
   decrement(): void {
     this.focused = false;
-    this.value.set(this.clamp(this.roundToStep(this.value() - this.step())));
+    const base = this.value() ?? this.min() + this.step();
+    this.value.set(this.clamp(this.roundToStep(base - this.step())));
   }
 
   private commit(): void {
     const raw = this.displayValue().replace(',', '.').trim();
+    if (raw === '') {
+      this.value.set(null);
+      return;
+    }
     const parsed = parseFloat(raw);
     const num = Number.isNaN(parsed) ? this.value() : this.clamp(this.roundToStep(parsed));
     if (num === this.value()) {

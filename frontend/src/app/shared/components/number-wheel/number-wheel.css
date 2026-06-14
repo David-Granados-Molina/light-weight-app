@@ -14,7 +14,7 @@
 }
 
 .step-btn {
-  flex: 0 0 48px;
+  flex: 0 0 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,7 +50,7 @@
   justify-content: center;
   gap: 1px;
   min-width: 0;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
 .value-input {
@@ -61,16 +61,19 @@
   text-align: center;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 17px;
+  letter-spacing: -0.3px;
   color: var(--color-text);
   padding: 0;
+  min-width: 0;
 }
 
 .value-unit {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-text-secondary);
   font-family: var(--font-body);
   font-weight: 400;
+  white-space: nowrap;
 }
 
 .stepper.compact {
@@ -79,7 +82,7 @@
 }
 
 .stepper.compact .step-btn {
-  flex-basis: 32px;
+  flex-basis: 30px;
 }
 
 .stepper.compact .step-btn svg {
@@ -88,10 +91,10 @@
 }
 
 .stepper.compact .value-input {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .stepper.compact .value-unit {
-  font-size: 10px;
+  font-size: 9px;
 }

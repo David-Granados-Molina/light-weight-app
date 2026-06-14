@@ -94,33 +94,35 @@
           <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
           </div>
-          <div class="exercise-info">
-            <div class="exercise-name">{{ item.exercise.name }}</div>
-            <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
-              {{ typeLabel[item.exercise.type] }}
+          <div class="exercise-main">
+            <div class="exercise-top">
+              <div class="exercise-info">
+                <div class="exercise-name">{{ item.exercise.name }}</div>
+                <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
+                  {{ typeLabel[item.exercise.type] }}
+                </div>
+              </div>
+              <button type="button" class="remove-btn" (click)="askRemoveExercise(i)" aria-label="Quitar ejercicio">✕</button>
+            </div>
+            <div class="targets">
+              <app-number-wheel
+                [min]="1"
+                [max]="20"
+                [step]="1"
+                unit="series"
+                [value]="item.targetSets"
+                (valueChange)="setTarget(i, 'targetSets', $event)"
+              />
+              <app-number-wheel
+                [min]="1"
+                [max]="200"
+                [step]="1"
+                [unit]="item.exercise.inputType === 'tiempo' ? 'seg' : 'reps'"
+                [value]="item.targetReps"
+                (valueChange)="setTarget(i, 'targetReps', $event)"
+              />
             </div>
           </div>
-          <div class="targets">
-            <app-number-wheel
-              compact
-              [min]="1"
-              [max]="20"
-              [step]="1"
-              unit="series"
-              [value]="item.targetSets"
-              (valueChange)="setTarget(i, 'targetSets', $event)"
-            />
-            <app-number-wheel
-              compact
-              [min]="1"
-              [max]="200"
-              [step]="1"
-              [unit]="item.exercise.inputType === 'tiempo' ? 'seg' : 'reps'"
-              [value]="item.targetReps"
-              (valueChange)="setTarget(i, 'targetReps', $event)"
-            />
-          </div>
-          <button type="button" class="remove-btn" (click)="askRemoveExercise(i)" aria-label="Quitar ejercicio">✕</button>
         </div>
       } @empty {
         <div class="empty">Añade ejercicios a la rutina</div>

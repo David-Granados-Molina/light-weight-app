@@ -258,6 +258,21 @@
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
+.exercise-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.exercise-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .exercise-info {
   flex: 1;
   min-width: 0;
@@ -276,10 +291,14 @@
 
 .targets {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex-shrink: 0;
-  width: 124px;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+
+.targets app-number-wheel {
+  flex: 1;
+  min-width: 0;
 }
 
 .remove-btn {

@@ -151,8 +151,8 @@ export class RoutineForm {
     });
   }
 
-  setTarget(index: number, field: 'targetSets' | 'targetReps', value: number): void {
-    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  setTarget(index: number, field: 'targetSets' | 'targetReps', value: number | null): void {
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, [field]: value ?? row[field] } : row)));
   }
 
   startCreateExercise(): void {

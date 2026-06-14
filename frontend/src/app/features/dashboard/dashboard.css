@@ -149,7 +149,7 @@
 }
 
 .tip-progress {
-  height: 3px;
+  height: 4px;
   border-radius: 2px;
   background: var(--color-border);
   overflow: hidden;
@@ -157,20 +157,20 @@
 
 .tip-progress-bar {
   height: 100%;
-  width: 0%;
+  width: 100%;
   background: var(--color-accent);
   border-radius: 2px;
-  animation-name: tip-progress;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: tip-progress 10s linear forwards;
 }
 
 @keyframes tip-progress {
   from {
-    width: 0%;
+    transform: scaleX(0);
   }
   to {
-    width: 100%;
+    transform: scaleX(1);
   }
 }
 
