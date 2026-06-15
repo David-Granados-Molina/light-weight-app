@@ -1,10 +1,10 @@
 <div class="page">
-  <h1 class="title">Progresión</h1>
+  <h1 class="title">Progreso</h1>
 
   @if (loading() && !data()) {
     <app-exercise-loader />
   } @else if (!routines().length) {
-    <div class="empty">Crea una rutina para empezar a ver tu progresión aquí.</div>
+    <div class="empty">Crea una rutina para empezar a ver tu Progreso aquí.</div>
   } @else {
     <div class="chips app-scroll">
       @for (r of routines(); track r.id) {
