@@ -15,3 +15,10 @@ export interface ProgressData {
   actual: number;
   cambio: number;
 }
+
+export type RoutineProgressItem = ProgressData;
+
+export interface RoutineProgressData {
+  routine: { id: string; name: string; category: Exercise['category'] };
+  items: RoutineProgressItem[];
+}

@@ -28,10 +28,12 @@ export const INPUT_TYPE_LABEL: Record<InputType, string> = {
   peso: 'Peso',
   reps: 'Repeticiones',
   tiempo: 'Tiempo',
+  emom: 'EMOM',
 };
 
 export const INPUT_TYPE_UNIT: Record<InputType, string> = {
   peso: 'kg',
   reps: 'reps',
   tiempo: 'seg',
+  emom: 'rondas',
 };

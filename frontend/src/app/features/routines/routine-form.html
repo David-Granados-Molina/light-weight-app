@@ -110,6 +110,7 @@
                 [max]="20"
                 [step]="1"
                 unit="series"
+                compact
                 [value]="item.targetSets"
                 (valueChange)="setTarget(i, 'targetSets', $event)"
               />
@@ -117,9 +118,19 @@
                 [min]="1"
                 [max]="200"
                 [step]="1"
-                [unit]="item.exercise.inputType === 'tiempo' ? 'seg' : 'reps'"
-                [value]="item.targetReps"
-                (valueChange)="setTarget(i, 'targetReps', $event)"
+                [unit]="'min ' + repsUnit(item.exercise.inputType)"
+                compact
+                [value]="item.targetRepsMin"
+                (valueChange)="setTarget(i, 'targetRepsMin', $event)"
+              />
+              <app-number-wheel
+                [min]="1"
+                [max]="200"
+                [step]="1"
+                [unit]="'max ' + repsUnit(item.exercise.inputType)"
+                compact
+                [value]="item.targetRepsMax"
+                (valueChange)="setTarget(i, 'targetRepsMax', $event)"
               />
             </div>
           </div>
@@ -159,4 +170,16 @@
     (confirmed)="confirmDeleteRoutineAction()"
     (cancelled)="cancelDeleteRoutine()"
   />
+}
+
+@if (saving()) {
+  <div class="saving-overlay">
+    <div class="saving-sheet">
+      <app-exercise-loader text="" compact />
+      <div class="saving-title">Guardando rutina…</div>
+      <div class="saving-text">
+        No salgas de aquí hasta que se confirme que la rutina se ha guardado. Puede tardar unos segundos.
+      </div>
+    </div>
+  </div>
 }

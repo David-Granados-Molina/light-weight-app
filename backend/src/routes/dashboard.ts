@@ -4,10 +4,6 @@ import { addDays, isSameDay, startOfWeek } from '../lib/dateUtils';
 
 export const dashboardRouter = Router();
 
-function setVolume(set: { weight: number | null; reps: number | null }): number {
-  return (set.weight ?? 0) * (set.reps ?? 0);
-}
-
 // GET /api/dashboard
 dashboardRouter.get('/', async (req, res) => {
   const userId = req.userId!;
@@ -17,21 +13,14 @@ dashboardRouter.get('/', async (req, res) => {
 
   const weekSessions = await prisma.workoutSession.findMany({
     where: { userId, date: { gte: weekStart, lt: weekEnd } },
-    include: { exercises: { include: { sets: true } } },
   });
 
   const weekBars = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(weekStart, i);
     const sessionsOfDay = weekSessions.filter((s) => isSameDay(s.date, day));
-    const volumeKg = sessionsOfDay.reduce(
-      (total, session) =>
-        total + session.exercises.reduce((s, ex) => s + ex.sets.reduce((ss, set) => ss + setVolume(set), 0), 0),
-      0,
-    );
     return {
       date: day.toISOString(),
-      volumeKg,
-      category: sessionsOfDay[0]?.category ?? null,
+      categories: [...new Set(sessionsOfDay.map((s) => s.category))],
       isToday: isSameDay(day, today),
     };
   });

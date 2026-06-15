@@ -4,11 +4,16 @@ import { prisma } from '../lib/prisma';
 
 export const routinesRouter = Router();
 
-const routineExerciseSchema = z.object({
-  exerciseId: z.string(),
-  targetSets: z.number().int().min(1).max(20),
-  targetReps: z.number().int().min(1).max(200),
-});
+const routineExerciseSchema = z
+  .object({
+    exerciseId: z.string(),
+    targetSets: z.number().int().min(1).max(20),
+    targetRepsMin: z.number().int().min(1).max(200),
+    targetRepsMax: z.number().int().min(1).max(200),
+  })
+  .refine((data) => data.targetRepsMax >= data.targetRepsMin, {
+    message: 'targetRepsMax debe ser mayor o igual que targetRepsMin',
+  });
 
 const routineSchema = z.object({
   name: z.string().min(2),

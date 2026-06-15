@@ -10,6 +10,8 @@ export interface SetEntry {
 export interface AddedExercise {
   exercise: Exercise;
   sets: SetEntry[];
+  targetRepsMin?: number;
+  targetRepsMax?: number;
 }
 
 /**

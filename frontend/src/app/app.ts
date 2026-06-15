@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { AuthService } from './core/services/auth.service';
 import { TabBar } from './shared/components/tab-bar/tab-bar';
 
 const AUTH_ROUTE_PREFIXES = ['/login', '/recuperar', '/restablecer'];
@@ -15,6 +17,8 @@ const AUTH_ROUTE_PREFIXES = ['/login', '/recuperar', '/restablecer'];
 })
 export class App {
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly document = inject(DOCUMENT);
 
   private readonly url = toSignal(
     this.router.events.pipe(
@@ -25,4 +29,11 @@ export class App {
   );
 
   readonly isAuthRoute = computed(() => AUTH_ROUTE_PREFIXES.some((prefix) => this.url().startsWith(prefix)));
+
+  constructor() {
+    effect(() => {
+      const color = this.auth.currentUser()?.themeColor ?? '#ffbf00';
+      this.document.documentElement.style.setProperty('--color-accent', color);
+    });
+  }
 }

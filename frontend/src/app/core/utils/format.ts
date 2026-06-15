@@ -1,3 +1,5 @@
+import { InputType } from '../models/exercise.model';
+
 export function formatNumber(value: number): string {
   return value.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 }
@@ -8,16 +10,17 @@ interface SetLike {
   time?: number | null;
 }
 
-/** "20kg×8", "12 reps" o "45s" según el tipo de serie. */
-export function formatSet(s: SetLike): string {
+/** "20kg×8", "12 reps", "45s" o "5 EMOM×8" según el tipo de serie. */
+export function formatSet(s: SetLike, inputType?: InputType): string {
+  if (inputType === 'emom') return `${s.time ?? 0} EMOM×${s.reps ?? 0}`;
   if (s.time !== null && s.time !== undefined) return `${s.time}s`;
   if (s.weight !== null && s.weight !== undefined && s.weight > 0) return `${s.weight}kg×${s.reps ?? 0}`;
   return `${s.reps ?? 0}`;
 }
 
 /** Une las series de un ejercicio, ej. "20kg×8 · 20kg×8 · 18kg×6". */
-export function formatSets(sets: SetLike[]): string {
-  return sets.map(formatSet).join(' · ');
+export function formatSets(sets: SetLike[], inputType?: InputType): string {
+  return sets.map((s) => formatSet(s, inputType)).join(' · ');
 }
 
 const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];

@@ -8,7 +8,7 @@ const exerciseSchema = z.object({
   name: z.string().min(2),
   category: z.enum(['gym', 'calistenia']),
   type: z.enum(['empuje', 'tiron', 'pierna', 'core']),
-  inputType: z.enum(['peso', 'reps', 'tiempo']),
+  inputType: z.enum(['peso', 'reps', 'tiempo', 'emom']),
   muscleGroup: z.string().optional().nullable(),
 });
 

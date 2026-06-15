@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { cropImageToDataUrl, readImageFile } from '../../core/utils/image';
+import { avatarSrc, AVATAR_IDS } from '../../core/utils/avatar';
 
-const CROP_VIEWPORT = 240;
+const THEME_COLORS = ['#ffbf00', '#ba5a6e', '#9d1d1d', '#32673d', '#005492', '#69418b', '#9c9c9c', '#5fa990'];
 
 @Component({
   selector: 'app-profile',
@@ -20,8 +20,14 @@ export class Profile {
 
   readonly name = signal('');
   readonly email = computed(() => this.user()?.email ?? '');
-  readonly avatarUrl = signal<string | null>(null);
+  readonly avatarId = signal<string | null>(null);
+  readonly themeColor = signal('#ffbf00');
   readonly initial = computed(() => (this.name().charAt(0) || '?').toUpperCase());
+  readonly avatarPreview = computed(() => avatarSrc(this.avatarId()));
+
+  readonly avatarIds = AVATAR_IDS;
+  readonly avatarSrc = avatarSrc;
+  readonly themeColors = THEME_COLORS;
 
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
@@ -29,25 +35,11 @@ export class Profile {
 
   readonly canSave = computed(() => this.name().trim().length >= 2 && !this.saving());
 
-  readonly cropViewport = CROP_VIEWPORT;
-  readonly cropSrc = signal<string | null>(null);
-  readonly cropNatural = signal({ w: 0, h: 0 });
-  readonly cropZoom = signal(1);
-  readonly cropOffset = signal({ x: 0, y: 0 });
-  private dragStart: { x: number; y: number; offsetX: number; offsetY: number } | null = null;
-
-  readonly cropBaseScale = computed(() => {
-    const { w, h } = this.cropNatural();
-    return w && h ? CROP_VIEWPORT / Math.min(w, h) : 1;
-  });
-  readonly cropScale = computed(() => this.cropBaseScale() * this.cropZoom());
-  readonly cropDispWidth = computed(() => this.cropNatural().w * this.cropScale());
-  readonly cropDispHeight = computed(() => this.cropNatural().h * this.cropScale());
-
   constructor() {
     const user = this.user();
     this.name.set(user?.name ?? '');
-    this.avatarUrl.set(user?.avatarUrl ?? null);
+    this.avatarId.set(user?.avatarUrl ?? null);
+    this.themeColor.set(user?.themeColor ?? '#ffbf00');
   }
 
   onNameInput(event: Event): void {
@@ -55,93 +47,14 @@ export class Profile {
     this.success.set(false);
   }
 
-  async onPhotoSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    try {
-      const { src, width, height } = await readImageFile(file);
-      this.cropSrc.set(src);
-      this.cropNatural.set({ w: width, h: height });
-      this.cropZoom.set(1);
-      this.cropOffset.set({ x: 0, y: 0 });
-    } catch {
-      this.error.set('No se ha podido procesar la imagen.');
-    } finally {
-      input.value = '';
-    }
-  }
-
-  onCropPointerDown(event: PointerEvent): void {
-    event.preventDefault();
-    const offset = this.cropOffset();
-    this.dragStart = { x: event.clientX, y: event.clientY, offsetX: offset.x, offsetY: offset.y };
-    (event.target as HTMLElement).setPointerCapture(event.pointerId);
-  }
-
-  onCropPointerMove(event: PointerEvent): void {
-    if (!this.dragStart) return;
-    const dx = event.clientX - this.dragStart.x;
-    const dy = event.clientY - this.dragStart.y;
-    this.cropOffset.set(
-      this.clampCropOffset(
-        { x: this.dragStart.offsetX + dx, y: this.dragStart.offsetY + dy },
-        this.cropZoom(),
-      ),
-    );
-  }
-
-  onCropPointerUp(): void {
-    this.dragStart = null;
-  }
-
-  onZoomInput(event: Event): void {
-    const zoom = Number((event.target as HTMLInputElement).value);
-    this.cropZoom.set(zoom);
-    this.cropOffset.set(this.clampCropOffset(this.cropOffset(), zoom));
-  }
-
-  async confirmCrop(): Promise<void> {
-    const src = this.cropSrc();
-    if (!src) return;
-
-    const { w: natW, h: natH } = this.cropNatural();
-    const scale = this.cropScale();
-    const offset = this.cropOffset();
-    const sourceSize = CROP_VIEWPORT / scale;
-    const sourceX = natW / 2 - offset.x / scale - sourceSize / 2;
-    const sourceY = natH / 2 - offset.y / scale - sourceSize / 2;
-
-    try {
-      const dataUrl = await cropImageToDataUrl(src, { x: sourceX, y: sourceY, size: sourceSize });
-      this.avatarUrl.set(dataUrl);
-      this.success.set(false);
-    } catch {
-      this.error.set('No se ha podido procesar la imagen.');
-    } finally {
-      this.cropSrc.set(null);
-    }
-  }
-
-  cancelCrop(): void {
-    this.cropSrc.set(null);
-  }
-
-  removePhoto(): void {
-    this.avatarUrl.set(null);
+  selectAvatar(id: string): void {
+    this.avatarId.set(id);
     this.success.set(false);
   }
 
-  private clampCropOffset(offset: { x: number; y: number }, zoom: number): { x: number; y: number } {
-    const scale = this.cropBaseScale() * zoom;
-    const { w: natW, h: natH } = this.cropNatural();
-    const maxX = Math.max(0, (natW * scale - CROP_VIEWPORT) / 2);
-    const maxY = Math.max(0, (natH * scale - CROP_VIEWPORT) / 2);
-    return {
-      x: Math.min(maxX, Math.max(-maxX, offset.x)),
-      y: Math.min(maxY, Math.max(-maxY, offset.y)),
-    };
+  selectColor(color: string): void {
+    this.themeColor.set(color);
+    this.success.set(false);
   }
 
   save(): void {
@@ -149,16 +62,18 @@ export class Profile {
 
     this.saving.set(true);
     this.error.set(null);
-    this.authService.updateProfile({ name: this.name().trim(), avatarUrl: this.avatarUrl() }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.success.set(true);
-      },
-      error: () => {
-        this.saving.set(false);
-        this.error.set('No se ha podido guardar los cambios.');
-      },
-    });
+    this.authService
+      .updateProfile({ name: this.name().trim(), avatarUrl: this.avatarId(), themeColor: this.themeColor() })
+      .subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.success.set(true);
+        },
+        error: () => {
+          this.saving.set(false);
+          this.error.set('No se ha podido guardar los cambios.');
+        },
+      });
   }
 
   goRecover(): void {

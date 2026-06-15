@@ -45,6 +45,15 @@
   color: var(--color-cali);
 }
 
+.date-mode-chips {
+  margin-top: 10px;
+}
+
+.date-mode-chips .chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .search-input {
   width: 100%;
   margin-top: 12px;
@@ -60,6 +69,33 @@
 
 .search-input::placeholder {
   color: var(--color-text-muted);
+}
+
+.date-input {
+  color-scheme: dark;
+}
+
+.date-selects {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.date-select {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 13px 14px;
+  color: var(--color-text);
+  font-size: 15px;
+  outline: none;
+  font-family: inherit;
+}
+
+.date-select-full {
+  width: 100%;
+  margin-top: 12px;
 }
 
 .session-list {

@@ -16,6 +16,48 @@
     }
   </div>
 
+  <div class="chips date-mode-chips app-scroll">
+    @for (chip of dateModeChips; track chip.key) {
+      <button
+        type="button"
+        class="chip"
+        [class.active]="dateMode() === chip.key"
+        (click)="selectDateMode(chip.key)"
+      >
+        {{ chip.label }}
+      </button>
+    }
+  </div>
+
+  @if (dateMode() === 'dia') {
+    <input
+      class="search-input date-input"
+      type="date"
+      [max]="todayIso"
+      [value]="selectedDay()"
+      (change)="onDayInput($event)"
+    />
+  } @else if (dateMode() === 'mes') {
+    <div class="date-selects">
+      <select class="date-select" [value]="selectedMonth()" (change)="onMonthInput($event)">
+        @for (m of months; track m.value) {
+          <option [value]="m.value">{{ m.label }}</option>
+        }
+      </select>
+      <select class="date-select" [value]="selectedYear()" (change)="onYearInput($event)">
+        @for (y of years(); track y) {
+          <option [value]="y">{{ y }}</option>
+        }
+      </select>
+    </div>
+  } @else if (dateMode() === 'anio') {
+    <select class="date-select date-select-full" [value]="selectedYear()" (change)="onYearInput($event)">
+      @for (y of years(); track y) {
+        <option [value]="y">{{ y }}</option>
+      }
+    </select>
+  }
+
   <input
     class="search-input"
     type="text"
@@ -42,7 +84,7 @@
               @for (e of s.exercises; track e.id) {
                 <div class="session-exercise">
                   <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                  <span class="session-exercise-sets">{{ formatSets(e.sets) }}</span>
+                  <span class="session-exercise-sets">{{ formatSets(e.sets, e.exercise.inputType) }}</span>
                 </div>
               }
             </div>

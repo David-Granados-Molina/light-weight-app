@@ -23,6 +23,7 @@ enum InputType {
   peso
   reps
   tiempo
+  emom
 }
 
 model User {
@@ -32,6 +33,7 @@ model User {
   passwordHash String?
   googleId     String?              @unique
   avatarUrl    String?
+  themeColor   String?
   createdAt    DateTime             @default(now())
   routines     Routine[]
   sessions     WorkoutSession[]
@@ -72,14 +74,15 @@ model Routine {
 }
 
 model RoutineExercise {
-  id         String   @id @default(uuid())
-  routineId  String
-  routine    Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
-  exerciseId String
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
-  targetSets Int
-  targetReps Int
-  order      Int      @default(0)
+  id            String   @id @default(uuid())
+  routineId     String
+  routine       Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseId    String
+  exercise      Exercise @relation(fields: [exerciseId], references: [id])
+  targetSets    Int
+  targetRepsMin Int
+  targetRepsMax Int
+  order         Int      @default(0)
 }
 
 model WorkoutSession {

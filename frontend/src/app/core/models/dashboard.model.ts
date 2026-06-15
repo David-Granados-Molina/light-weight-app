@@ -3,8 +3,7 @@ import { SessionExercise } from './session.model';
 
 export interface WeekBar {
   date: string;
-  volumeKg: number;
-  category: Category | null;
+  categories: Category[];
   isToday: boolean;
 }
 

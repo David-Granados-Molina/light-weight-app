@@ -56,7 +56,7 @@
           @for (e of s.exercises; track e.id) {
             <div class="summary-exercise">
               <span class="summary-exercise-name">{{ e.exercise.name }}</span>
-              <span class="summary-exercise-sets">{{ formatSets(e.sets) }}</span>
+              <span class="summary-exercise-sets">{{ formatSets(e.sets, e.exercise.inputType) }}</span>
             </div>
           }
         </div>

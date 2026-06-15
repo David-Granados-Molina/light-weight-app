@@ -206,7 +206,7 @@
   margin-top: 10px;
 }
 
-.volume-header {
+.checks-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -218,6 +218,8 @@
   gap: 12px;
   font-size: 11px;
   color: var(--color-text-muted);
+  margin-top: 14px;
+  justify-content: center;
 }
 
 .legend-item {
@@ -233,31 +235,42 @@
   display: inline-block;
 }
 
-.bars {
+.checks {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  height: 70px;
+  align-items: center;
 }
 
-.bar-col {
+.check-col {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 7px;
 }
 
-.bar {
-  width: 18px;
-  border-radius: 5px;
+.check-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  justify-content: center;
 }
 
-.bar-label {
+.check-icon {
+  color: var(--color-text-muted);
+}
+
+.check-icon.empty {
+  opacity: 0.35;
+}
+
+.check-label {
   font-size: 11px;
   color: var(--color-text-muted);
 }
 
-.bar-label.today {
+.check-label.today {
   color: var(--color-text);
   font-weight: 700;
 }

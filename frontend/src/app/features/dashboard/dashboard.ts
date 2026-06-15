@@ -6,11 +6,10 @@ import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { sessionTypeLabel } from '../../core/models/labels';
+import { avatarSrc } from '../../core/utils/avatar';
 import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
-interface WeekBarView extends WeekBar {
-  heightPx: number;
-  color: string;
+interface WeekCheckView extends WeekBar {
   letter: string;
 }
 
@@ -43,7 +42,7 @@ export class Dashboard {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
-  readonly avatarUrl = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
+  readonly avatarUrl = computed(() => avatarSrc(this.authService.currentUser()?.avatarUrl));
   readonly todayLabel = todayLabel();
   readonly formatSets = formatSets;
   readonly relativeDayLabel = relativeDayLabel;
@@ -65,16 +64,12 @@ export class Dashboard {
     })),
   );
 
-  readonly weekBars = computed<WeekBarView[]>(() => {
-    const bars = this.summary()?.weekBars ?? [];
-    const maxVol = Math.max(1, ...bars.map((b) => b.volumeKg));
-    return bars.map((bar, i) => ({
+  readonly weekChecks = computed<WeekCheckView[]>(() =>
+    (this.summary()?.weekBars ?? []).map((bar, i) => ({
       ...bar,
-      heightPx: Math.max(14, Math.round((bar.volumeKg / maxVol) * 70)),
-      color: bar.category === 'gym' ? 'var(--color-gym)' : bar.category === 'calistenia' ? 'var(--color-cali)' : '#262626',
       letter: dayLetter(i),
-    }));
-  });
+    })),
+  );
 
   toggleExpand(id: string): void {
     this.expandedId.update((current) => (current === id ? null : id));

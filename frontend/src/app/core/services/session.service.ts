@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { Category } from '../models/exercise.model';
-import { SessionInput, WorkoutSession } from '../models/session.model';
+import { SessionInput, SessionSet, WorkoutSession } from '../models/session.model';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -32,8 +32,23 @@ export class SessionService {
     return this.http.get<WorkoutSession>(`${this.baseUrl}/${id}`);
   }
 
+  getByDate(date: string): Observable<WorkoutSession> {
+    return this.http.get<WorkoutSession>(`${this.baseUrl}/by-date/${date}`);
+  }
+
+  getLastByExercises(exerciseIds: string[]): Observable<Record<string, { date: string; sets: SessionSet[] } | null>> {
+    if (!exerciseIds.length) return of({});
+    return this.http.get<Record<string, { date: string; sets: SessionSet[] } | null>>(`${this.baseUrl}/last`, {
+      params: { exerciseIds: exerciseIds.join(',') },
+    });
+  }
+
   create(input: SessionInput): Observable<WorkoutSession> {
     return this.http.post<WorkoutSession>(this.baseUrl, input);
+  }
+
+  update(id: string, input: SessionInput): Observable<WorkoutSession> {
+    return this.http.put<WorkoutSession>(`${this.baseUrl}/${id}`, input);
   }
 
   delete(id: string): Observable<void> {

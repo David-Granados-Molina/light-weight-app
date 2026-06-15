@@ -10,24 +10,43 @@
   </div>
 
   <div class="avatar-section">
-    <label class="avatar-wrap" for="avatar-input">
-      @if (avatarUrl()) {
-      <img [src]="avatarUrl()" alt="" class="avatar-img" />
+    <div class="avatar-preview">
+      @if (avatarPreview()) {
+        <img [src]="avatarPreview()" alt="" class="avatar-img" />
       } @else {
-      <span class="avatar-fallback">{{ initial() }}</span>
+        <span class="avatar-fallback">{{ initial() }}</span>
       }
-    </label>
-    <span class="avatar-edit">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 20h9" />
-        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-      </svg>
-    </span>
-    <input id="avatar-input" type="file" accept="image/png,image/jpeg,image/webp" class="visually-hidden"
-      (change)="onPhotoSelected($event)" />
-    @if (avatarUrl()) {
-    <button type="button" class="remove-photo-btn" (click)="removePhoto()">Quitar foto</button>
+    </div>
+  </div>
+
+  <label class="field-label">Avatar</label>
+  <div class="avatar-grid">
+    @for (id of avatarIds; track id) {
+      <button
+        type="button"
+        class="avatar-option"
+        [class.selected]="avatarId() === id"
+        [attr.aria-pressed]="avatarId() === id"
+        [attr.aria-label]="'Elegir avatar ' + id"
+        (click)="selectAvatar(id)"
+      >
+        <img [src]="avatarSrc(id)" alt="" />
+      </button>
+    }
+  </div>
+
+  <label class="field-label">Color</label>
+  <div class="color-grid">
+    @for (color of themeColors; track color) {
+      <button
+        type="button"
+        class="color-option"
+        [class.selected]="themeColor() === color"
+        [attr.aria-pressed]="themeColor() === color"
+        [attr.aria-label]="'Elegir color ' + color"
+        [style.background]="color"
+        (click)="selectColor(color)"
+      ></button>
     }
   </div>
 
@@ -60,41 +79,4 @@
   </div>
 
   <button type="button" class="logout-btn" (click)="logout()">Cerrar sesión</button>
-
-  @if (cropSrc()) {
-    <div class="crop-overlay">
-      <div class="crop-sheet">
-        <div class="crop-title">Encuadra tu foto</div>
-        <div
-          class="crop-viewport"
-          [style.width.px]="cropViewport"
-          [style.height.px]="cropViewport"
-          (pointerdown)="onCropPointerDown($event)"
-          (pointermove)="onCropPointerMove($event)"
-          (pointerup)="onCropPointerUp()"
-          (pointercancel)="onCropPointerUp()"
-        >
-          <img
-            [src]="cropSrc()"
-            alt=""
-            class="crop-img"
-            [style.width.px]="cropDispWidth()"
-            [style.height.px]="cropDispHeight()"
-            [style.transform]="'translate(' + cropOffset().x + 'px, ' + cropOffset().y + 'px)'"
-          />
-        </div>
-        <input
-          class="crop-zoom"
-          type="range"
-          min="1"
-          max="3"
-          step="0.05"
-          [value]="cropZoom()"
-          (input)="onZoomInput($event)"
-        />
-        <button type="button" class="saved-primary" (click)="confirmCrop()">Usar esta foto</button>
-        <button type="button" class="saved-secondary" (click)="cancelCrop()">Cancelar</button>
-      </div>
-    </div>
-  }
 </div>

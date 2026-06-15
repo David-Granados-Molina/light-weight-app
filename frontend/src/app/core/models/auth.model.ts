@@ -3,11 +3,13 @@ export interface AuthUser {
   name: string;
   email: string;
   avatarUrl: string | null;
+  themeColor: string | null;
 }
 
 export interface UpdateProfileInput {
   name?: string;
   avatarUrl?: string | null;
+  themeColor?: string | null;
 }
 
 export interface LoginInput {

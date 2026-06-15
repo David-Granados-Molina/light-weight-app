@@ -5,7 +5,8 @@ export interface RoutineExercise {
   exerciseId: string;
   exercise: Exercise;
   targetSets: number;
-  targetReps: number;
+  targetRepsMin: number;
+  targetRepsMax: number;
   order: number;
 }
 
@@ -21,7 +22,8 @@ export interface Routine {
 export interface RoutineExerciseInput {
   exerciseId: string;
   targetSets: number;
-  targetReps: number;
+  targetRepsMin: number;
+  targetRepsMax: number;
 }
 
 export interface RoutineInput {

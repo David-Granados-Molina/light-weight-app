@@ -11,9 +11,23 @@ export const authRouter = Router();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-function toPublicUser(user: { id: string; name: string; email: string; avatarUrl?: string | null }) {
-  return { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl ?? null };
+function toPublicUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+  themeColor?: string | null;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatarUrl: user.avatarUrl ?? null,
+    themeColor: user.themeColor ?? null,
+  };
 }
+
+const THEME_COLORS = ['#ffbf00', '#ba5a6e', '#9d1d1d', '#32673d', '#005492', '#69418b', '#9c9c9c', '#5fa990'];
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -161,10 +175,10 @@ const updateMeSchema = z.object({
   name: z.string().min(2).max(60).optional(),
   avatarUrl: z
     .string()
-    .max(500_000)
-    .regex(/^data:image\/(png|jpeg|webp);base64,/)
+    .regex(/^avatar:[1-6]$/)
     .nullable()
     .optional(),
+  themeColor: z.enum(THEME_COLORS as [string, ...string[]]).nullable().optional(),
 });
 
 authRouter.patch('/me', requireAuth, async (req, res) => {

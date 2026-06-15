@@ -14,7 +14,8 @@ interface ExerciseRow {
   exerciseId: string;
   exercise: Exercise;
   targetSets: number;
-  targetReps: number;
+  targetRepsMin: number;
+  targetRepsMax: number;
 }
 
 const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core'];
@@ -93,7 +94,8 @@ export class RoutineForm {
               exerciseId: e.exerciseId,
               exercise: e.exercise,
               targetSets: e.targetSets,
-              targetReps: e.targetReps,
+              targetRepsMin: e.targetRepsMin,
+              targetRepsMax: e.targetRepsMax,
             })),
           );
           this.loading.set(false);
@@ -124,7 +126,10 @@ export class RoutineForm {
   }
 
   addExercise(exercise: Exercise): void {
-    this.exercises.update((list) => [...list, { exerciseId: exercise.id, exercise, targetSets: 3, targetReps: 10 }]);
+    this.exercises.update((list) => [
+      ...list,
+      { exerciseId: exercise.id, exercise, targetSets: 3, targetRepsMin: 8, targetRepsMax: 12 },
+    ]);
     this.search.set('');
   }
 
@@ -151,8 +156,22 @@ export class RoutineForm {
     });
   }
 
-  setTarget(index: number, field: 'targetSets' | 'targetReps', value: number | null): void {
-    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, [field]: value ?? row[field] } : row)));
+  repsUnit(inputType: InputType): string {
+    if (inputType === 'tiempo') return 'seg';
+    if (inputType === 'emom') return 'rondas';
+    return 'reps';
+  }
+
+  setTarget(index: number, field: 'targetSets' | 'targetRepsMin' | 'targetRepsMax', value: number | null): void {
+    this.exercises.update((list) =>
+      list.map((row, i) => {
+        if (i !== index || value === null) return row;
+        const updated = { ...row, [field]: value };
+        if (field === 'targetRepsMin' && updated.targetRepsMax < value) updated.targetRepsMax = value;
+        if (field === 'targetRepsMax' && updated.targetRepsMin > value) updated.targetRepsMin = value;
+        return updated;
+      }),
+    );
   }
 
   startCreateExercise(): void {
@@ -203,7 +222,8 @@ export class RoutineForm {
       exercises: this.exercises().map((e) => ({
         exerciseId: e.exerciseId,
         targetSets: e.targetSets,
-        targetReps: e.targetReps,
+        targetRepsMin: e.targetRepsMin,
+        targetRepsMax: e.targetRepsMax,
       })),
     };
 

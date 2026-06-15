@@ -8,23 +8,35 @@ import { SessionInput, SessionSet } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
 import { formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
-import { SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
+import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
-
-interface DateChip {
-  iso: string;
-  label: string;
-}
 
 interface LastSessionData {
   date: string;
   sets: SessionSet[];
 }
 
+interface DayCell {
+  iso: string;
+  day: number;
+  inMonth: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+const WEEKDAY_HEADERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
 function isoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 const WORSE_MESSAGES = [
@@ -69,20 +81,18 @@ export class RegisterWorkout {
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
-
-  readonly dateChips: DateChip[] = Array.from({ length: 4 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const iso = isoDate(d);
-    return { iso, label: relativeDayLabel(iso) };
-  });
+  readonly weekdayHeaders = WEEKDAY_HEADERS;
+  readonly todayIso = isoDate(new Date());
 
   readonly catalog = signal<Exercise[]>([]);
   readonly routines = signal<Routine[]>([]);
+  readonly loadingRoutines = signal(true);
+  readonly loadingDay = signal(false);
   readonly search = this.draft.search;
   readonly added = this.draft.added;
   readonly selectedDate = this.draft.selectedDate;
   readonly selectedRoutineId = this.draft.selectedRoutineId;
+  readonly editingSessionId = signal<string | null>(null);
   readonly saving = signal(false);
   readonly saved = signal(false);
   readonly saveError = signal(false);
@@ -92,10 +102,15 @@ export class RegisterWorkout {
   readonly showReminder = signal(false);
   readonly reminderDismissed = signal(false);
   readonly pendingRoutine = signal<Routine | null>(null);
+  readonly showCalendar = signal(false);
+  readonly showDateConfirm = signal(false);
+  readonly calendarMonth = signal(startOfMonth(new Date()));
 
   readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   readonly lastData = signal<Record<string, LastSessionData | null>>({});
+
+  private todaySnapshot: { added: AddedExercise[]; routineId: string | null } | null = null;
 
   readonly searchResults = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -107,12 +122,67 @@ export class RegisterWorkout {
 
   readonly showResults = computed(() => this.search().trim() !== '' && this.searchResults().length > 0);
 
+  readonly searchPlaceholder = computed(() =>
+    this.added().length > 0 ? 'Añadir ejercicio adicional…' : 'Buscar ejercicio…',
+  );
+
   readonly totalSeries = computed(() => this.added().reduce((total, a) => total + a.sets.length, 0));
+
+  readonly selectedDateLabel = computed(() => {
+    const iso = this.selectedDate() ?? this.todayIso;
+    if (iso === this.todayIso) return 'Hoy';
+    const label = new Date(`${iso}T00:00:00`).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+
+  readonly calendarMonthLabel = computed(() => {
+    const label = this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+
+  readonly canNextMonth = computed(() => {
+    const m = this.calendarMonth();
+    const now = startOfMonth(new Date());
+    return (
+      m.getFullYear() < now.getFullYear() || (m.getFullYear() === now.getFullYear() && m.getMonth() < now.getMonth())
+    );
+  });
+
+  readonly calendarWeeks = computed<DayCell[][]>(() => {
+    const month = this.calendarMonth();
+    const today = this.todayIso;
+    const firstWeekday = (month.getDay() + 6) % 7; // Lunes = 0
+    const gridStart = new Date(month);
+    gridStart.setDate(gridStart.getDate() - firstWeekday);
+
+    const cells: DayCell[] = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(gridStart);
+      d.setDate(d.getDate() + i);
+      const iso = isoDate(d);
+      cells.push({
+        iso,
+        day: d.getDate(),
+        inMonth: d.getMonth() === month.getMonth(),
+        isToday: iso === today,
+        isFuture: iso > today,
+      });
+    }
+
+    const weeks: DayCell[][] = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+    while (weeks.length > 4 && weeks[weeks.length - 1].every((c) => !c.inMonth)) weeks.pop();
+    return weeks;
+  });
 
   readonly shareText = computed(() => {
     const added = this.added();
     if (!added.length) return '';
-    const date = this.selectedDate() ?? this.dateChips[0].iso;
+    const date = this.selectedDate() ?? this.todayIso;
     const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString('es-ES', {
       weekday: 'long',
       day: 'numeric',
@@ -120,19 +190,23 @@ export class RegisterWorkout {
     });
     const capitalized = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
     const type = sessionTypeLabel(added.map((a) => a.exercise.type));
-    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets)}`);
+    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets, a.exercise.inputType)}`);
     return `💪 Entreno · ${capitalized} (${type})\n\n${lines.join('\n')}\n\n— Light Weight`;
   });
 
   constructor() {
     this.exerciseService.getAll().subscribe((list) => this.catalog.set(list));
-    this.routineService.getAll().subscribe((list) => this.routines.set(list));
+    this.routineService.getAll().subscribe({
+      next: (list) => {
+        this.routines.set(list);
+        this.loadingRoutines.set(false);
+      },
+      error: () => this.loadingRoutines.set(false),
+    });
     if (!this.selectedDate()) {
-      this.selectedDate.set(this.dateChips[0].iso);
+      this.selectedDate.set(this.todayIso);
     }
-    for (const item of this.added()) {
-      this.fetchLastSession(item.exercise.id);
-    }
+    this.fetchLastSessions(this.added().map((a) => a.exercise.id));
 
     const reminderId = setInterval(() => {
       if (this.added().length > 0 && !this.saved() && !this.saving() && !this.reminderDismissed()) {
@@ -145,10 +219,6 @@ export class RegisterWorkout {
   closeReminder(): void {
     this.showReminder.set(false);
     this.reminderDismissed.set(true);
-  }
-
-  selectDate(iso: string): void {
-    this.selectedDate.set(iso);
   }
 
   onSearchInput(event: Event): void {
@@ -190,6 +260,21 @@ export class RegisterWorkout {
     );
   }
 
+  /** Grupo muscular y rango objetivo de la rutina, p. ej. "Pecho · 8-12 reps". */
+  exerciseInfo(item: AddedExercise): string {
+    const parts: string[] = [];
+    if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
+    if (item.targetRepsMin !== undefined && item.targetRepsMax !== undefined) {
+      const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
+      const range =
+        item.targetRepsMin === item.targetRepsMax
+          ? `${item.targetRepsMin}`
+          : `${item.targetRepsMin}-${item.targetRepsMax}`;
+      parts.push(`${range} ${unit}`);
+    }
+    return parts.join(' · ');
+  }
+
   selectRoutine(routine: Routine): void {
     if (this.added().length > 0) {
       this.pendingRoutine.set(routine);
@@ -215,60 +300,103 @@ export class RegisterWorkout {
   }
 
   private loadRoutine(routine: Routine): void {
-    const added = routine.exercises.map((re) => ({
+    const added: AddedExercise[] = routine.exercises.map((re) => ({
       exercise: re.exercise,
       sets: Array.from({ length: re.targetSets }, () => this.emptySet()),
+      targetRepsMin: re.targetRepsMin,
+      targetRepsMax: re.targetRepsMax,
     }));
     this.added.set(added);
     this.selectedRoutineId.set(routine.id);
+    this.editingSessionId.set(null);
     this.search.set('');
-    for (const item of added) {
-      this.fetchLastSession(item.exercise.id);
+    this.fetchLastSessions(added.map((item) => item.exercise.id));
+  }
+
+  openCalendar(): void {
+    this.calendarMonth.set(startOfMonth(new Date(`${this.selectedDate() ?? this.todayIso}T00:00:00`)));
+    this.showCalendar.set(true);
+  }
+
+  closeCalendar(): void {
+    this.showCalendar.set(false);
+  }
+
+  prevCalendarMonth(): void {
+    const d = new Date(this.calendarMonth());
+    d.setMonth(d.getMonth() - 1);
+    this.calendarMonth.set(d);
+  }
+
+  nextCalendarMonth(): void {
+    if (!this.canNextMonth()) return;
+    const d = new Date(this.calendarMonth());
+    d.setMonth(d.getMonth() + 1);
+    this.calendarMonth.set(d);
+  }
+
+  pickDate(iso: string): void {
+    if (iso > this.todayIso) return;
+    this.showCalendar.set(false);
+    if (iso === this.selectedDate()) return;
+
+    const wasToday = (this.selectedDate() ?? this.todayIso) === this.todayIso && this.editingSessionId() === null;
+    if (wasToday) {
+      this.todaySnapshot = { added: this.added(), routineId: this.selectedRoutineId() };
     }
+
+    if (iso === this.todayIso && this.todaySnapshot) {
+      this.selectedDate.set(iso);
+      this.added.set(this.todaySnapshot.added);
+      this.selectedRoutineId.set(this.todaySnapshot.routineId);
+      this.editingSessionId.set(null);
+      this.todaySnapshot = null;
+      this.fetchLastSessions(this.added().map((item) => item.exercise.id));
+      return;
+    }
+
+    this.selectedDate.set(iso);
+    this.loadSessionForDate(iso);
   }
 
   save(): void {
-    const added = this.added();
-    if (!added.length || this.saving()) return;
+    if (!this.added().length || this.saving()) return;
+    const date = this.selectedDate() ?? this.todayIso;
+    if (date !== this.todayIso) {
+      this.showDateConfirm.set(true);
+      return;
+    }
+    this.doSave();
+  }
 
-    const input: SessionInput = {
-      date: this.selectedDate() ?? this.dateChips[0].iso,
-      category: added[0].exercise.category,
-      type: added[0].exercise.type,
-      exercises: added.map((a) => ({
-        exerciseId: a.exercise.id,
-        sets: a.sets.map((s, i) => ({
-          setNumber: i + 1,
-          weight: s.weight ?? null,
-          reps: s.reps ?? null,
-          time: s.time ?? null,
-        })),
-      })),
-    };
+  confirmSaveDate(): void {
+    this.showDateConfirm.set(false);
+    this.doSave();
+  }
 
-    this.saving.set(true);
-    this.saveError.set(false);
-    this.sessionService.create(input).subscribe({
-      next: () => {
-        const series = this.totalSeries();
-        this.savedSummary.set(series === 1 ? '1 serie guardada' : `${series} series guardadas`);
-        this.comparisonMessage.set(pickRandom(this.comparisonPool()));
-        this.saving.set(false);
-        this.saved.set(true);
-        this.showReminder.set(false);
-        this.reminderDismissed.set(false);
-      },
-      error: () => {
-        this.saving.set(false);
-        this.saveError.set(true);
-      },
-    });
+  cancelSaveDate(): void {
+    this.showDateConfirm.set(false);
   }
 
   closeSaved(): void {
     this.saved.set(false);
     this.shareCopied.set(false);
-    this.draft.reset();
+    const wasToday = (this.selectedDate() ?? this.todayIso) === this.todayIso;
+    this.editingSessionId.set(null);
+    if (wasToday) {
+      this.draft.reset();
+      return;
+    }
+    this.selectedDate.set(this.todayIso);
+    if (this.todaySnapshot) {
+      this.added.set(this.todaySnapshot.added);
+      this.selectedRoutineId.set(this.todaySnapshot.routineId);
+      this.todaySnapshot = null;
+    } else {
+      this.added.set([]);
+      this.selectedRoutineId.set(null);
+    }
+    this.search.set('');
   }
 
   goHistorial(): void {
@@ -295,6 +423,84 @@ export class RegisterWorkout {
     } catch {
       // clipboard no disponible
     }
+  }
+
+  lastSummary(item: AddedExercise): { sets: string; when: string } | null {
+    const data = this.lastData()[item.exercise.id];
+    if (!data) return null;
+    return {
+      sets: data.sets.map((s) => formatSet(s, item.exercise.inputType)).join(' · '),
+      when: relativeDayLabel(data.date),
+    };
+  }
+
+  private doSave(): void {
+    const added = this.added();
+    const date = this.selectedDate() ?? this.todayIso;
+
+    const input: SessionInput = {
+      date,
+      category: added[0].exercise.category,
+      type: added[0].exercise.type,
+      exercises: added.map((a) => ({
+        exerciseId: a.exercise.id,
+        sets: a.sets.map((s, i) => ({
+          setNumber: i + 1,
+          weight: s.weight ?? null,
+          reps: s.reps ?? null,
+          time: s.time ?? null,
+        })),
+      })),
+    };
+
+    this.saving.set(true);
+    this.saveError.set(false);
+    const editingId = this.editingSessionId();
+    const request = editingId ? this.sessionService.update(editingId, input) : this.sessionService.create(input);
+    request.subscribe({
+      next: () => {
+        const series = this.totalSeries();
+        this.savedSummary.set(series === 1 ? '1 serie guardada' : `${series} series guardadas`);
+        this.comparisonMessage.set(pickRandom(this.comparisonPool()));
+        this.saving.set(false);
+        this.saved.set(true);
+        this.showReminder.set(false);
+        this.reminderDismissed.set(false);
+      },
+      error: () => {
+        this.saving.set(false);
+        this.saveError.set(true);
+      },
+    });
+  }
+
+  private loadSessionForDate(iso: string): void {
+    this.loadingDay.set(true);
+    this.search.set('');
+    this.sessionService.getByDate(iso).subscribe({
+      next: (session) => {
+        this.editingSessionId.set(session.id);
+        this.selectedRoutineId.set(null);
+        this.added.set(
+          session.exercises.map((e) => ({
+            exercise: e.exercise,
+            sets: e.sets.map((s) => ({
+              weight: s.weight ?? undefined,
+              reps: s.reps ?? undefined,
+              time: s.time ?? undefined,
+            })),
+          })),
+        );
+        this.loadingDay.set(false);
+        this.fetchLastSessions(this.added().map((item) => item.exercise.id));
+      },
+      error: () => {
+        this.editingSessionId.set(null);
+        this.selectedRoutineId.set(null);
+        this.added.set([]);
+        this.loadingDay.set(false);
+      },
+    });
   }
 
   private comparisonPool(): string[] {
@@ -324,16 +530,8 @@ export class RegisterWorkout {
   ): number {
     if (inputType === 'peso') return sets.reduce((sum, s) => sum + (s.weight ?? 0) * (s.reps ?? 0), 0);
     if (inputType === 'reps') return sets.reduce((sum, s) => sum + (s.reps ?? 0), 0);
+    if (inputType === 'emom') return sets.reduce((sum, s) => sum + (s.time ?? 0) * (s.reps ?? 0), 0);
     return sets.reduce((sum, s) => sum + (s.time ?? 0), 0);
-  }
-
-  lastSummary(exerciseId: string): { sets: string; when: string } | null {
-    const data = this.lastData()[exerciseId];
-    if (!data) return null;
-    return {
-      sets: data.sets.map((s) => formatSet(s)).join(' · '),
-      when: relativeDayLabel(data.date),
-    };
   }
 
   private fetchLastSession(exerciseId: string): void {
@@ -346,9 +544,19 @@ export class RegisterWorkout {
     });
   }
 
+  /** Carga el último entreno de varios ejercicios en una sola petición. */
+  private fetchLastSessions(exerciseIds: string[]): void {
+    const pending = [...new Set(exerciseIds)].filter((id) => this.lastData()[id] === undefined);
+    if (!pending.length) return;
+    this.sessionService.getLastByExercises(pending).subscribe((map) => {
+      this.lastData.update((m) => ({ ...m, ...map }));
+    });
+  }
+
   private defaultSet(inputType: InputType, targetReps?: number): SetEntry {
     if (inputType === 'peso') return { weight: 40, reps: targetReps ?? 8 };
     if (inputType === 'reps') return { reps: targetReps ?? 10, weight: 0 };
+    if (inputType === 'emom') return { time: 10, reps: targetReps ?? 8 };
     return { time: targetReps ?? 30 };
   }
 

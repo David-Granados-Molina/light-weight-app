@@ -35,6 +35,14 @@
   color: var(--color-accent-contrast);
 }
 
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
 .metric-toggle {
   display: flex;
   gap: 8px;
@@ -60,6 +68,21 @@
 .metric-btn.active {
   background: var(--color-surface-alt);
   color: var(--color-text);
+}
+
+.exercise-block {
+  margin-top: 22px;
+}
+
+.exercise-block:first-of-type {
+  margin-top: 18px;
+}
+
+.exercise-block-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
 .stats {

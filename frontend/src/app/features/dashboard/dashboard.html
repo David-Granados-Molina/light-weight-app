@@ -26,12 +26,7 @@
   } @else if (error()) {
     <div class="empty">No se ha podido conectar con el servidor.</div>
   } @else {
-    <div class="section-header">
-      <div class="section-label">Esta semana</div>
-      <a routerLink="/calendario" class="calendar-link" aria-label="Calendario de entrenos">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-      </a>
-    </div>
+    <div class="section-label">Esta semana</div>
     <div class="week-stats">
       <div class="stat stat-accent">
         <div class="stat-value">{{ weekEntrenos() }}</div>
@@ -47,21 +42,32 @@
       </div>
     </div>
 
-    <div class="card volume-card">
-      <div class="volume-header">
-        <span class="muted-label">Volumen por día</span>
-        <span class="legend">
-          <span class="legend-item"><span class="dot" style="background: var(--color-gym)"></span>Gym</span>
-          <span class="legend-item"><span class="dot" style="background: var(--color-cali)"></span>Cali</span>
-        </span>
+    <div class="card checks-card">
+      <div class="checks-header">
+        <span class="muted-label">Días entrenados</span>
+        <a routerLink="/calendario" class="calendar-link" aria-label="Calendario de entrenos">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        </a>
       </div>
-      <div class="bars">
-        @for (bar of weekBars(); track bar.date) {
-          <div class="bar-col">
-            <div class="bar" [style.height.px]="bar.heightPx" [style.background]="bar.color"></div>
-            <span class="bar-label" [class.today]="bar.isToday">{{ bar.letter }}</span>
+      <div class="checks">
+        @for (day of weekChecks(); track day.date) {
+          <div class="check-col">
+            <div class="check-icons">
+              @if (day.categories.length) {
+                @for (cat of day.categories; track cat) {
+                  <svg class="check-icon" [style.color]="cat === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                }
+              } @else {
+                <svg class="check-icon empty" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+              }
+            </div>
+            <span class="check-label" [class.today]="day.isToday">{{ day.letter }}</span>
           </div>
         }
+      </div>
+      <div class="legend">
+        <span class="legend-item"><span class="dot" style="background: var(--color-gym)"></span>Gym</span>
+        <span class="legend-item"><span class="dot" style="background: var(--color-cali)"></span>Cali</span>
       </div>
     </div>
 
@@ -90,7 +96,7 @@
               @for (e of s.exercises; track e.id) {
                 <div class="session-exercise">
                   <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                  <span class="session-exercise-sets">{{ formatSets(e.sets) }}</span>
+                  <span class="session-exercise-sets">{{ formatSets(e.sets, e.exercise.inputType) }}</span>
                 </div>
               }
             </div>

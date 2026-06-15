@@ -3,57 +3,71 @@
 
   @if (loading() && !data()) {
     <app-exercise-loader />
-  } @else if (!exercises().length) {
-    <div class="empty">Todavía no hay datos suficientes para mostrar progresión.</div>
+  } @else if (!routines().length) {
+    <div class="empty">Crea una rutina para empezar a ver tu progresión aquí.</div>
   } @else {
     <div class="chips app-scroll">
-      @for (ex of exercises(); track ex.id) {
+      @for (r of routines(); track r.id) {
         <button
           type="button"
           class="chip"
-          [class.active]="selectedExerciseId() === ex.id"
-          (click)="selectExercise(ex.id)"
+          [class.active]="selectedRoutineId() === r.id"
+          (click)="selectRoutine(r.id)"
         >
-          {{ ex.name }}
+          <span class="dot" [style.background]="categoryColor[r.category]"></span>{{ r.name }}
         </button>
       }
     </div>
 
-    @if (data()?.exercise?.inputType !== 'peso') {
-      <div class="metric-toggle">
-        <button type="button" class="metric-btn" [class.active]="metric() === 'peso'" (click)="selectMetric('peso')">
-          {{ metricLabel() }}
-        </button>
-        <button type="button" class="metric-btn" [class.active]="metric() === 'volumen'" (click)="selectMetric('volumen')">
-          Volumen total
-        </button>
-      </div>
-    }
+    <div class="metric-toggle">
+      <button type="button" class="metric-btn" [class.active]="metric() === 'peso'" (click)="selectMetric('peso')">
+        Mejor marca
+      </button>
+      <button type="button" class="metric-btn" [class.active]="metric() === 'volumen'" (click)="selectMetric('volumen')">
+        Volumen total
+      </button>
+    </div>
 
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Récord</div>
-        <div class="stat-value">{{ pr() }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Actual</div>
-        <div class="stat-value">{{ actual() }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Progreso</div>
-        <div class="stat-value" [class.positive]="cambioPositive()" [class.negative]="!cambioPositive()">
-          {{ cambio() }}
+    @if (loading()) {
+      <app-exercise-loader />
+    } @else {
+      @for (item of data()?.items ?? []; track item.exercise.id) {
+        <div class="exercise-block">
+          <div class="exercise-block-title" [style.color]="categoryColor[item.exercise.category]">
+            {{ item.exercise.name }}
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-label">Récord</div>
+              <div class="stat-value">{{ itemPr(item) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Actual</div>
+              <div class="stat-value">{{ itemActual(item) }}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Progreso (mes)</div>
+              <div
+                class="stat-value"
+                [class.positive]="itemCambioPositive(item)"
+                [class.negative]="!itemCambioPositive(item)"
+              >
+                {{ itemCambio(item) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">{{ itemChartTitle(item) }}</div>
+            <div class="chart-wrap">
+              <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-title">{{ chartTitle() }}</div>
-      <div class="chart-wrap">
-        @if (chartData()) {
-          <p-chart type="line" [data]="chartData()" [options]="chartOptions()" [height]="'200'" />
-        }
-      </div>
-    </div>
+      } @empty {
+        <div class="empty">Esta rutina todavía no tiene entrenos registrados.</div>
+      }
+    }
   }
 </div>

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { addDays, startOfDay } from '../lib/dateUtils';
 import { prisma } from '../lib/prisma';
 
 export const sessionsRouter = Router();
@@ -66,6 +67,49 @@ sessionsRouter.get('/', async (req, res) => {
   res.json(sessions);
 });
 
+// GET /api/sessions/last?exerciseIds=id1,id2,... -> última sesión registrada para cada ejercicio
+sessionsRouter.get('/last', async (req, res) => {
+  const userId = req.userId!;
+  const ids = String(req.query.exerciseIds ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  const result: Record<string, { date: string; sets: unknown[] } | null> = {};
+  for (const id of ids) result[id] = null;
+  if (!ids.length) return res.json(result);
+
+  const sessionExercises = await prisma.sessionExercise.findMany({
+    where: { exerciseId: { in: ids }, session: { userId } },
+    include: { session: true, sets: { orderBy: { setNumber: 'asc' } } },
+    orderBy: { session: { date: 'desc' } },
+  });
+
+  for (const se of sessionExercises) {
+    if (result[se.exerciseId] === null) {
+      result[se.exerciseId] = { date: se.session.date.toISOString(), sets: se.sets };
+    }
+  }
+
+  res.json(result);
+});
+
+// GET /api/sessions/by-date/:date -> entreno existente ese día (para editarlo), o 404 si no hay
+sessionsRouter.get('/by-date/:date', async (req, res) => {
+  const userId = req.userId!;
+  const day = new Date(req.params.date);
+  if (Number.isNaN(day.getTime())) return res.status(400).json({ error: 'Fecha no válida' });
+
+  const start = startOfDay(day);
+  const session = await prisma.workoutSession.findFirst({
+    where: { userId, date: { gte: start, lt: addDays(start, 1) } },
+    include,
+  });
+
+  if (!session) return res.status(404).json({ error: 'No hay entreno ese día' });
+  res.json(session);
+});
+
 sessionsRouter.get('/:id', async (req, res) => {
   const session = await prisma.workoutSession.findUnique({ where: { id: req.params.id }, include });
   if (!session) return res.status(404).json({ error: 'Entreno no encontrado' });
@@ -103,6 +147,44 @@ sessionsRouter.post('/', async (req, res) => {
   });
 
   res.status(201).json(session);
+});
+
+sessionsRouter.put('/:id', async (req, res) => {
+  const parsed = sessionSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { exercises, date, ...rest } = parsed.data;
+
+  try {
+    await prisma.sessionExercise.deleteMany({ where: { sessionId: req.params.id } });
+
+    const session = await prisma.workoutSession.update({
+      where: { id: req.params.id },
+      data: {
+        ...rest,
+        date: date ?? new Date(),
+        exercises: {
+          create: exercises.map((e, i) => ({
+            exerciseId: e.exerciseId,
+            order: i,
+            sets: {
+              create: e.sets.map((s) => ({
+                setNumber: s.setNumber,
+                weight: s.weight ?? null,
+                reps: s.reps ?? null,
+                time: s.time ?? null,
+              })),
+            },
+          })),
+        },
+      },
+      include,
+    });
+
+    res.json(session);
+  } catch {
+    res.status(404).json({ error: 'Entreno no encontrado' });
+  }
 });
 
 sessionsRouter.delete('/:id', async (req, res) => {
