@@ -132,16 +132,18 @@
                 [value]="item.targetRepsMax"
                 (valueChange)="setTarget(i, 'targetRepsMax', $event)"
               />
-              <app-number-wheel
-                [min]="0"
-                [max]="300"
-                [step]="0.5"
-                [decimals]="1"
-                unit="kg"
-                compact
-                [value]="item.targetWeight"
-                (valueChange)="setTargetWeight(i, $event)"
-              />
+              @if (showWeight(item.exercise)) {
+                <app-number-wheel
+                  [min]="0"
+                  [max]="300"
+                  [step]="0.5"
+                  [decimals]="1"
+                  unit="kg"
+                  compact
+                  [value]="item.targetWeight"
+                  (valueChange)="setTargetWeight(i, $event)"
+                />
+              }
             </div>
           </div>
         </div>

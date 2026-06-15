@@ -266,7 +266,11 @@ export class RegisterWorkout {
     if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
     if (item.targetRepsMin !== undefined && item.targetRepsMax !== undefined) {
       const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
-      parts.push(`${item.targetRepsMin}-${item.targetRepsMax} ${unit}`);
+      if (item.targetRepsMin === item.targetRepsMax) {
+        parts.push(`${item.targetRepsMin} ${unit}`);
+      } else {
+        parts.push(`min: ${item.targetRepsMin} - max: ${item.targetRepsMax} ${unit}`);
+      }
     }
     return parts.join(' · ');
   }

@@ -164,6 +164,11 @@ export class RoutineForm {
     return 'reps';
   }
 
+  /** En calistenia solo tiene sentido el peso para ejercicios lastrados (ej. "Fondos lastrados"). */
+  showWeight(exercise: Exercise): boolean {
+    return exercise.category === 'gym' || exercise.name.toLowerCase().includes('lastre');
+  }
+
   setTarget(index: number, field: 'targetSets' | 'targetRepsMin' | 'targetRepsMax', value: number | null): void {
     this.exercises.update((list) =>
       list.map((row, i) => {

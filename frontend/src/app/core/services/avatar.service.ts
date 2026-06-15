@@ -5,6 +5,16 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { map } from 'rxjs';
 import { avatarSrc } from '../utils/avatar';
 
+/**
+ * Los SVG de los avatares reutilizan ids internos (ej. "m" para una mascara). Al insertarlos
+ * en linea varios a la vez en el DOM, esos ids colisionan y todos acaban referenciando la
+ * mascara del primero. Se sufijan con un identificador unico por avatar para evitarlo.
+ */
+function makeIdsUnique(svg: string, src: string): string {
+  const suffix = src.replace(/[^a-zA-Z0-9]/g, '');
+  return svg.replace(/(id="|url\(#)([\w-]+)/g, (_match, prefix, id) => `${prefix}${id}-${suffix}`);
+}
+
 /** Carga y cachea el SVG (en línea) de cada avatar, para que `currentColor` siga el tema activo. */
 @Injectable({ providedIn: 'root' })
 export class AvatarService {
@@ -20,7 +30,7 @@ export class AvatarService {
     let entry = this.cache.get(src);
     if (!entry) {
       entry = toSignal(
-        this.http.get(src, { responseType: 'text' }).pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(svg))),
+        this.http.get(src, { responseType: 'text' }).pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(makeIdsUnique(svg, src)))),
         { initialValue: null, injector: this.injector },
       );
       this.cache.set(src, entry);
