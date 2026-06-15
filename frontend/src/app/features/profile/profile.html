@@ -19,42 +19,91 @@
     </div>
   </div>
 
-  <label class="field-label">Avatar</label>
-  <div class="avatar-grid">
-    @for (id of avatarIds; track id) {
-      <button
-        type="button"
-        class="avatar-option"
-        [class.selected]="avatarId() === id"
-        [attr.aria-pressed]="avatarId() === id"
-        [attr.aria-label]="'Elegir avatar ' + id"
-        (click)="selectAvatar(id)"
-      >
-        <img [src]="avatarSrc(id)" alt="" />
-      </button>
-    }
-  </div>
-
-  <label class="field-label">Color</label>
-  <div class="color-grid">
-    @for (color of themeColors; track color) {
-      <button
-        type="button"
-        class="color-option"
-        [class.selected]="themeColor() === color"
-        [attr.aria-pressed]="themeColor() === color"
-        [attr.aria-label]="'Elegir color ' + color"
-        [style.background]="color"
-        (click)="selectColor(color)"
-      ></button>
-    }
-  </div>
-
   <label class="field-label">Nombre</label>
   <input class="text-input" type="text" placeholder="Tu nombre" [value]="name()" (input)="onNameInput($event)" />
 
   <label class="field-label">Email</label>
   <input class="text-input" type="email" [value]="email()" disabled />
+
+  <label class="field-label">Avatar</label>
+  <div class="dropdown">
+    <button
+      type="button"
+      class="dropdown-trigger"
+      [class.open]="avatarMenuOpen()"
+      [attr.aria-expanded]="avatarMenuOpen()"
+      (click)="toggleAvatarMenu()"
+    >
+      <span class="trigger-avatar">
+        @if (avatarPreview()) {
+          <img [src]="avatarPreview()" alt="" />
+        } @else {
+          <span class="trigger-avatar-fallback">{{ initial() }}</span>
+        }
+      </span>
+      <span class="trigger-label">Elegir avatar</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+    @if (avatarMenuOpen()) {
+      <div class="dropdown-panel avatar-panel">
+        @for (id of avatarIds; track id) {
+          <button
+            type="button"
+            class="avatar-option"
+            [class.selected]="avatarId() === id"
+            [attr.aria-pressed]="avatarId() === id"
+            [attr.aria-label]="'Elegir avatar ' + id"
+            (click)="selectAvatar(id)"
+          >
+            <img [src]="avatarSrc(id)" alt="" />
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <label class="field-label">Temas</label>
+  <div class="dropdown">
+    <button
+      type="button"
+      class="dropdown-trigger"
+      [class.open]="themeMenuOpen()"
+      [attr.aria-expanded]="themeMenuOpen()"
+      (click)="toggleThemeMenu()"
+    >
+      <span class="trigger-swatch" [style.background]="themeColor()"></span>
+      <span class="trigger-label">{{ currentThemeLabel() }}</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+    @if (themeMenuOpen()) {
+      <div class="dropdown-panel theme-panel">
+        @for (theme of themeOptions; track theme.color) {
+          <button
+            type="button"
+            class="theme-option"
+            [class.selected]="themeColor() === theme.color"
+            [attr.aria-pressed]="themeColor() === theme.color"
+            (click)="selectColor(theme.color)"
+          >
+            <span class="swatch" [style.background]="theme.color"></span>
+            <span class="theme-label">{{ theme.label }}</span>
+            @if (themeColor() === theme.color) {
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+            }
+          </button>
+        }
+      </div>
+    }
+  </div>
 
   @if (error()) {
   <div class="error">{{ error() }}</div>

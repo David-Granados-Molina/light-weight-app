@@ -3,7 +3,16 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { avatarSrc, AVATAR_IDS } from '../../core/utils/avatar';
 
-const THEME_COLORS = ['#ffbf00', '#ba5a6e', '#9d1d1d', '#32673d', '#005492', '#69418b', '#9c9c9c', '#5fa990'];
+const THEME_OPTIONS = [
+  { color: '#ffbf00', label: 'Ámbar' },
+  { color: '#ba5a6e', label: 'Rosa' },
+  { color: '#9d1d1d', label: 'Rojo' },
+  { color: '#32673d', label: 'Verde' },
+  { color: '#005492', label: 'Azul' },
+  { color: '#69418b', label: 'Morado' },
+  { color: '#9c9c9c', label: 'Gris' },
+  { color: '#5fa990', label: 'Menta' },
+];
 
 @Component({
   selector: 'app-profile',
@@ -11,6 +20,9 @@ const THEME_COLORS = ['#ffbf00', '#ba5a6e', '#9d1d1d', '#32673d', '#005492', '#6
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.html',
   styleUrl: './profile.css',
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class Profile {
   private readonly authService = inject(AuthService);
@@ -27,7 +39,13 @@ export class Profile {
 
   readonly avatarIds = AVATAR_IDS;
   readonly avatarSrc = avatarSrc;
-  readonly themeColors = THEME_COLORS;
+  readonly themeOptions = THEME_OPTIONS;
+
+  readonly avatarMenuOpen = signal(false);
+  readonly themeMenuOpen = signal(false);
+  readonly currentThemeLabel = computed(
+    () => this.themeOptions.find((t) => t.color === this.themeColor())?.label ?? 'Tema',
+  );
 
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
@@ -47,14 +65,33 @@ export class Profile {
     this.success.set(false);
   }
 
+  toggleAvatarMenu(): void {
+    this.avatarMenuOpen.update((open) => !open);
+    this.themeMenuOpen.set(false);
+  }
+
+  toggleThemeMenu(): void {
+    this.themeMenuOpen.update((open) => !open);
+    this.avatarMenuOpen.set(false);
+  }
+
   selectAvatar(id: string): void {
     this.avatarId.set(id);
+    this.avatarMenuOpen.set(false);
     this.success.set(false);
   }
 
   selectColor(color: string): void {
     this.themeColor.set(color);
+    this.themeMenuOpen.set(false);
     this.success.set(false);
+  }
+
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target.closest('.dropdown')) return;
+    this.avatarMenuOpen.set(false);
+    this.themeMenuOpen.set(false);
   }
 
   save(): void {
