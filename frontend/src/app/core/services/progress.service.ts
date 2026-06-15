@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { Exercise } from '../models/exercise.model';
-import { ProgressData, ProgressMetric, RoutineProgressData } from '../models/progress.model';
+import { ProgressData, RoutineProgressData } from '../models/progress.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProgressService {
@@ -14,11 +14,11 @@ export class ProgressService {
     return this.http.get<Exercise[]>(`${this.baseUrl}/exercises`);
   }
 
-  getProgress(exerciseId: string, metric: ProgressMetric): Observable<ProgressData> {
-    return this.http.get<ProgressData>(`${this.baseUrl}/${exerciseId}`, { params: { metric } });
+  getProgress(exerciseId: string): Observable<ProgressData> {
+    return this.http.get<ProgressData>(`${this.baseUrl}/${exerciseId}`);
   }
 
-  getRoutineProgress(routineId: string, metric: ProgressMetric): Observable<RoutineProgressData> {
-    return this.http.get<RoutineProgressData>(`${this.baseUrl}/routine/${routineId}`, { params: { metric } });
+  getRoutineProgress(routineId: string): Observable<RoutineProgressData> {
+    return this.http.get<RoutineProgressData>(`${this.baseUrl}/routine/${routineId}`);
   }
 }

@@ -1,18 +1,21 @@
 import { Exercise } from './exercise.model';
 
-export type ProgressMetric = 'peso' | 'volumen';
-
 export interface ProgressPoint {
   date: string;
   value: number;
+  reps: number | null;
+}
+
+export interface ProgressStat {
+  value: number;
+  reps: number | null;
 }
 
 export interface ProgressData {
   exercise: Exercise;
-  metric: ProgressMetric;
   points: ProgressPoint[];
-  pr: number;
-  actual: number;
+  pr: ProgressStat;
+  actual: ProgressStat;
   cambio: number;
 }
 

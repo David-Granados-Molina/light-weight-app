@@ -3,7 +3,7 @@ import { ChartModule } from 'primeng/chart';
 import { ProgressService } from '../../core/services/progress.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
-import { ProgressMetric, RoutineProgressData, RoutineProgressItem } from '../../core/models/progress.model';
+import { ProgressStat, RoutineProgressData, RoutineProgressItem } from '../../core/models/progress.model';
 import { CATEGORY_COLOR, INPUT_TYPE_UNIT } from '../../core/models/labels';
 import { formatNumber, shortDateLabel } from '../../core/utils/format';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
@@ -23,7 +23,6 @@ export class Progress {
 
   readonly routines = signal<Routine[]>([]);
   readonly selectedRoutineId = signal<string | null>(null);
-  readonly metric = signal<ProgressMetric>('peso');
   readonly data = signal<RoutineProgressData | null>(null);
   readonly loading = signal(true);
 
@@ -48,14 +47,7 @@ export class Progress {
     this.loadProgress();
   }
 
-  selectMetric(metric: ProgressMetric): void {
-    if (metric === this.metric()) return;
-    this.metric.set(metric);
-    this.loadProgress();
-  }
-
   itemMetricLabel(item: RoutineProgressItem): string {
-    if (this.metric() === 'volumen') return 'Volumen total';
     if (item.exercise.inputType === 'reps') return 'Repeticiones máximas';
     if (item.exercise.inputType === 'tiempo') return 'Tiempo máximo';
     if (item.exercise.inputType === 'emom') return 'Mejor EMOM';
@@ -68,11 +60,19 @@ export class Progress {
   }
 
   itemPr(item: RoutineProgressItem): string {
-    return this.formatValue(item, item.pr);
+    return this.formatStat(item, item.pr);
+  }
+
+  itemPrReps(item: RoutineProgressItem): string | null {
+    return item.pr.reps !== null ? `${item.pr.reps} reps` : null;
   }
 
   itemActual(item: RoutineProgressItem): string {
-    return this.formatValue(item, item.actual);
+    return this.formatStat(item, item.actual);
+  }
+
+  itemActualReps(item: RoutineProgressItem): string | null {
+    return item.actual.reps !== null ? `${item.actual.reps} reps` : null;
   }
 
   itemCambio(item: RoutineProgressItem): string {
@@ -84,7 +84,7 @@ export class Progress {
   }
 
   itemChartData(item: RoutineProgressItem) {
-    const color = this.metric() === 'peso' ? '#ffbf00' : '#00E5FF';
+    const color = '#ffbf00';
     return {
       labels: item.points.map((p) => shortDateLabel(p.date)),
       datasets: [
@@ -112,7 +112,6 @@ export class Progress {
   }
 
   itemChartOptions(item: RoutineProgressItem) {
-    const metric = this.metric();
     const unit = INPUT_TYPE_UNIT[item.exercise.inputType];
     return {
       responsive: true,
@@ -131,10 +130,11 @@ export class Progress {
           titleFont: { family: 'Space Grotesk' },
           bodyFont: { family: 'Space Grotesk', weight: '700', size: 14 },
           callbacks: {
-            label: (context: { parsed: { y: number } }) =>
-              metric === 'volumen'
-                ? formatNumber(context.parsed.y) + ' ' + unit
-                : context.parsed.y + ' ' + unit,
+            label: (context: { dataIndex: number; parsed: { y: number } }) => {
+              const value = `${context.parsed.y} ${unit}`;
+              const reps = item.points[context.dataIndex]?.reps;
+              return reps !== null && reps !== undefined ? `${value} × ${reps} reps` : value;
+            },
           },
         },
       },
@@ -156,7 +156,7 @@ export class Progress {
     const id = this.selectedRoutineId();
     if (!id) return;
     this.loading.set(true);
-    this.progressService.getRoutineProgress(id, this.metric()).subscribe({
+    this.progressService.getRoutineProgress(id).subscribe({
       next: (data) => {
         this.data.set(data);
         this.loading.set(false);
@@ -165,13 +165,14 @@ export class Progress {
     });
   }
 
-  private formatValue(item: RoutineProgressItem, value: number): string {
+  private formatStat(item: RoutineProgressItem, stat: ProgressStat): string {
     const unit = INPUT_TYPE_UNIT[item.exercise.inputType];
-    return `${formatNumber(value)} ${unit}`;
+    return `${formatNumber(stat.value)} ${unit}`;
   }
 
   private formatChange(item: RoutineProgressItem, value: number): string {
-    const formatted = this.formatValue(item, Math.abs(value));
+    const unit = INPUT_TYPE_UNIT[item.exercise.inputType];
+    const formatted = `${formatNumber(Math.abs(value))} ${unit}`;
     if (value > 0) return `+${formatted}`;
     if (value < 0) return `-${formatted}`;
     return formatted;

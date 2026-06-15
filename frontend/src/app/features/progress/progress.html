@@ -19,15 +19,6 @@
       }
     </div>
 
-    <div class="metric-toggle">
-      <button type="button" class="metric-btn" [class.active]="metric() === 'peso'" (click)="selectMetric('peso')">
-        Mejor marca
-      </button>
-      <button type="button" class="metric-btn" [class.active]="metric() === 'volumen'" (click)="selectMetric('volumen')">
-        Volumen total
-      </button>
-    </div>
-
     @if (loading()) {
       <app-exercise-loader />
     } @else {
@@ -41,10 +32,16 @@
             <div class="stat-card">
               <div class="stat-label">Récord</div>
               <div class="stat-value">{{ itemPr(item) }}</div>
+              @if (itemPrReps(item)) {
+                <div class="stat-sub">{{ itemPrReps(item) }}</div>
+              }
             </div>
             <div class="stat-card">
               <div class="stat-label">Actual</div>
               <div class="stat-value">{{ itemActual(item) }}</div>
+              @if (itemActualReps(item)) {
+                <div class="stat-sub">{{ itemActualReps(item) }}</div>
+              }
             </div>
             <div class="stat-card">
               <div class="stat-label">Progreso (mes)</div>

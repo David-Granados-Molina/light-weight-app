@@ -43,33 +43,6 @@
   margin-right: 6px;
 }
 
-.metric-toggle {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 4px;
-}
-
-.metric-btn {
-  flex: 1;
-  font-weight: 600;
-  font-size: 13px;
-  border: none;
-  border-radius: 9px;
-  padding: 11px;
-  cursor: pointer;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.metric-btn.active {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-}
-
 .exercise-block {
   margin-top: 22px;
 }
@@ -120,6 +93,13 @@
 
 .stat-value.negative {
   color: var(--color-text-secondary);
+}
+
+.stat-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: 2px;
 }
 
 .chart-card {

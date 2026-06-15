@@ -4,18 +4,20 @@ import { prisma } from '../lib/prisma';
 export const progressRouter = Router();
 
 type SetLike = { weight: number | null; reps: number | null; time: number | null };
+type BestValue = { value: number; reps: number | null };
 
-function maxValue(sets: SetLike[], inputType: string): number {
-  if (inputType === 'peso') return Math.max(0, ...sets.map((s) => s.weight ?? 0));
-  if (inputType === 'tiempo') return Math.max(0, ...sets.map((s) => s.time ?? 0));
-  return Math.max(0, ...sets.map((s) => s.reps ?? 0));
-}
-
-function volumeValue(sets: SetLike[], inputType: string): number {
-  if (inputType === 'peso') return sets.reduce((acc, s) => acc + (s.weight ?? 0) * (s.reps ?? 0), 0);
-  if (inputType === 'tiempo') return sets.reduce((acc, s) => acc + (s.time ?? 0), 0);
-  if (inputType === 'emom') return sets.reduce((acc, s) => acc + (s.reps ?? 0) * (s.time ?? 0), 0);
-  return sets.reduce((acc, s) => acc + (s.reps ?? 0), 0);
+/** Para ejercicios con peso, el "mejor" set es el de mayor peso, junto con las repeticiones hechas con ese peso. */
+function bestValue(sets: SetLike[], inputType: string): BestValue {
+  if (inputType === 'peso') {
+    let best: BestValue = { value: 0, reps: null };
+    for (const s of sets) {
+      const weight = s.weight ?? 0;
+      if (weight > best.value) best = { value: weight, reps: s.reps ?? null };
+    }
+    return best;
+  }
+  if (inputType === 'tiempo') return { value: Math.max(0, ...sets.map((s) => s.time ?? 0)), reps: null };
+  return { value: Math.max(0, ...sets.map((s) => s.reps ?? 0)), reps: null };
 }
 
 /** Compara el mejor valor del último mes con datos frente al del mes anterior con datos. */
@@ -60,12 +62,7 @@ progressRouter.get('/exercises', async (req, res) => {
 
 type ExerciseLike = { id: string; inputType: string };
 
-async function buildProgressData(
-  userId: string,
-  exercise: ExerciseLike,
-  metric: 'peso' | 'volumen',
-  routineId?: string,
-) {
+async function buildProgressData(userId: string, exercise: ExerciseLike, routineId?: string) {
   const sessionExercises = await prisma.sessionExercise.findMany({
     where: { exerciseId: exercise.id, session: { userId, ...(routineId ? { routineId } : {}) } },
     include: { session: true, sets: true },
@@ -74,24 +71,19 @@ async function buildProgressData(
 
   const points = sessionExercises.map((se) => ({
     date: se.session.date.toISOString(),
-    value:
-      metric === 'volumen'
-        ? volumeValue(se.sets, exercise.inputType)
-        : maxValue(se.sets, exercise.inputType),
+    ...bestValue(se.sets, exercise.inputType),
   }));
 
-  const values = points.map((p) => p.value);
-  const pr = values.length ? Math.max(...values) : 0;
-  const actual = values.length ? values[values.length - 1] : 0;
+  const pr = points.reduce<BestValue>((acc, p) => (p.value > acc.value ? p : acc), { value: 0, reps: null });
+  const actual: BestValue = points.length ? points[points.length - 1] : { value: 0, reps: null };
   const cambio = monthlyChange(points);
 
-  return { metric, points, pr, actual, cambio };
+  return { points, pr, actual, cambio };
 }
 
-// GET /api/progress/routine/:routineId?metric=peso|volumen -> progreso de cada ejercicio de la rutina
+// GET /api/progress/routine/:routineId -> progreso de cada ejercicio de la rutina
 progressRouter.get('/routine/:routineId', async (req, res) => {
   const userId = req.userId!;
-  const metric = req.query.metric === 'volumen' ? 'volumen' : 'peso';
 
   const routine = await prisma.routine.findFirst({
     where: { id: req.params.routineId, userId },
@@ -102,21 +94,20 @@ progressRouter.get('/routine/:routineId', async (req, res) => {
   const items = await Promise.all(
     routine.exercises.map(async (re) => ({
       exercise: re.exercise,
-      ...(await buildProgressData(userId, re.exercise, metric, routine.id)),
+      ...(await buildProgressData(userId, re.exercise, routine.id)),
     })),
   );
 
   res.json({ routine: { id: routine.id, name: routine.name, category: routine.category }, items });
 });
 
-// GET /api/progress/:exerciseId?metric=peso|volumen
+// GET /api/progress/:exerciseId
 progressRouter.get('/:exerciseId', async (req, res) => {
   const userId = req.userId!;
-  const metric = req.query.metric === 'volumen' ? 'volumen' : 'peso';
 
   const exercise = await prisma.exercise.findUnique({ where: { id: req.params.exerciseId } });
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
 
-  const data = await buildProgressData(userId, exercise, metric);
+  const data = await buildProgressData(userId, exercise);
   res.json({ exercise, ...data });
 });
