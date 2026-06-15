@@ -41,7 +41,7 @@
 .avatar-preview {
   width: 92px;
   height: 92px;
-  border-radius: 50%;
+  border-radius: 22%;
   background: var(--color-surface-alt);
   border: 1px solid var(--color-border-strong);
   display: flex;
@@ -82,7 +82,7 @@
 .trigger-avatar {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 22%;
   overflow: hidden;
   background: var(--color-surface-alt);
   display: flex;
@@ -134,7 +134,7 @@
 
 .avatar-option {
   aspect-ratio: 1;
-  border-radius: 50%;
+  border-radius: 22%;
   background: var(--color-surface-alt);
   border: 2px solid var(--color-border);
   overflow: hidden;

@@ -84,6 +84,51 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
+function rand(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
+
+function roundTo(value: number, step: number): number {
+  return Math.round(value / step) * step;
+}
+
+/** Progresión de peso casi lineal a lo largo del año, con variación aleatoria y una semana de descarga cada 6. */
+function weightFor(name: string, week: number): number {
+  const cfg = WEIGHT_PROGRESSION[name];
+  const deload = week % 6 === 5 ? -cfg.start * 0.05 : 0;
+  const value = cfg.start + cfg.weekly * week + deload + rand(-1, 1);
+  return Math.max(cfg.step, roundTo(value, cfg.step));
+}
+
+/** Progresión de repeticiones/segundos a lo largo del año, con variación aleatoria. */
+function repsFor(name: string, week: number): number {
+  const cfg = REPS_PROGRESSION[name];
+  const value = cfg.start + cfg.weekly * week + rand(-1, 1);
+  return Math.min(cfg.max, Math.max(1, Math.round(value)));
+}
+
+const WEIGHT_PROGRESSION: Record<string, { start: number; weekly: number; step: number }> = {
+  'Press banca': { start: 65, weekly: 0.4, step: 0.5 },
+  Sentadilla: { start: 85, weekly: 0.5, step: 0.5 },
+  'Peso muerto': { start: 100, weekly: 0.7, step: 0.5 },
+  'Hip thrust': { start: 70, weekly: 1.35, step: 1.25 },
+  'Remo con barra': { start: 45, weekly: 0.3, step: 0.5 },
+  'Jalón al pecho': { start: 40, weekly: 0.25, step: 0.5 },
+  'Curl de bíceps': { start: 12, weekly: 0.08, step: 1 },
+  'Press militar': { start: 28, weekly: 0.2, step: 0.5 },
+  'Fondos lastrados': { start: 5, weekly: 0.25, step: 1.25 },
+  Prensa: { start: 80, weekly: 0.6, step: 1.25 },
+};
+
+const REPS_PROGRESSION: Record<string, { start: number; weekly: number; max: number }> = {
+  Flexiones: { start: 14, weekly: 0.18, max: 28 },
+  Fondos: { start: 6, weekly: 0.14, max: 16 },
+  Plancha: { start: 35, weekly: 0.5, max: 90 },
+};
+
+/** Probabilidad de que un entreno planificado se salte, como ocurre en la vida real. */
+const SKIP_CHANCE = 0.12;
+
 async function main() {
   console.log('Seed: creando usuario demo...');
   const user = await prisma.user.upsert({
@@ -152,102 +197,116 @@ async function main() {
     },
   ];
 
+  const routineIdByName = new Map<string, string>();
   for (const routine of routinesData) {
-    const existing = await prisma.routine.findFirst({
+    let created = await prisma.routine.findFirst({
       where: { userId: user.id, name: routine.name },
     });
-    if (existing) continue;
-    await prisma.routine.create({
-      data: {
-        userId: user.id,
-        name: routine.name,
-        category: routine.category,
-        exercises: {
-          create: routine.exercises.map((e, i) => ({
-            exerciseId: exerciseByName.get(e.name)!,
-            targetSets: e.targetSets,
-            targetRepsMin: e.targetReps,
-            targetRepsMax: e.targetReps,
-            order: i,
-          })),
+    if (!created) {
+      created = await prisma.routine.create({
+        data: {
+          userId: user.id,
+          name: routine.name,
+          category: routine.category,
+          exercises: {
+            create: routine.exercises.map((e, i) => ({
+              exerciseId: exerciseByName.get(e.name)!,
+              targetSets: e.targetSets,
+              targetRepsMin: e.targetReps,
+              targetRepsMax: e.targetReps,
+              order: i,
+            })),
+          },
         },
-      },
-    });
+      });
+    }
+    routineIdByName.set(routine.name, created.id);
   }
 
   const existingSessions = await prisma.workoutSession.count({ where: { userId: user.id } });
   if (existingSessions > 0) {
-    console.log('Seed: ya existen sesiones, omitiendo histórico.');
-    await prisma.$disconnect();
-    return;
+    console.log('Seed: borrando histórico anterior...');
+    await prisma.workoutSession.deleteMany({ where: { userId: user.id } });
   }
 
-  console.log('Seed: generando histórico de entrenos (8 semanas)...');
+  console.log('Seed: generando histórico de entrenos (1 año)...');
+  const WEEKS = 52;
   const thisMonday = startOfWeek(new Date());
 
-  // Progresión de peso (kg) de las semanas más antiguas a las más recientes
-  const progression = {
-    'Press banca': [70, 70, 72.5, 72.5, 75, 77.5, 80, 82.5],
-    Sentadilla: [90, 92.5, 95, 97.5, 100, 105, 107.5, 110],
-    'Peso muerto': [105, 107.5, 110, 115, 117.5, 122.5, 127.5, 130],
-    'Hip thrust': [80, 85, 90, 100, 108, 118, 130, 140],
+  type PlanExercise = { name: string; sets: { reps: number; weight?: number; time?: number }[] };
+  type PlanSession = {
+    offsetDays: number;
+    category: Category;
+    type: ExerciseType;
+    routineName: string;
+    exercises: PlanExercise[];
   };
 
-  type PlanExercise = { name: string; sets: { reps: number; weight?: number; time?: number }[] };
-  type PlanSession = { offsetDays: number; category: Category; type: ExerciseType; exercises: PlanExercise[] };
-
-  for (let week = 0; week < 8; week++) {
-    const weekStart = addDays(thisMonday, (week - 7) * 7); // semana -7 (más antigua) a 0 (actual)
-    const w = (name: keyof typeof progression) => progression[name][week];
+  for (let week = 0; week < WEEKS; week++) {
+    const weekStart = addDays(thisMonday, (week - (WEEKS - 1)) * 7); // semana -(WEEKS-1) (más antigua) a 0 (actual)
 
     const plan: PlanSession[] = [
       {
         offsetDays: 0, // lunes
         category: 'gym',
         type: 'tiron',
+        routineName: 'Tirón',
         exercises: [
-          { name: 'Peso muerto', sets: [6, 6, 5, 5].map((reps) => ({ reps, weight: w('Peso muerto') })) },
-          { name: 'Remo con barra', sets: [8, 8, 8].map((reps) => ({ reps, weight: 50 + week })) },
-          { name: 'Jalón al pecho', sets: [10, 10, 10].map((reps) => ({ reps, weight: 45 + week * 0.5 })) },
-          { name: 'Curl de bíceps', sets: [12, 12, 10].map((reps) => ({ reps, weight: 14 })) },
+          { name: 'Peso muerto', sets: [6, 6, 5, 5].map((reps) => ({ reps, weight: weightFor('Peso muerto', week) })) },
+          { name: 'Remo con barra', sets: [8, 8, 8].map((reps) => ({ reps, weight: weightFor('Remo con barra', week) })) },
+          { name: 'Jalón al pecho', sets: [10, 10, 10].map((reps) => ({ reps, weight: weightFor('Jalón al pecho', week) })) },
+          { name: 'Curl de bíceps', sets: [12, 12, 10].map((reps) => ({ reps, weight: weightFor('Curl de bíceps', week) })) },
         ],
       },
       {
         offsetDays: 1, // martes
         category: 'calistenia',
         type: 'empuje',
+        routineName: 'Full body calistenia',
         exercises: [
-          { name: 'Flexiones', sets: [18, 16, 15].map((reps) => ({ reps })) },
-          { name: 'Fondos', sets: [10, 9, 8].map((reps) => ({ reps })) },
-          { name: 'Plancha', sets: [{ reps: 0, time: 45 }, { reps: 0, time: 45 }, { reps: 0, time: 40 }].map((s) => s) },
+          {
+            name: 'Flexiones',
+            sets: [0, -2, -3].map((delta) => ({ reps: Math.max(1, repsFor('Flexiones', week) + delta) })),
+          },
+          {
+            name: 'Fondos',
+            sets: [0, -1, -2].map((delta) => ({ reps: Math.max(1, repsFor('Fondos', week) + delta) })),
+          },
+          {
+            name: 'Plancha',
+            sets: [0, 0, -5].map((delta) => ({ reps: 0, time: Math.max(10, repsFor('Plancha', week) + delta) })),
+          },
         ],
       },
       {
         offsetDays: 3, // jueves
         category: 'gym',
         type: 'empuje',
+        routineName: 'Empuje',
         exercises: [
-          { name: 'Press banca', sets: [8, 8, 7, 6].map((reps) => ({ reps, weight: w('Press banca') })) },
-          { name: 'Press militar', sets: [10, 10, 8].map((reps) => ({ reps, weight: 30 + week * 0.5 })) },
-          { name: 'Fondos lastrados', sets: [8, 8, 6].map((reps) => ({ reps, weight: 10 + week })) },
+          { name: 'Press banca', sets: [8, 8, 7, 6].map((reps) => ({ reps, weight: weightFor('Press banca', week) })) },
+          { name: 'Press militar', sets: [10, 10, 8].map((reps) => ({ reps, weight: weightFor('Press militar', week) })) },
+          { name: 'Fondos lastrados', sets: [8, 8, 6].map((reps) => ({ reps, weight: weightFor('Fondos lastrados', week) })) },
         ],
       },
       {
         offsetDays: 4, // viernes
         category: 'gym',
         type: 'pierna',
+        routineName: 'Pierna',
         exercises: [
-          { name: 'Sentadilla', sets: [8, 8, 6, 6].map((reps) => ({ reps, weight: w('Sentadilla') })) },
-          { name: 'Hip thrust', sets: [10, 10, 8].map((reps) => ({ reps, weight: w('Hip thrust') })) },
-          { name: 'Prensa', sets: [10, 10, 10].map((reps) => ({ reps, weight: 90 + week * 2 })) },
+          { name: 'Sentadilla', sets: [8, 8, 6, 6].map((reps) => ({ reps, weight: weightFor('Sentadilla', week) })) },
+          { name: 'Hip thrust', sets: [10, 10, 8].map((reps) => ({ reps, weight: weightFor('Hip thrust', week) })) },
+          { name: 'Prensa', sets: [10, 10, 10].map((reps) => ({ reps, weight: weightFor('Prensa', week) })) },
         ],
       },
     ];
 
-    // No registrar entrenos en el futuro (la semana actual puede estar incompleta)
     for (const session of plan) {
       const date = addDays(weekStart, session.offsetDays);
+      // No registrar entrenos en el futuro, y simular días saltados al azar
       if (date.getTime() > Date.now()) continue;
+      if (Math.random() < SKIP_CHANCE) continue;
 
       await prisma.workoutSession.create({
         data: {
@@ -256,6 +315,7 @@ async function main() {
           category: session.category,
           type: session.type,
           source: 'manual',
+          routineId: routineIdByName.get(session.routineName) ?? null,
           exercises: {
             create: session.exercises.map((ex, i) => ({
               exerciseId: exerciseByName.get(ex.name)!,
