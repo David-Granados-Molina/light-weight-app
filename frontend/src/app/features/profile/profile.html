@@ -11,11 +11,7 @@
 
   <div class="avatar-section">
     <div class="avatar-preview">
-      @if (avatarPreview()) {
-        <img [src]="avatarPreview()" alt="" class="avatar-img" />
-      } @else {
-        <span class="avatar-fallback">{{ initial() }}</span>
-      }
+      <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
     </div>
   </div>
 
@@ -35,11 +31,7 @@
       (click)="toggleAvatarMenu()"
     >
       <span class="trigger-avatar">
-        @if (avatarPreview()) {
-          <img [src]="avatarPreview()" alt="" />
-        } @else {
-          <span class="trigger-avatar-fallback">{{ initial() }}</span>
-        }
+        <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
       </span>
       <span class="trigger-label">Elegir avatar</span>
       <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -49,6 +41,20 @@
     </button>
     @if (avatarMenuOpen()) {
       <div class="dropdown-panel avatar-panel">
+        <button
+          type="button"
+          class="avatar-option none-option"
+          [class.selected]="avatarId() === null"
+          [attr.aria-pressed]="avatarId() === null"
+          aria-label="Sin avatar"
+          (click)="selectAvatar(null)"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M5 5l14 14" />
+          </svg>
+        </button>
         @for (id of avatarIds; track id) {
           <button
             type="button"
@@ -58,7 +64,7 @@
             [attr.aria-label]="'Elegir avatar ' + id"
             (click)="selectAvatar(id)"
           >
-            <img [src]="avatarSrc(id)" alt="" />
+            <app-avatar [avatarId]="id" />
           </button>
         }
       </div>

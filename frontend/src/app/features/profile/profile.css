@@ -50,17 +50,8 @@
   overflow: hidden;
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-fallback {
-  font-family: var(--font-display);
-  font-weight: 700;
+.avatar-preview app-avatar {
   font-size: 34px;
-  color: var(--color-accent);
 }
 
 .dropdown {
@@ -100,18 +91,8 @@
   flex-shrink: 0;
 }
 
-.trigger-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.trigger-avatar-fallback {
-  font-family: var(--font-display);
-  font-weight: 700;
+.trigger-avatar app-avatar {
   font-size: 14px;
-  color: var(--color-accent);
 }
 
 .trigger-swatch {
@@ -165,11 +146,19 @@
   border-color: var(--color-accent);
 }
 
-.avatar-option img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.avatar-option app-avatar {
+  padding: 4px;
+}
+
+.none-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.none-option.selected {
+  color: var(--color-accent);
 }
 
 .theme-panel {

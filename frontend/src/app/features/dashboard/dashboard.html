@@ -13,11 +13,7 @@
       <div class="greeting">Hola, {{ userName() }}</div>
     </div>
     <a routerLink="/perfil" class="avatar" aria-label="Perfil">
-      @if (avatarUrl()) {
-        <img [src]="avatarUrl()" alt="" class="avatar-img" />
-      } @else {
-        {{ userName().charAt(0) }}
-      }
+      <app-avatar [avatarId]="avatarId()" [fallback]="userName().charAt(0)" />
     </a>
   </div>
 

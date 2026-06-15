@@ -5,8 +5,8 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
+import { AppAvatar } from '../../shared/components/avatar/avatar';
 import { sessionTypeLabel } from '../../core/models/labels';
-import { avatarSrc } from '../../core/utils/avatar';
 import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
 interface WeekCheckView extends WeekBar {
@@ -31,7 +31,7 @@ const TIP_TICK_MS = 100;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CategoryTag, ExerciseLoader],
+  imports: [RouterLink, CategoryTag, ExerciseLoader, AppAvatar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -42,7 +42,7 @@ export class Dashboard {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
-  readonly avatarUrl = computed(() => avatarSrc(this.authService.currentUser()?.avatarUrl));
+  readonly avatarId = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
   readonly todayLabel = todayLabel();
   readonly formatSets = formatSets;
   readonly relativeDayLabel = relativeDayLabel;

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { avatarSrc, AVATAR_IDS } from '../../core/utils/avatar';
+import { AVATAR_IDS } from '../../core/utils/avatar';
+import { AppAvatar } from '../../shared/components/avatar/avatar';
 
 const THEME_OPTIONS = [
   { color: '#ffbf00', label: 'Ámbar' },
@@ -16,7 +17,7 @@ const THEME_OPTIONS = [
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink],
+  imports: [RouterLink, AppAvatar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.html',
   styleUrl: './profile.css',
@@ -35,10 +36,8 @@ export class Profile {
   readonly avatarId = signal<string | null>(null);
   readonly themeColor = signal('#ffbf00');
   readonly initial = computed(() => (this.name().charAt(0) || '?').toUpperCase());
-  readonly avatarPreview = computed(() => avatarSrc(this.avatarId()));
 
   readonly avatarIds = AVATAR_IDS;
-  readonly avatarSrc = avatarSrc;
   readonly themeOptions = THEME_OPTIONS;
 
   readonly avatarMenuOpen = signal(false);
@@ -75,7 +74,7 @@ export class Profile {
     this.avatarMenuOpen.set(false);
   }
 
-  selectAvatar(id: string): void {
+  selectAvatar(id: string | null): void {
     this.avatarId.set(id);
     this.avatarMenuOpen.set(false);
     this.success.set(false);

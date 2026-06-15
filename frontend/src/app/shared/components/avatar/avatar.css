@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  color: var(--color-accent);
+}
+
+.avatar-glyph {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-initial {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: inherit;
+}
+
+.avatar-glyph ::ng-deep svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
