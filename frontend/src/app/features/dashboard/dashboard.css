@@ -162,16 +162,7 @@
   border-radius: 2px;
   transform: scaleX(0);
   transform-origin: left center;
-  animation: tip-progress 10s linear forwards;
-}
-
-@keyframes tip-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+  transition: transform 0.1s linear;
 }
 
 .stat-accent {

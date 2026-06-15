@@ -47,6 +47,7 @@
   height: 46px;
   border-radius: 15px;
   justify-content: center;
+  align-items: center;
 }
 
 .add-button.active {
@@ -54,7 +55,9 @@
 }
 
 .plus {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 20px;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -28,6 +28,7 @@ const TIPS = [
 ];
 
 const TIP_DURATION_MS = 10_000;
+const TIP_TICK_MS = 100;
 
 @Component({
   selector: 'app-dashboard',
@@ -53,6 +54,7 @@ export class Dashboard {
   readonly expandedId = signal<string | null>(null);
 
   readonly tipIndex = signal(0);
+  readonly tipProgress = signal(0);
   readonly currentTip = computed(() => TIPS[this.tipIndex()]);
 
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
@@ -90,9 +92,15 @@ export class Dashboard {
       },
     });
 
+    let elapsedMs = 0;
     const tipId = setInterval(() => {
-      this.tipIndex.update((i) => (i + 1) % TIPS.length);
-    }, TIP_DURATION_MS);
+      elapsedMs += TIP_TICK_MS;
+      if (elapsedMs >= TIP_DURATION_MS) {
+        elapsedMs = 0;
+        this.tipIndex.update((i) => (i + 1) % TIPS.length);
+      }
+      this.tipProgress.set(elapsedMs / TIP_DURATION_MS);
+    }, TIP_TICK_MS);
     this.destroyRef.onDestroy(() => clearInterval(tipId));
   }
 }

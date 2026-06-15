@@ -60,194 +60,23 @@
   color: var(--color-text-secondary);
 }
 
-/* bench press: shoulder sways slightly, forearm extends the bar up and down */
-.bench-upper-arm {
-  transform-origin: 27px 70px;
-  animation: bench-upper-arm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+/* cada ejercicio se dibuja en dos posturas (inicio/fin del movimiento) que
+   se funden entre sí en bucle, dando la sensación de repetición del gesto */
+.pose-a,
+.pose-b {
+  animation: pose-fade 1.6s ease-in-out infinite;
 }
 
-.bench-forearm {
-  transform-origin: 22px 52px;
-  animation: bench-forearm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+.pose-b {
+  animation-delay: 0.8s;
 }
 
-@keyframes bench-upper-arm {
+@keyframes pose-fade {
   0%,
   100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(6deg);
-  }
-}
-
-@keyframes bench-forearm {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(-120deg);
-  }
-}
-
-/* bicep curl: upper arm steady, forearm + dumbbell curl up to the shoulder */
-.curl-upper-arm {
-  transform-origin: 50px 24px;
-  animation: curl-upper-arm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-.curl-forearm {
-  transform-origin: 50px 46px;
-  animation: curl-forearm 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-@keyframes curl-upper-arm {
-  0%,
-  100% {
-    transform: rotate(0deg);
+    opacity: 1;
   }
   50% {
-    transform: rotate(-6deg);
-  }
-}
-
-@keyframes curl-forearm {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(-143deg);
-  }
-}
-
-/* squat: whole body sinks while thigh and shin fold at the knee */
-.squat-body {
-  animation: squat-body 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-.squat-thigh {
-  transform-origin: 50px 42px;
-  animation: squat-thigh 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-.squat-shin {
-  transform-origin: 50px 64px;
-  animation: squat-shin 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-@keyframes squat-body {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  45%,
-  55% {
-    transform: translateY(13px);
-  }
-}
-
-@keyframes squat-thigh {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(35deg);
-  }
-}
-
-@keyframes squat-shin {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(-60deg);
-  }
-}
-
-/* pull-up: body rises toward the bar, legs sway slightly */
-.pullup-body {
-  animation: pullup-body 1.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-.pullup-legs {
-  transform-origin: 50px 68px;
-  animation: pullup-legs 1.5s ease-in-out infinite;
-}
-
-@keyframes pullup-body {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  45%,
-  55% {
-    transform: translateY(-9px);
-  }
-}
-
-@keyframes pullup-legs {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(6deg);
-  }
-}
-
-/* push-up: arm bends at the planted hand, lowering the body toward the floor */
-.pushup-arm {
-  transform-origin: 40px 70px;
-  animation: pushup-arm 1.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-@keyframes pushup-arm {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  45%,
-  55% {
-    transform: rotate(-22deg);
-  }
-}
-
-/* dips: body slides down between the bars, legs sway slightly */
-.dips-body {
-  animation: dips-body 1.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-}
-
-.dips-legs {
-  transform-origin: 50px 55px;
-  animation: dips-legs 1.5s ease-in-out infinite;
-}
-
-@keyframes dips-body {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  45%,
-  55% {
-    transform: translateY(11px);
-  }
-}
-
-@keyframes dips-legs {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(-4deg);
+    opacity: 0;
   }
 }
