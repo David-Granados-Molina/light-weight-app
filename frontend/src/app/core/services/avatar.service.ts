@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, Signal, signal } from '@angular/core';
+import { inject, Injectable, Injector, Signal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { map } from 'rxjs';
@@ -10,6 +10,7 @@ import { avatarSrc } from '../utils/avatar';
 export class AvatarService {
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly injector = inject(Injector);
   private readonly cache = new Map<string, Signal<SafeHtml | null>>();
 
   get(avatarId: string | null | undefined): Signal<SafeHtml | null> {
@@ -20,7 +21,7 @@ export class AvatarService {
     if (!entry) {
       entry = toSignal(
         this.http.get(src, { responseType: 'text' }).pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(svg))),
-        { initialValue: null },
+        { initialValue: null, injector: this.injector },
       );
       this.cache.set(src, entry);
     }

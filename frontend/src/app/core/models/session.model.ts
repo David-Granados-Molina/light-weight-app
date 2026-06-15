@@ -23,6 +23,7 @@ export interface WorkoutSession {
   type: ExerciseType;
   source: 'manual' | 'whatsapp';
   notes: string | null;
+  routineId: string | null;
   createdAt: string;
   exercises: SessionExercise[];
 }
@@ -45,5 +46,6 @@ export interface SessionInput {
   type: ExerciseType;
   source?: 'manual' | 'whatsapp';
   notes?: string | null;
+  routineId?: string | null;
   exercises: SessionExerciseInput[];
 }

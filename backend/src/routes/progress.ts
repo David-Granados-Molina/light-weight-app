@@ -60,9 +60,14 @@ progressRouter.get('/exercises', async (req, res) => {
 
 type ExerciseLike = { id: string; inputType: string };
 
-async function buildProgressData(userId: string, exercise: ExerciseLike, metric: 'peso' | 'volumen') {
+async function buildProgressData(
+  userId: string,
+  exercise: ExerciseLike,
+  metric: 'peso' | 'volumen',
+  routineId?: string,
+) {
   const sessionExercises = await prisma.sessionExercise.findMany({
-    where: { exerciseId: exercise.id, session: { userId } },
+    where: { exerciseId: exercise.id, session: { userId, ...(routineId ? { routineId } : {}) } },
     include: { session: true, sets: true },
     orderBy: { session: { date: 'asc' } },
   });
@@ -97,7 +102,7 @@ progressRouter.get('/routine/:routineId', async (req, res) => {
   const items = await Promise.all(
     routine.exercises.map(async (re) => ({
       exercise: re.exercise,
-      ...(await buildProgressData(userId, re.exercise, metric)),
+      ...(await buildProgressData(userId, re.exercise, metric, routine.id)),
     })),
   );
 

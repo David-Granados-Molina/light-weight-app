@@ -266,11 +266,7 @@ export class RegisterWorkout {
     if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
     if (item.targetRepsMin !== undefined && item.targetRepsMax !== undefined) {
       const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
-      const range =
-        item.targetRepsMin === item.targetRepsMax
-          ? `${item.targetRepsMin}`
-          : `${item.targetRepsMin}-${item.targetRepsMax}`;
-      parts.push(`${range} ${unit}`);
+      parts.push(`${item.targetRepsMin}-${item.targetRepsMax} ${unit}`);
     }
     return parts.join(' · ');
   }
@@ -442,6 +438,7 @@ export class RegisterWorkout {
       date,
       category: added[0].exercise.category,
       type: added[0].exercise.type,
+      routineId: this.selectedRoutineId(),
       exercises: added.map((a) => ({
         exerciseId: a.exercise.id,
         sets: a.sets.map((s, i) => ({
@@ -480,7 +477,7 @@ export class RegisterWorkout {
     this.sessionService.getByDate(iso).subscribe({
       next: (session) => {
         this.editingSessionId.set(session.id);
-        this.selectedRoutineId.set(null);
+        this.selectedRoutineId.set(session.routineId ?? null);
         this.added.set(
           session.exercises.map((e) => ({
             exercise: e.exercise,

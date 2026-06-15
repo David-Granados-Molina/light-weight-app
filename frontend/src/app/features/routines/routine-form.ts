@@ -16,6 +16,7 @@ interface ExerciseRow {
   targetSets: number;
   targetRepsMin: number;
   targetRepsMax: number;
+  targetWeight: number | null;
 }
 
 const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core'];
@@ -96,6 +97,7 @@ export class RoutineForm {
               targetSets: e.targetSets,
               targetRepsMin: e.targetRepsMin,
               targetRepsMax: e.targetRepsMax,
+              targetWeight: e.targetWeight,
             })),
           );
           this.loading.set(false);
@@ -128,7 +130,7 @@ export class RoutineForm {
   addExercise(exercise: Exercise): void {
     this.exercises.update((list) => [
       ...list,
-      { exerciseId: exercise.id, exercise, targetSets: 3, targetRepsMin: 8, targetRepsMax: 12 },
+      { exerciseId: exercise.id, exercise, targetSets: 3, targetRepsMin: 8, targetRepsMax: 12, targetWeight: null },
     ]);
     this.search.set('');
   }
@@ -172,6 +174,10 @@ export class RoutineForm {
         return updated;
       }),
     );
+  }
+
+  setTargetWeight(index: number, value: number | null): void {
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, targetWeight: value } : row)));
   }
 
   startCreateExercise(): void {
@@ -224,6 +230,7 @@ export class RoutineForm {
         targetSets: e.targetSets,
         targetRepsMin: e.targetRepsMin,
         targetRepsMax: e.targetRepsMax,
+        targetWeight: e.targetWeight,
       })),
     };
 

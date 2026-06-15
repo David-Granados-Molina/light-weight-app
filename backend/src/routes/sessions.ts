@@ -23,6 +23,7 @@ const sessionSchema = z.object({
   type: z.enum(['empuje', 'tiron', 'pierna', 'core']),
   source: z.enum(['manual', 'whatsapp']).default('manual'),
   notes: z.string().optional().nullable(),
+  routineId: z.string().optional().nullable(),
   exercises: z.array(sessionExerciseSchema).min(1),
 });
 

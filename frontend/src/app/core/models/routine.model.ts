@@ -7,6 +7,7 @@ export interface RoutineExercise {
   targetSets: number;
   targetRepsMin: number;
   targetRepsMax: number;
+  targetWeight: number | null;
   order: number;
 }
 
@@ -24,6 +25,7 @@ export interface RoutineExerciseInput {
   targetSets: number;
   targetRepsMin: number;
   targetRepsMax: number;
+  targetWeight?: number | null;
 }
 
 export interface RoutineInput {

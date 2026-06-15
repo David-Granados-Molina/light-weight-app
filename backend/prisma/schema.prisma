@@ -71,6 +71,7 @@ model Routine {
   notes     String?
   createdAt DateTime          @default(now())
   exercises RoutineExercise[]
+  sessions  WorkoutSession[]
 }
 
 model RoutineExercise {
@@ -82,6 +83,7 @@ model RoutineExercise {
   targetSets    Int
   targetRepsMin Int
   targetRepsMax Int
+  targetWeight  Float?
   order         Int      @default(0)
 }
 
@@ -89,6 +91,8 @@ model WorkoutSession {
   id        String            @id @default(uuid())
   userId    String
   user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routineId String?
+  routine   Routine?          @relation(fields: [routineId], references: [id], onDelete: SetNull)
   date      DateTime          @default(now())
   category  Category
   type      ExerciseType
