@@ -15,6 +15,7 @@ export const TYPE_LABEL: Record<ExerciseType, string> = {
   tiron: 'Tirón',
   pierna: 'Pierna',
   core: 'Core',
+  cardio: 'Cardio',
 };
 
 /** Etiqueta del tipo de entreno; si combina empuje y tirón, los muestra juntos. */
@@ -29,6 +30,7 @@ export const INPUT_TYPE_LABEL: Record<InputType, string> = {
   reps: 'Repeticiones',
   tiempo: 'Tiempo',
   emom: 'EMOM',
+  min: 'Minutos',
 };
 
 export const INPUT_TYPE_UNIT: Record<InputType, string> = {
@@ -36,4 +38,5 @@ export const INPUT_TYPE_UNIT: Record<InputType, string> = {
   reps: 'reps',
   tiempo: 'seg',
   emom: 'rondas',
+  min: 'min',
 };

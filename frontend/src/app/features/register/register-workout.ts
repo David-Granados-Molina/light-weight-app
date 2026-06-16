@@ -265,7 +265,7 @@ export class RegisterWorkout {
     const parts: string[] = [];
     if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
     if (item.targetRepsMin !== undefined && item.targetRepsMax !== undefined) {
-      const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
+      const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'min' ? 'min' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
       if (item.targetRepsMin === item.targetRepsMax) {
         parts.push(`${item.targetRepsMin} ${unit}`);
       } else {
@@ -558,6 +558,7 @@ export class RegisterWorkout {
     if (inputType === 'peso') return { weight: 40, reps: targetReps ?? 8 };
     if (inputType === 'reps') return { reps: targetReps ?? 10, weight: 0 };
     if (inputType === 'emom') return { time: 10, reps: targetReps ?? 8 };
+    if (inputType === 'min') return { time: targetReps ?? 30 };
     return { time: targetReps ?? 30 };
   }
 

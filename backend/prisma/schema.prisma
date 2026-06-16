@@ -17,6 +17,7 @@ enum ExerciseType {
   tiron
   pierna
   core
+  cardio
 }
 
 enum InputType {
@@ -24,6 +25,7 @@ enum InputType {
   reps
   tiempo
   emom
+  min
 }
 
 model User {

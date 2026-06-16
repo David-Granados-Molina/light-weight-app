@@ -1,6 +1,6 @@
 export type Category = 'gym' | 'calistenia';
-export type ExerciseType = 'empuje' | 'tiron' | 'pierna' | 'core';
-export type InputType = 'peso' | 'reps' | 'tiempo' | 'emom';
+export type ExerciseType = 'empuje' | 'tiron' | 'pierna' | 'core' | 'cardio';
+export type InputType = 'peso' | 'reps' | 'tiempo' | 'emom' | 'min';
 
 export interface Exercise {
   id: string;

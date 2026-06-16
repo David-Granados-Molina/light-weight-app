@@ -108,6 +108,16 @@
                       (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
                     />
                   }
+                  @case ('min') {
+                    <app-number-wheel
+                      [min]="0"
+                      [max]="180"
+                      [step]="5"
+                      unit="min"
+                      [value]="set.time ?? null"
+                      (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
+                    />
+                  }
                   @case ('emom') {
                     <app-number-wheel
                       [min]="1"

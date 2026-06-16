@@ -3,7 +3,7 @@ import { ChartModule } from 'primeng/chart';
 import { ProgressService } from '../../core/services/progress.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
-import { ProgressStat, RoutineProgressData, RoutineProgressItem } from '../../core/models/progress.model';
+import { ProgressPoint, ProgressStat, RoutineProgressData, RoutineProgressItem } from '../../core/models/progress.model';
 import { CATEGORY_COLOR, INPUT_TYPE_UNIT } from '../../core/models/labels';
 import { formatNumber, shortDateLabel } from '../../core/utils/format';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
@@ -23,6 +23,7 @@ export class Progress {
 
   readonly routines = signal<Routine[]>([]);
   readonly selectedRoutineId = signal<string | null>(null);
+  readonly timeRange = signal<'1M' | '3M' | '1A'>('1A');
   readonly data = signal<RoutineProgressData | null>(null);
   readonly loading = signal(true);
 
@@ -47,9 +48,14 @@ export class Progress {
     this.loadProgress();
   }
 
+  selectTimeRange(range: '1M' | '3M' | '1A'): void {
+    this.timeRange.set(range);
+  }
+
   itemMetricLabel(item: RoutineProgressItem): string {
     if (item.exercise.inputType === 'reps') return 'Repeticiones máximas';
     if (item.exercise.inputType === 'tiempo') return 'Tiempo máximo';
+    if (item.exercise.inputType === 'min') return 'Tiempo máximo';
     if (item.exercise.inputType === 'emom') return 'Mejor EMOM';
     return 'Peso máximo';
   }
@@ -60,36 +66,39 @@ export class Progress {
   }
 
   itemPr(item: RoutineProgressItem): string {
-    return this.formatStat(item, item.pr);
+    return this.formatStat(item, this.computePr(this.getFilteredPoints(item)));
   }
 
   itemPrReps(item: RoutineProgressItem): string | null {
-    return item.pr.reps !== null ? `${item.pr.reps} reps` : null;
+    const pr = this.computePr(this.getFilteredPoints(item));
+    return pr.reps !== null ? `${pr.reps} reps` : null;
   }
 
   itemActual(item: RoutineProgressItem): string {
-    return this.formatStat(item, item.actual);
+    return this.formatStat(item, this.computeActual(this.getFilteredPoints(item)));
   }
 
   itemActualReps(item: RoutineProgressItem): string | null {
-    return item.actual.reps !== null ? `${item.actual.reps} reps` : null;
+    const actual = this.computeActual(this.getFilteredPoints(item));
+    return actual.reps !== null ? `${actual.reps} reps` : null;
   }
 
   itemCambio(item: RoutineProgressItem): string {
-    return this.formatChange(item, item.cambio);
+    return this.formatChange(item, this.computeCambio(this.getFilteredPoints(item)));
   }
 
   itemCambioPositive(item: RoutineProgressItem): boolean {
-    return item.cambio >= 0;
+    return this.computeCambio(this.getFilteredPoints(item)) >= 0;
   }
 
   itemChartData(item: RoutineProgressItem) {
     const color = '#ffbf00';
+    const points = this.getFilteredPoints(item);
     return {
-      labels: item.points.map((p) => shortDateLabel(p.date)),
+      labels: points.map((p) => shortDateLabel(p.date)),
       datasets: [
         {
-          data: item.points.map((p) => p.value),
+          data: points.map((p) => p.value),
           borderColor: color,
           backgroundColor: (context: { chart: { ctx: CanvasRenderingContext2D } }) => {
             const ctx = context.chart.ctx;
@@ -113,6 +122,7 @@ export class Progress {
 
   itemChartOptions(item: RoutineProgressItem) {
     const unit = INPUT_TYPE_UNIT[item.exercise.inputType];
+    const points = this.getFilteredPoints(item);
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -132,7 +142,7 @@ export class Progress {
           callbacks: {
             label: (context: { dataIndex: number; parsed: { y: number } }) => {
               const value = `${context.parsed.y} ${unit}`;
-              const reps = item.points[context.dataIndex]?.reps;
+              const reps = points[context.dataIndex]?.reps;
               return reps !== null && reps !== undefined ? `${value} × ${reps} reps` : value;
             },
           },
@@ -150,6 +160,36 @@ export class Progress {
         },
       },
     };
+  }
+
+  private getFilteredPoints(item: RoutineProgressItem): ProgressPoint[] {
+    const range = this.timeRange();
+    const ms = range === '1M' ? 30 * 86400000 : range === '3M' ? 91 * 86400000 : 365 * 86400000;
+    const cutoff = Date.now() - ms;
+    return item.points.filter((p) => new Date(p.date).getTime() >= cutoff);
+  }
+
+  private computePr(points: ProgressPoint[]): ProgressStat {
+    return points.reduce<ProgressStat>((acc, p) => (p.value > acc.value ? p : acc), { value: 0, reps: null });
+  }
+
+  private computeActual(points: ProgressPoint[]): ProgressStat {
+    return points.length ? points[points.length - 1] : { value: 0, reps: null };
+  }
+
+  private computeCambio(points: ProgressPoint[]): number {
+    const byMonth = new Map<string, number[]>();
+    for (const p of points) {
+      const key = p.date.slice(0, 7);
+      const vals = byMonth.get(key) ?? [];
+      vals.push(p.value);
+      byMonth.set(key, vals);
+    }
+    const months = [...byMonth.keys()].sort();
+    if (months.length < 2) return 0;
+    const cur = Math.max(...byMonth.get(months[months.length - 1])!);
+    const prev = Math.max(...byMonth.get(months[months.length - 2])!);
+    return cur - prev;
   }
 
   private loadProgress(): void {

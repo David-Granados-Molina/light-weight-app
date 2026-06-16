@@ -19,6 +19,12 @@
       }
     </div>
 
+    <div class="time-toggle" role="group" aria-label="Rango de tiempo">
+      <button type="button" class="time-btn" [class.active]="timeRange() === '1M'" (click)="selectTimeRange('1M')">1M</button>
+      <button type="button" class="time-btn" [class.active]="timeRange() === '3M'" (click)="selectTimeRange('3M')">3M</button>
+      <button type="button" class="time-btn" [class.active]="timeRange() === '1A'" (click)="selectTimeRange('1A')">1A</button>
+    </div>
+
     @if (loading()) {
       <app-exercise-loader />
     } @else {

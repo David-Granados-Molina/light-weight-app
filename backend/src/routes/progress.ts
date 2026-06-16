@@ -16,7 +16,7 @@ function bestValue(sets: SetLike[], inputType: string): BestValue {
     }
     return best;
   }
-  if (inputType === 'tiempo') return { value: Math.max(0, ...sets.map((s) => s.time ?? 0)), reps: null };
+  if (inputType === 'tiempo' || inputType === 'min') return { value: Math.max(0, ...sets.map((s) => s.time ?? 0)), reps: null };
   return { value: Math.max(0, ...sets.map((s) => s.reps ?? 0)), reps: null };
 }
 

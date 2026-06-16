@@ -66,6 +66,15 @@ const CATALOG: {
   { name: 'Hollow body', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Superman', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda baja' },
   { name: 'Burpees', category: 'calistenia', type: 'core', inputType: 'reps', muscleGroup: 'Full body' },
+
+  // Cardio (gym)
+  { name: 'Bici estática', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'Cinta de correr', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'Elíptica', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'Remo ergómetro', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'Escaladora', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'Carrera exterior', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
+  { name: 'HIIT', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
 ];
 
 // Lunes=1 ... Domingo=0

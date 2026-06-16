@@ -5,7 +5,7 @@ export type ParsedSet = { reps?: number; weight?: number; time?: number };
 export type ParsedExercise = { name: string; exerciseId: string | null; sets: ParsedSet[] };
 export type ParsedWorkout = {
   category: 'gym' | 'calistenia';
-  type: 'empuje' | 'tiron' | 'pierna' | 'core';
+  type: 'empuje' | 'tiron' | 'pierna' | 'core' | 'cardio';
   exercises: ParsedExercise[];
   warnings: string[];
 };
@@ -21,7 +21,7 @@ function buildTool(catalogNames: string[]) {
       type: 'object' as const,
       properties: {
         category: { type: 'string', enum: ['gym', 'calistenia'] },
-        type: { type: 'string', enum: ['empuje', 'tiron', 'pierna', 'core'] },
+        type: { type: 'string', enum: ['empuje', 'tiron', 'pierna', 'core', 'cardio'] },
         exercises: {
           type: 'array',
           items: {
@@ -88,7 +88,7 @@ export async function parseWorkoutMessage(message: string): Promise<ParsedWorkou
     messages: [
       {
         role: 'user',
-        content: `Hoy es ${new Date().toLocaleDateString('es-ES')}. El usuario describe el entreno que ha hecho hoy. Extrae la categoría (gym o calistenia), el tipo de entreno (empuje, tiron, pierna o core) y, para cada ejercicio, las series realizadas con sus repeticiones y, si aplica, el peso en kg o el tiempo en segundos.\n\nMensaje del usuario:\n"""${message}"""`,
+        content: `Hoy es ${new Date().toLocaleDateString('es-ES')}. El usuario describe el entreno que ha hecho hoy. Extrae la categoría (gym o calistenia), el tipo de entreno (empuje, tiron, pierna, core o cardio) y, para cada ejercicio, las series realizadas con sus repeticiones y, si aplica, el peso en kg o el tiempo en segundos.\n\nMensaje del usuario:\n"""${message}"""`,
       },
     ],
   });
@@ -100,7 +100,7 @@ export async function parseWorkoutMessage(message: string): Promise<ParsedWorkou
 
   const input = toolUse.input as {
     category: 'gym' | 'calistenia';
-    type: 'empuje' | 'tiron' | 'pierna' | 'core';
+    type: 'empuje' | 'tiron' | 'pierna' | 'core' | 'cardio';
     exercises: { name: string; sets: ParsedSet[] }[];
   };
 

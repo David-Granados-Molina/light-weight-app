@@ -19,8 +19,8 @@ interface ExerciseRow {
   targetWeight: number | null;
 }
 
-const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core'];
-const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo'];
+const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core', 'cardio'];
+const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo', 'min'];
 
 @Component({
   selector: 'app-routine-form',
@@ -160,12 +160,14 @@ export class RoutineForm {
 
   repsUnit(inputType: InputType): string {
     if (inputType === 'tiempo') return 'seg';
+    if (inputType === 'min') return 'min';
     if (inputType === 'emom') return 'rondas';
     return 'reps';
   }
 
   /** En calistenia solo tiene sentido el peso para ejercicios lastrados (ej. "Fondos lastrados"). */
   showWeight(exercise: Exercise): boolean {
+    if (exercise.inputType === 'min' || exercise.type === 'cardio') return false;
     return exercise.category === 'gym' || exercise.name.toLowerCase().includes('lastre');
   }
 
