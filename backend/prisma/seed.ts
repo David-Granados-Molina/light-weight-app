@@ -61,11 +61,11 @@ const CATALOG: {
   { name: 'Puente de glúteo', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Glúteo' },
   { name: 'Salto al cajón', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
   { name: 'Front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
-  { name: 'Elevación de piernas colgado', category: 'calistenia', type: 'core', inputType: 'reps', muscleGroup: 'Core' },
-  { name: 'Rueda abdominal', category: 'calistenia', type: 'core', inputType: 'reps', muscleGroup: 'Core' },
+  { name: 'Elevación de piernas colgado', category: 'calistenia', type: 'core', inputType: 'peso', muscleGroup: 'Core' },
+  { name: 'Rueda abdominal', category: 'calistenia', type: 'core', inputType: 'peso', muscleGroup: 'Core' },
   { name: 'Hollow body', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Superman', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda baja' },
-  { name: 'Burpees', category: 'calistenia', type: 'core', inputType: 'reps', muscleGroup: 'Full body' },
+  { name: 'Burpees', category: 'calistenia', type: 'core', inputType: 'peso', muscleGroup: 'Full body' },
 
   // Cardio (gym)
   { name: 'Bici estática', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },

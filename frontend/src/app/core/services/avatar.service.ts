@@ -22,6 +22,7 @@ export class AvatarService {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly injector = inject(Injector);
   private readonly cache = new Map<string, Signal<SafeHtml | null>>();
+  private readonly rawCache = new Map<string, Signal<string | null>>();
 
   get(avatarId: string | null | undefined): Signal<SafeHtml | null> {
     const src = avatarSrc(avatarId);
@@ -34,6 +35,22 @@ export class AvatarService {
         { initialValue: null, injector: this.injector },
       );
       this.cache.set(src, entry);
+    }
+    return entry;
+  }
+
+  /** Devuelve el texto SVG crudo (sin procesar) para usos como lightbox o blob URL. */
+  getRaw(avatarId: string | null | undefined): Signal<string | null> {
+    const src = avatarSrc(avatarId);
+    if (!src) return signal(null);
+
+    let entry = this.rawCache.get(src);
+    if (!entry) {
+      entry = toSignal(
+        this.http.get(src, { responseType: 'text' }),
+        { initialValue: null, injector: this.injector },
+      );
+      this.rawCache.set(src, entry);
     }
     return entry;
   }

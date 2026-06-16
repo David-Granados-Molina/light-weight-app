@@ -10,7 +10,7 @@
   </div>
 
   <div class="avatar-section">
-    <button type="button" class="avatar-preview" aria-label="Ver avatar ampliado" (click)="previewOpen.set(true)">
+    <button type="button" class="avatar-preview" aria-label="Ver avatar ampliado" (click)="openPreview()">
       <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
     </button>
   </div>
@@ -137,9 +137,13 @@
 </div>
 
 @if (previewOpen()) {
-  <div class="avatar-lightbox" role="dialog" aria-modal="true" aria-label="Vista previa del avatar" (click)="previewOpen.set(false)">
+  <div class="avatar-lightbox" role="dialog" aria-modal="true" aria-label="Vista previa del avatar" (click)="closePreview()">
     <div class="lightbox-avatar" (click)="$event.stopPropagation()">
-      <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
+      @if (lightboxSrc()) {
+        <img class="lightbox-img" [src]="lightboxSrc()!" alt="Avatar" />
+      } @else {
+        <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
+      }
     </div>
   </div>
 }

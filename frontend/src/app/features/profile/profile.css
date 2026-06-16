@@ -73,12 +73,17 @@
   width: min(72vw, 320px);
   height: min(72vw, 320px);
   border-radius: 22%;
-  background: var(--color-surface-alt);
+  background: #fff;
   border: 2px solid var(--color-border-strong);
   overflow: hidden;
   animation: scaleIn 0.22s ease both;
-  /* Nearest-neighbour sampling: avoids bilinear blur when upscaling the
-     160-px PNG masks embedded in each avatar SVG */
+}
+
+.lightbox-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
   image-rendering: pixelated;
 }
 

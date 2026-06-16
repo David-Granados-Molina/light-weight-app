@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { AVATAR_IDS } from '../../core/utils/avatar';
+import { AvatarService } from '../../core/services/avatar.service';
+import { AVATAR_IDS, avatarSrc } from '../../core/utils/avatar';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
 
 const THEME_OPTIONS = [
@@ -23,11 +24,12 @@ const THEME_OPTIONS = [
   styleUrl: './profile.css',
   host: {
     '(document:click)': 'onDocumentClick($event)',
-    '(document:keydown.escape)': 'previewOpen.set(false)',
+    '(document:keydown.escape)': 'closePreview()',
   },
 })
-export class Profile {
+export class Profile implements OnDestroy {
   private readonly authService = inject(AuthService);
+  private readonly avatarService = inject(AvatarService);
   private readonly router = inject(Router);
 
   private readonly user = this.authService.currentUser;
@@ -44,6 +46,8 @@ export class Profile {
   readonly avatarMenuOpen = signal(false);
   readonly themeMenuOpen = signal(false);
   readonly previewOpen = signal(false);
+  readonly lightboxSrc = signal<string | null>(null);
+
   readonly currentThemeLabel = computed(
     () => this.themeOptions.find((t) => t.color === this.themeColor())?.label ?? 'Tema',
   );
@@ -54,11 +58,17 @@ export class Profile {
 
   readonly canSave = computed(() => this.name().trim().length >= 2 && !this.saving());
 
+  private blobUrl: string | null = null;
+
   constructor() {
     const user = this.user();
     this.name.set(user?.name ?? '');
     this.avatarId.set(user?.avatarUrl ?? null);
     this.themeColor.set(user?.themeColor ?? '#ffbf00');
+  }
+
+  ngOnDestroy(): void {
+    this.revokeBlobUrl();
   }
 
   onNameInput(event: Event): void {
@@ -95,6 +105,15 @@ export class Profile {
     this.themeMenuOpen.set(false);
   }
 
+  openPreview(): void {
+    this.previewOpen.set(true);
+    this.loadLightboxSrc();
+  }
+
+  closePreview(): void {
+    this.previewOpen.set(false);
+  }
+
   save(): void {
     if (!this.canSave()) return;
 
@@ -120,5 +139,47 @@ export class Profile {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  private loadLightboxSrc(): void {
+    const id = this.avatarId();
+    if (!id) return;
+
+    const raw = this.avatarService.getRaw(id)();
+    if (raw) {
+      this.buildBlobUrl(raw);
+      return;
+    }
+
+    // SVG not yet in cache — wait one tick and retry via the signal
+    const src = avatarSrc(id);
+    if (!src) return;
+    fetch(src)
+      .then((r) => r.text())
+      .then((text) => this.buildBlobUrl(text))
+      .catch(() => {});
+  }
+
+  private buildBlobUrl(raw: string): void {
+    const origin = window.location.origin;
+    // Replace currentColor with the actual theme color and make any relative
+    // href paths absolute so they resolve correctly from a blob: URL context.
+    const processed = raw
+      .replace(/currentColor/g, this.themeColor())
+      .replace(/href="\//g, `href="${origin}/`)
+      // Add crisp-edges to embedded <image> elements so the browser uses
+      // nearest-neighbour sampling rather than bilinear upscaling.
+      .replace(/<image\b/g, '<image image-rendering="crispEdges"');
+
+    this.revokeBlobUrl();
+    this.blobUrl = URL.createObjectURL(new Blob([processed], { type: 'image/svg+xml' }));
+    this.lightboxSrc.set(this.blobUrl);
+  }
+
+  private revokeBlobUrl(): void {
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+      this.blobUrl = null;
+    }
   }
 }
