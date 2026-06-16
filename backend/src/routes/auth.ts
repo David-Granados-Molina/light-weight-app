@@ -175,7 +175,7 @@ const updateMeSchema = z.object({
   name: z.string().min(2).max(60).optional(),
   avatarUrl: z
     .string()
-    .regex(/^avatar:[1-8]$/)
+    .regex(/^avatar:[1-9]$/)
     .nullable()
     .optional(),
   themeColor: z.enum(THEME_COLORS as [string, ...string[]]).nullable().optional(),
