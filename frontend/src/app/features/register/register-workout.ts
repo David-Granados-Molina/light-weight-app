@@ -12,6 +12,7 @@ import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
+import { RoutineSelect } from '../../shared/components/routine-select/routine-select';
 
 interface LastSessionData {
   date: string;
@@ -65,7 +66,7 @@ function pickRandom(list: string[]): string {
 
 @Component({
   selector: 'app-register-workout',
-  imports: [NumberWheel, ConfirmDialog, ExerciseLoader],
+  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './register-workout.html',
   styleUrl: './register-workout.css',
@@ -298,10 +299,9 @@ export class RegisterWorkout {
     this.setValue(exIndex, setIndex, 'time', this.cardioHours(exIndex, setIndex) * 60 + (mins ?? 0));
   }
 
-  onRoutineChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    if (!value) { this.clearRoutine(); return; }
-    const routine = this.routines().find((r) => r.id === value);
+  onRoutineChanged(id: string | null): void {
+    if (!id) { this.clearRoutine(); return; }
+    const routine = this.routines().find((r) => r.id === id);
     if (routine) this.selectRoutine(routine);
   }
 

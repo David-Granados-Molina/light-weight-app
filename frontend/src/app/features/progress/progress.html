@@ -6,11 +6,11 @@
   } @else if (!routines().length) {
     <div class="empty">Crea una rutina para empezar a ver tu Progreso aquí.</div>
   } @else {
-    <select class="routine-select" aria-label="Seleccionar rutina" (change)="onRoutineChange($event)">
-      @for (r of routines(); track r.id) {
-        <option [value]="r.id" [selected]="selectedRoutineId() === r.id">{{ r.name }}</option>
-      }
-    </select>
+    <app-routine-select
+      [routines]="routines()"
+      [selectedId]="selectedRoutineId()"
+      (changed)="onRoutineChanged($event)"
+    />
 
     @if (loading()) {
       <app-exercise-loader />
@@ -58,7 +58,9 @@
           <div class="chart-card">
             <div class="chart-title">{{ itemChartTitle(item) }}</div>
             <div class="chart-wrap">
-              <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+              @for (rangeKey of [getTimeRange(item.exercise.id)]; track rangeKey) {
+                <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+              }
             </div>
           </div>
         </div>

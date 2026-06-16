@@ -26,12 +26,12 @@
 
   @if (!loadingRoutines() && routines().length > 0) {
     <div class="section-label">Rutina</div>
-    <select class="routine-select" aria-label="Seleccionar rutina" (change)="onRoutineChange($event)">
-      <option value="">— Sin rutina —</option>
-      @for (r of routines(); track r.id) {
-        <option [value]="r.id" [selected]="selectedRoutineId() === r.id">{{ r.name }}</option>
-      }
-    </select>
+    <app-routine-select
+      [routines]="routines()"
+      [selectedId]="selectedRoutineId()"
+      [allowEmpty]="true"
+      (changed)="onRoutineChanged($event)"
+    />
   }
 
   <div class="search-wrap">

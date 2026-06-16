@@ -7,10 +7,11 @@ import { ProgressPoint, ProgressStat, RoutineProgressData, RoutineProgressItem }
 import { CATEGORY_COLOR, INPUT_TYPE_UNIT } from '../../core/models/labels';
 import { formatNumber, shortDateLabel } from '../../core/utils/format';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
+import { RoutineSelect } from '../../shared/components/routine-select/routine-select';
 
 @Component({
   selector: 'app-progress',
-  imports: [ChartModule, ExerciseLoader],
+  imports: [ChartModule, ExerciseLoader, RoutineSelect],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './progress.html',
   styleUrl: './progress.css',
@@ -42,8 +43,8 @@ export class Progress {
     });
   }
 
-  onRoutineChange(event: Event): void {
-    this.selectRoutine((event.target as HTMLSelectElement).value);
+  onRoutineChanged(id: string | null): void {
+    if (id) this.selectRoutine(id);
   }
 
   selectRoutine(id: string): void {
