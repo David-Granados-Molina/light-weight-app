@@ -31,6 +31,8 @@ const TIPS = [
   '"No pierdas el tiempo preocupándote por lo que otros piensen de ti. Concéntrate en tu propio camino y sigue adelante." - Ronnie Coleman',
   '"La disciplina es la clave para alcanzar cualquier objetivo." - Ronnie Coleman',
   '"Trabajo duro y dedicación. No hay secretos. Solo entrena duro, come limpio, descansa bien y cree en ti mismo." - Ronnie Coleman',
+  'YIEEEEEEEEEEEEEEE BUDDYYYYYYYYYYYYYYYY',
+  'LIGHT WEIGHT BABYYYYYYYYYYYYYYYYYY',
 ];
 
 const TIP_DURATION_MS = 10_000;
