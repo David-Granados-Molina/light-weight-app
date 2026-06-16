@@ -128,9 +128,17 @@ export class RoutineForm {
   }
 
   addExercise(exercise: Exercise): void {
+    const isCardio = exercise.inputType === 'min';
     this.exercises.update((list) => [
       ...list,
-      { exerciseId: exercise.id, exercise, targetSets: 3, targetRepsMin: 8, targetRepsMax: 12, targetWeight: null },
+      {
+        exerciseId: exercise.id,
+        exercise,
+        targetSets: isCardio ? 1 : 3,
+        targetRepsMin: isCardio ? 30 : 8,
+        targetRepsMax: isCardio ? 30 : 12,
+        targetWeight: null,
+      },
     ]);
     this.search.set('');
   }
@@ -156,6 +164,22 @@ export class RoutineForm {
       moveItemInArray(copy, event.previousIndex, event.currentIndex);
       return copy;
     });
+  }
+
+  cardioTargetHours(index: number): number {
+    return Math.floor((this.exercises()[index]?.targetRepsMin ?? 0) / 60);
+  }
+
+  cardioTargetMins(index: number): number {
+    return (this.exercises()[index]?.targetRepsMin ?? 0) % 60;
+  }
+
+  setCardioHours(index: number, hours: number | null): void {
+    this.setTarget(index, 'targetRepsMin', (hours ?? 0) * 60 + this.cardioTargetMins(index));
+  }
+
+  setCardioMins(index: number, mins: number | null): void {
+    this.setTarget(index, 'targetRepsMin', this.cardioTargetHours(index) * 60 + (mins ?? 0));
   }
 
   repsUnit(inputType: InputType): string {

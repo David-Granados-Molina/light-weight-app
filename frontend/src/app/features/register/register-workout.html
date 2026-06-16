@@ -111,11 +111,19 @@
                   @case ('min') {
                     <app-number-wheel
                       [min]="0"
-                      [max]="180"
+                      [max]="5"
+                      [step]="1"
+                      unit="h"
+                      [value]="cardioHours(exIndex, setIndex)"
+                      (valueChange)="setCardioHours(exIndex, setIndex, $event)"
+                    />
+                    <app-number-wheel
+                      [min]="0"
+                      [max]="55"
                       [step]="5"
                       unit="min"
-                      [value]="set.time ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
+                      [value]="cardioMins(exIndex, setIndex)"
+                      (valueChange)="setCardioMins(exIndex, setIndex, $event)"
                     />
                   }
                   @case ('emom') {

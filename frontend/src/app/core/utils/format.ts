@@ -13,7 +13,12 @@ interface SetLike {
 /** "20kg×8", "12 reps", "45s", "30min" o "5 EMOM×8" según el tipo de serie. */
 export function formatSet(s: SetLike, inputType?: InputType): string {
   if (inputType === 'emom') return `${s.time ?? 0} EMOM×${s.reps ?? 0}`;
-  if (inputType === 'min') return `${s.time ?? 0}min`;
+  if (inputType === 'min') {
+    const total = s.time ?? 0;
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`;
+  }
   if (s.time !== null && s.time !== undefined) return `${s.time}s`;
   if (s.weight !== null && s.weight !== undefined && s.weight > 0) return `${s.weight}kg×${s.reps ?? 0}`;
   return `${s.reps ?? 0}`;

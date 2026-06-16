@@ -265,14 +265,37 @@ export class RegisterWorkout {
     const parts: string[] = [];
     if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
     if (item.targetRepsMin !== undefined && item.targetRepsMax !== undefined) {
-      const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'min' ? 'min' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
-      if (item.targetRepsMin === item.targetRepsMax) {
-        parts.push(`${item.targetRepsMin} ${unit}`);
+      if (item.exercise.inputType === 'min') {
+        const total = item.targetRepsMin;
+        const h = Math.floor(total / 60);
+        const m = total % 60;
+        parts.push(h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`);
       } else {
-        parts.push(`min: ${item.targetRepsMin} - max: ${item.targetRepsMax} ${unit}`);
+        const unit = item.exercise.inputType === 'tiempo' ? 'seg' : item.exercise.inputType === 'emom' ? 'rondas' : 'reps';
+        if (item.targetRepsMin === item.targetRepsMax) {
+          parts.push(`${item.targetRepsMin} ${unit}`);
+        } else {
+          parts.push(`min: ${item.targetRepsMin} - max: ${item.targetRepsMax} ${unit}`);
+        }
       }
     }
     return parts.join(' · ');
+  }
+
+  cardioHours(exIndex: number, setIndex: number): number {
+    return Math.floor((this.added()[exIndex]?.sets[setIndex]?.time ?? 0) / 60);
+  }
+
+  cardioMins(exIndex: number, setIndex: number): number {
+    return (this.added()[exIndex]?.sets[setIndex]?.time ?? 0) % 60;
+  }
+
+  setCardioHours(exIndex: number, setIndex: number, hours: number | null): void {
+    this.setValue(exIndex, setIndex, 'time', (hours ?? 0) * 60 + this.cardioMins(exIndex, setIndex));
+  }
+
+  setCardioMins(exIndex: number, setIndex: number, mins: number | null): void {
+    this.setValue(exIndex, setIndex, 'time', this.cardioHours(exIndex, setIndex) * 60 + (mins ?? 0));
   }
 
   selectRoutine(routine: Routine): void {

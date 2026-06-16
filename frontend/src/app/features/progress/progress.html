@@ -19,19 +19,20 @@
       }
     </div>
 
-    <div class="time-toggle" role="group" aria-label="Rango de tiempo">
-      <button type="button" class="time-btn" [class.active]="timeRange() === '1M'" (click)="selectTimeRange('1M')">1M</button>
-      <button type="button" class="time-btn" [class.active]="timeRange() === '3M'" (click)="selectTimeRange('3M')">3M</button>
-      <button type="button" class="time-btn" [class.active]="timeRange() === '1A'" (click)="selectTimeRange('1A')">1A</button>
-    </div>
-
     @if (loading()) {
       <app-exercise-loader />
     } @else {
       @for (item of data()?.items ?? []; track item.exercise.id) {
         <div class="exercise-block">
-          <div class="exercise-block-title" [style.color]="categoryColor[item.exercise.category]">
-            {{ item.exercise.name }}
+          <div class="exercise-block-header">
+            <div class="exercise-block-title" [style.color]="categoryColor[item.exercise.category]">
+              {{ item.exercise.name }}
+            </div>
+            <div class="time-toggle" role="group" [attr.aria-label]="'Rango para ' + item.exercise.name">
+              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '1M'" (click)="selectTimeRange(item.exercise.id, '1M')">1M</button>
+              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '3M'" (click)="selectTimeRange(item.exercise.id, '3M')">3M</button>
+              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '1A'" (click)="selectTimeRange(item.exercise.id, '1A')">1A</button>
+            </div>
           </div>
 
           <div class="stats">
