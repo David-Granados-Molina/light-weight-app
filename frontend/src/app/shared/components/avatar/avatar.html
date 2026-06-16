@@ -1,6 +1,4 @@
-@if (isPng() && pngSrc()) {
-  <img class="avatar-img" [src]="pngSrc()!" alt="Avatar" />
-} @else if (svg(); as markup) {
+@if (svg(); as markup) {
   <span class="avatar-glyph" [innerHTML]="markup"></span>
 } @else {
   <span class="avatar-initial">{{ fallback() }}</span>

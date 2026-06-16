@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 992 1065">
+  <defs>
+    <filter id="f" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 -1 -1 0 2"/>
+    </filter>
+    <mask id="m">
+      <image href="/avatars/avatar-9-source.png" width="992" height="1065" filter="url(#f)"/>
+    </mask>
+  </defs>
+  <rect width="992" height="1065" fill="currentColor" mask="url(#m)"/>
+</svg>

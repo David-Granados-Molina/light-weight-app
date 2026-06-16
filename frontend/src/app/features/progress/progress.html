@@ -57,8 +57,13 @@
           <div class="chart-card">
             <div class="chart-title">{{ itemChartTitle(item) }}</div>
             <div class="chart-wrap">
-              @for (rangeKey of [getTimeRange(item.exercise.id)]; track rangeKey) {
-                <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+              @switch (getTimeRange(item.exercise.id)) {
+                @case ('3M') {
+                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+                }
+                @case ('1A') {
+                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+                }
               }
             </div>
           </div>
