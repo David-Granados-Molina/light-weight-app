@@ -42,6 +42,10 @@ export class Progress {
     });
   }
 
+  onRoutineChange(event: Event): void {
+    this.selectRoutine((event.target as HTMLSelectElement).value);
+  }
+
   selectRoutine(id: string): void {
     if (id === this.selectedRoutineId()) return;
     this.selectedRoutineId.set(id);

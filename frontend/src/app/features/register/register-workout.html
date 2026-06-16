@@ -24,25 +24,14 @@
     <app-exercise-loader text="Cargando entreno…" compact />
   }
 
-  @if (loadingRoutines()) {
-    <div class="loading-routines">Cargando rutinas…</div>
-  } @else if (routines().length > 0) {
-    <div class="section-label">Cargar rutina</div>
-    <div class="chip-row app-scroll">
-      @for (routine of routines(); track routine.id) {
-        <button
-          type="button"
-          class="chip routine-chip"
-          [class.active]="selectedRoutineId() === routine.id"
-          (click)="selectRoutine(routine)"
-        >
-          <span class="dot" [style.background]="categoryColor[routine.category]"></span>{{ routine.name }}
-        </button>
+  @if (!loadingRoutines() && routines().length > 0) {
+    <div class="section-label">Rutina</div>
+    <select class="routine-select" aria-label="Seleccionar rutina" (change)="onRoutineChange($event)">
+      <option value="">— Sin rutina —</option>
+      @for (r of routines(); track r.id) {
+        <option [value]="r.id" [selected]="selectedRoutineId() === r.id">{{ r.name }}</option>
       }
-      @if (selectedRoutineId()) {
-        <button type="button" class="chip clear-chip" (click)="clearRoutine()">✕ Quitar</button>
-      }
-    </div>
+    </select>
   }
 
   <div class="search-wrap">

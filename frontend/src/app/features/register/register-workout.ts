@@ -298,6 +298,13 @@ export class RegisterWorkout {
     this.setValue(exIndex, setIndex, 'time', this.cardioHours(exIndex, setIndex) * 60 + (mins ?? 0));
   }
 
+  onRoutineChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (!value) { this.clearRoutine(); return; }
+    const routine = this.routines().find((r) => r.id === value);
+    if (routine) this.selectRoutine(routine);
+  }
+
   selectRoutine(routine: Routine): void {
     if (this.added().length > 0) {
       this.pendingRoutine.set(routine);

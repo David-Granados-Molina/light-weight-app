@@ -6,18 +6,11 @@
   } @else if (!routines().length) {
     <div class="empty">Crea una rutina para empezar a ver tu Progreso aquí.</div>
   } @else {
-    <div class="chips app-scroll">
+    <select class="routine-select" aria-label="Seleccionar rutina" (change)="onRoutineChange($event)">
       @for (r of routines(); track r.id) {
-        <button
-          type="button"
-          class="chip"
-          [class.active]="selectedRoutineId() === r.id"
-          (click)="selectRoutine(r.id)"
-        >
-          <span class="dot" [style.background]="categoryColor[r.category]"></span>{{ r.name }}
-        </button>
+        <option [value]="r.id" [selected]="selectedRoutineId() === r.id">{{ r.name }}</option>
       }
-    </div>
+    </select>
 
     @if (loading()) {
       <app-exercise-loader />
