@@ -77,6 +77,9 @@
   border: 2px solid var(--color-border-strong);
   overflow: hidden;
   animation: scaleIn 0.22s ease both;
+  /* Nearest-neighbour sampling: avoids bilinear blur when upscaling the
+     160-px PNG masks embedded in each avatar SVG */
+  image-rendering: pixelated;
 }
 
 .lightbox-avatar app-avatar {
