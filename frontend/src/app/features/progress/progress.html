@@ -22,7 +22,6 @@
               {{ item.exercise.name }}
             </div>
             <div class="time-toggle" role="group" [attr.aria-label]="'Rango para ' + item.exercise.name">
-              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '1M'" (click)="selectTimeRange(item.exercise.id, '1M')">1M</button>
               <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '3M'" (click)="selectTimeRange(item.exercise.id, '3M')">3M</button>
               <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '1A'" (click)="selectTimeRange(item.exercise.id, '1A')">1A</button>
             </div>

@@ -24,7 +24,7 @@ export class Progress {
 
   readonly routines = signal<Routine[]>([]);
   readonly selectedRoutineId = signal<string | null>(null);
-  readonly timeRanges = signal<Record<string, '1M' | '3M' | '1A'>>({});
+  readonly timeRanges = signal<Record<string, '3M' | '1A'>>({});
   readonly data = signal<RoutineProgressData | null>(null);
   readonly loading = signal(true);
 
@@ -53,11 +53,11 @@ export class Progress {
     this.loadProgress();
   }
 
-  getTimeRange(exerciseId: string): '1M' | '3M' | '1A' {
+  getTimeRange(exerciseId: string): '3M' | '1A' {
     return this.timeRanges()[exerciseId] ?? '1A';
   }
 
-  selectTimeRange(exerciseId: string, range: '1M' | '3M' | '1A'): void {
+  selectTimeRange(exerciseId: string, range: '3M' | '1A'): void {
     this.timeRanges.update((m) => ({ ...m, [exerciseId]: range }));
   }
 
@@ -173,7 +173,7 @@ export class Progress {
 
   private getFilteredPoints(item: RoutineProgressItem): ProgressPoint[] {
     const range = this.getTimeRange(item.exercise.id);
-    const ms = range === '1M' ? 30 * 86400000 : range === '3M' ? 91 * 86400000 : 365 * 86400000;
+    const ms = range === '3M' ? 91 * 86400000 : 365 * 86400000;
     const cutoff = Date.now() - ms;
     return item.points.filter((p) => new Date(p.date).getTime() >= cutoff);
   }
