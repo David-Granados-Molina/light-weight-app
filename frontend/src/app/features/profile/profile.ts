@@ -23,6 +23,7 @@ const THEME_OPTIONS = [
   styleUrl: './profile.css',
   host: {
     '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'previewOpen.set(false)',
   },
 })
 export class Profile {
@@ -42,6 +43,7 @@ export class Profile {
 
   readonly avatarMenuOpen = signal(false);
   readonly themeMenuOpen = signal(false);
+  readonly previewOpen = signal(false);
   readonly currentThemeLabel = computed(
     () => this.themeOptions.find((t) => t.color === this.themeColor())?.label ?? 'Tema',
   );

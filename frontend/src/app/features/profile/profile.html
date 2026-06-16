@@ -10,9 +10,9 @@
   </div>
 
   <div class="avatar-section">
-    <div class="avatar-preview">
+    <button type="button" class="avatar-preview" aria-label="Ver avatar ampliado" (click)="previewOpen.set(true)">
       <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
-    </div>
+    </button>
   </div>
 
   <label class="field-label">Nombre</label>
@@ -135,3 +135,11 @@
 
   <button type="button" class="logout-btn" (click)="logout()">Cerrar sesión</button>
 </div>
+
+@if (previewOpen()) {
+  <div class="avatar-lightbox" role="dialog" aria-modal="true" aria-label="Vista previa del avatar" (click)="previewOpen.set(false)">
+    <div class="lightbox-avatar" (click)="$event.stopPropagation()">
+      <app-avatar [avatarId]="avatarId()" [fallback]="initial()" />
+    </div>
+  </div>
+}
