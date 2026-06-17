@@ -197,10 +197,6 @@
   border-color: var(--color-accent);
 }
 
-.avatar-option app-avatar {
-  padding: 4px;
-}
-
 .none-option {
   display: flex;
   align-items: center;
