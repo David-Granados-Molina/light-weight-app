@@ -43,7 +43,7 @@
   height: 92px;
   border-radius: 22%;
   background: var(--color-surface-alt);
-  border: 1px solid var(--color-border-strong);
+  border: 2px solid var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
