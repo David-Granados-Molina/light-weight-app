@@ -105,5 +105,11 @@
         <div class="empty">Sin resultados</div>
       }
     </div>
+
+    @if (hasMore()) {
+      <button type="button" class="load-more-btn" [disabled]="loadingMore()" (click)="loadMore()">
+        {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
+      </button>
+    }
   }
 </div>

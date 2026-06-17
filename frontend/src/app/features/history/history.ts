@@ -33,6 +33,12 @@ function isoDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+function subtractDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() - days);
+  return isoDate(d);
+}
+
 @Component({
   selector: 'app-history',
   imports: [ExerciseLoader],
@@ -55,12 +61,17 @@ export class History {
   readonly search = signal('');
   readonly sessions = signal<WorkoutSession[]>([]);
   readonly loading = signal(true);
+  readonly loadingMore = signal(false);
+  readonly hasMore = signal(true);
   readonly expandedId = signal<string | null>(null);
 
   readonly dateMode = signal<DateMode>('todos');
   readonly selectedDay = signal(this.todayIso);
   readonly selectedMonth = signal(new Date().getMonth());
   readonly selectedYear = signal(new Date().getFullYear());
+
+  private weekCursor = this.todayIso;
+  private consecutiveEmptyWeeks = 0;
 
   readonly filterChips: { key: HistFilter; label: string }[] = [
     { key: 'todos', label: 'Todos' },
@@ -96,7 +107,7 @@ export class History {
   );
 
   constructor() {
-    this.load();
+    this.reset();
   }
 
   toggleExpand(id: string): void {
@@ -112,32 +123,95 @@ export class History {
 
   selectFilter(key: HistFilter): void {
     this.filter.set(key);
-    this.load();
+    this.reset();
   }
 
   selectDateMode(key: DateMode): void {
     this.dateMode.set(key);
-    this.load();
+    this.reset();
   }
 
   onDayInput(event: Event): void {
     this.selectedDay.set((event.target as HTMLInputElement).value);
-    this.load();
+    this.reset();
   }
 
   onMonthInput(event: Event): void {
     this.selectedMonth.set(Number((event.target as HTMLSelectElement).value));
-    this.load();
+    this.reset();
   }
 
   onYearInput(event: Event): void {
     this.selectedYear.set(Number((event.target as HTMLSelectElement).value));
-    this.load();
+    this.reset();
   }
 
   onSearchInput(event: Event): void {
     this.search.set((event.target as HTMLInputElement).value);
-    this.load();
+    this.reset();
+  }
+
+  loadMore(): void {
+    if (!this.hasMore() || this.loadingMore()) return;
+    this.loadChunk(false);
+  }
+
+  private reset(): void {
+    this.weekCursor = this.todayIso;
+    this.consecutiveEmptyWeeks = 0;
+    this.hasMore.set(true);
+    this.sessions.set([]);
+    this.loadChunk(true);
+  }
+
+  private loadChunk(isFirst: boolean): void {
+    const mode = this.dateMode();
+    const filterVal = this.filter();
+    const category: Category | undefined = filterVal === 'todos' ? undefined : filterVal;
+    const q = this.search().trim() || undefined;
+
+    if (mode !== 'todos') {
+      this.loading.set(true);
+      const { from, to } = this.dateRange();
+      this.sessionService.getAll({ category, q, from, to }).subscribe({
+        next: (sessions) => {
+          this.sessions.set(sessions);
+          this.loading.set(false);
+          this.hasMore.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+      return;
+    }
+
+    const to = this.weekCursor;
+    const from = subtractDays(to, 6);
+
+    if (isFirst) this.loading.set(true);
+    else this.loadingMore.set(true);
+
+    this.sessionService.getAll({ category, q, from, to }).subscribe({
+      next: (sessions) => {
+        if (isFirst) {
+          this.sessions.set(sessions);
+          this.loading.set(false);
+        } else {
+          this.sessions.update((prev) => [...prev, ...sessions]);
+          this.loadingMore.set(false);
+        }
+        this.weekCursor = subtractDays(to, 7);
+        if (sessions.length === 0) {
+          this.consecutiveEmptyWeeks++;
+          if (this.consecutiveEmptyWeeks >= 2) this.hasMore.set(false);
+        } else {
+          this.consecutiveEmptyWeeks = 0;
+        }
+      },
+      error: () => {
+        this.loading.set(false);
+        this.loadingMore.set(false);
+      },
+    });
   }
 
   private dateRange(): { from?: string; to?: string } {
@@ -159,25 +233,5 @@ export class History {
       return { from: `${y}-01-01`, to: `${y}-12-31` };
     }
     return {};
-  }
-
-  private load(): void {
-    this.loading.set(true);
-    const filter = this.filter();
-    const { from, to } = this.dateRange();
-    this.sessionService
-      .getAll({
-        category: filter === 'todos' ? undefined : filter,
-        q: this.search().trim() || undefined,
-        from,
-        to,
-      })
-      .subscribe({
-        next: (sessions) => {
-          this.sessions.set(sessions);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
   }
 }
