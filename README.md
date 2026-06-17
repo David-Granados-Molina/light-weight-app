@@ -36,9 +36,6 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 - Login con Google (OAuth 2.0)
 - Recuperación de contraseña por email (enlace seguro de un solo uso)
 
-### Parsing con IA
-- Endpoint `/api/whatsapp` que acepta un mensaje de texto libre y extrae el entreno usando la API de Anthropic (Claude)
-
 ---
 
 ## Stack tecnológico
@@ -152,8 +149,6 @@ SMTP_PASS=tu_app_password
 
 FRONTEND_URL=http://localhost:4200
 CORS_ORIGIN=http://localhost:4200
-
-ANTHROPIC_API_KEY=sk-ant-...   # opcional, solo para el endpoint de WhatsApp
 ```
 
 ### 3. Migraciones y seed
