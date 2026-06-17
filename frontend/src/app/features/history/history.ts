@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
+import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
@@ -40,6 +42,8 @@ function isoDate(date: Date): string {
 })
 export class History {
   private readonly sessionService = inject(SessionService);
+  private readonly router = inject(Router);
+  private readonly draft = inject(WorkoutDraftStore);
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly categoryLabel = CATEGORY_LABEL;
@@ -81,6 +85,7 @@ export class History {
   readonly rows = computed(() =>
     this.sessions().map((s) => ({
       id: s.id,
+      date: s.date,
       category: s.category,
       typeLabel: sessionTypeLabel(s.exercises.map((e) => e.exercise.type)),
       dateLabel: relativeDayLabel(s.date),
@@ -96,6 +101,13 @@ export class History {
 
   toggleExpand(id: string): void {
     this.expandedId.update((current) => (current === id ? null : id));
+  }
+
+  editSession(date: string, event: Event): void {
+    event.stopPropagation();
+    this.draft.reset();
+    this.draft.selectedDate.set(date);
+    this.router.navigate(['/registrar']);
   }
 
   selectFilter(key: HistFilter): void {

@@ -207,6 +207,10 @@ export class RegisterWorkout {
     if (!this.selectedDate()) {
       this.selectedDate.set(this.todayIso);
     }
+    const initialDate = this.selectedDate();
+    if (initialDate && initialDate !== this.todayIso && this.added().length === 0) {
+      this.loadSessionForDate(initialDate);
+    }
     this.fetchLastSessions(this.added().map((a) => a.exercise.id));
 
     const reminderId = setInterval(() => {

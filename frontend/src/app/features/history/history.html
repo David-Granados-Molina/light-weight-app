@@ -76,7 +76,15 @@
             <span class="session-cat" [style.color]="categoryColor[s.category]">
               <span class="dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
             </span>
-            <span class="session-date">{{ s.dateLabel }}</span>
+            <div class="session-top-right">
+              <span class="session-date">{{ s.dateLabel }}</span>
+              <button type="button" class="session-edit-btn" aria-label="Editar entreno" (click)="editSession(s.date, $event)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="session-type">{{ s.typeLabel }}</div>
           @if (expandedId() === s.id) {
