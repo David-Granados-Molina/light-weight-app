@@ -2,7 +2,7 @@
 
 Aplicación web progresiva para el registro y seguimiento personal de entrenamientos. Diseñada para funcionar como una PWA móvil, con interfaz oscura y sistema de temas personalizables.
 
-**Demo:** [app.davidgranadosmolina.es](https://app.davidgranadosmolina.es)
+**Demo:** [light-weight-app.onrender.com](https://light-weight-app.onrender.com/)
 
 ---
 
