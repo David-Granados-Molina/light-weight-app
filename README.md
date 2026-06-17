@@ -207,9 +207,15 @@ La compilación del frontend para producción usa `fileReplacements` en `angular
 
 ## Capturas de pantalla
 
-> _Dashboard — Historial — Registro — Progreso_
-
-<!-- Añadir capturas aquí -->
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/inicio.png" width="180"/><br/><sub>Inicio</sub></td>
+    <td align="center"><img src="docs/screenshots/historial.png" width="180"/><br/><sub>Historial</sub></td>
+    <td align="center"><img src="docs/screenshots/registrar.png" width="180"/><br/><sub>Registrar</sub></td>
+    <td align="center"><img src="docs/screenshots/progreso.png" width="180"/><br/><sub>Progreso</sub></td>
+    <td align="center"><img src="docs/screenshots/rutinas.png" width="180"/><br/><sub>Rutinas</sub></td>
+  </tr>
+</table>
 
 ---
 
