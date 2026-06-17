@@ -17,3 +17,20 @@
   background: rgba(0, 0, 0, 0.4);
 }
 
+.secondary-btn {
+  width: 100%;
+  font-weight: 700;
+  font-size: 15px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+

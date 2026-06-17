@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
@@ -24,6 +24,8 @@ export class Login implements AfterViewInit {
   readonly error = signal<string | null>(null);
   readonly loading = signal(false);
 
+  readonly canSubmit = computed(() => this.email().trim().length > 0 && this.password().length > 0 && !this.loading());
+
   ngAfterViewInit(): void {
     const el = this.googleBtn()?.nativeElement;
     if (el) this.googleIdentity.renderButton(el, (idToken) => this.onGoogleCredential(idToken));
@@ -38,7 +40,7 @@ export class Login implements AfterViewInit {
   }
 
   submit(): void {
-    if (!this.email() || !this.password() || this.loading()) return;
+    if (!this.canSubmit()) return;
 
     this.loading.set(true);
     this.error.set(null);
@@ -48,6 +50,20 @@ export class Login implements AfterViewInit {
         this.loading.set(false);
         const apiError = err.error?.error;
         this.error.set(typeof apiError === 'string' ? apiError : 'Email o contraseña no válidos.');
+      },
+    });
+  }
+
+  loginAsTestUser(): void {
+    if (this.loading()) return;
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.authService.login({ email: 'test@test.com', password: 'test' }).subscribe({
+      next: () => this.router.navigateByUrl('/inicio'),
+      error: () => {
+        this.loading.set(false);
+        this.error.set('No se ha podido iniciar sesión con la cuenta de prueba.');
       },
     });
   }

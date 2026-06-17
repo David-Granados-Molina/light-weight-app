@@ -36,7 +36,7 @@
     <div class="error">{{ error() }}</div>
   }
 
-  <button type="button" class="primary-btn" [disabled]="loading()" (click)="submit()">
+  <button type="button" class="primary-btn" [disabled]="!canSubmit()" (click)="submit()">
     {{ loading() ? 'Entrando…' : 'Iniciar sesión' }}
   </button>
 
@@ -44,6 +44,11 @@
     <div class="divider">o</div>
     <div class="google-btn-wrap" #googleBtn></div>
   }
+
+  <div class="divider">o</div>
+  <button type="button" class="secondary-btn" [disabled]="loading()" (click)="loginAsTestUser()">
+    Probar con cuenta de prueba
+  </button>
 </div>
 
 @if (loading()) {

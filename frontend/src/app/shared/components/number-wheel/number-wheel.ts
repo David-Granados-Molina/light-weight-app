@@ -37,7 +37,26 @@ export class NumberWheel {
   }
 
   onInput(event: Event): void {
-    this.displayValue.set((event.target as HTMLInputElement).value);
+    const target = event.target as HTMLInputElement;
+    const allowNegative = this.min() < 0;
+    let sanitized = target.value.replace(allowNegative ? /[^0-9.,-]/g : /[^0-9.,]/g, '');
+
+    if (allowNegative) {
+      const negative = sanitized.startsWith('-');
+      sanitized = sanitized.replace(/-/g, '');
+      if (negative) sanitized = '-' + sanitized;
+    }
+
+    const sepIndex = sanitized.search(/[.,]/);
+    if (sepIndex !== -1) {
+      sanitized = sanitized.slice(0, sepIndex + 1) + sanitized.slice(sepIndex + 1).replace(/[.,]/g, '');
+    }
+
+    // Forzar el valor del input directamente: si el saneado coincide con el signal
+    // anterior (p.ej. dos letras seguidas que ambas se eliminan), Angular detecta el
+    // valor como "sin cambios" y no refresca el binding, dejando las letras visibles.
+    target.value = sanitized;
+    this.displayValue.set(sanitized);
   }
 
   onBlur(): void {
