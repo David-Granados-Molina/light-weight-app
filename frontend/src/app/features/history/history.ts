@@ -106,7 +106,7 @@ export class History {
   editSession(date: string, event: Event): void {
     event.stopPropagation();
     this.draft.reset();
-    this.draft.selectedDate.set(date);
+    this.draft.selectedDate.set(date.slice(0, 10));
     this.router.navigate(['/registrar']);
   }
 

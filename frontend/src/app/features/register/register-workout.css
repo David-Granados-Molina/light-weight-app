@@ -64,6 +64,20 @@
   cursor: pointer;
 }
 
+.edit-banner {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
 .loading-routines {
   margin-top: 18px;
   font-size: 13px;
