@@ -160,17 +160,25 @@ export class Profile implements OnDestroy {
       .catch(() => {});
   }
 
-  private buildBlobUrl(raw: string): void {
+  private async buildBlobUrl(raw: string): Promise<void> {
     const origin = window.location.origin;
-    // Replace currentColor with the actual theme color and make any relative
-    // href paths absolute so they resolve correctly from a blob: URL context.
-    const processed = raw
-      .replace(/currentColor/g, this.themeColor())
-      .replace(/href="\//g, `href="${origin}/`)
-      // Add crisp-edges to embedded <image> elements so the browser uses
-      // nearest-neighbour sampling rather than bilinear upscaling.
-      .replace(/<image\b/g, '<image image-rendering="crispEdges"');
+    let processed = raw.replace(/currentColor/g, this.themeColor());
 
+    // SVGs inside <img> blobs cannot make external network requests.
+    // Find relative href="/..." image paths and inline them as base64 data URIs.
+    for (const m of [...processed.matchAll(/href="(\/[^"]+)"/g)]) {
+      try {
+        const resp = await fetch(`${origin}${m[1]}`);
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          resp.blob().then((b) => reader.readAsDataURL(b));
+        });
+        processed = processed.replace(`href="${m[1]}"`, `href="${dataUrl}"`);
+      } catch { /* skip if unreachable */ }
+    }
+
+    processed = processed.replace(/<image\b/g, '<image image-rendering="crispEdges"');
     this.revokeBlobUrl();
     this.blobUrl = URL.createObjectURL(new Blob([processed], { type: 'image/svg+xml' }));
     this.lightboxSrc.set(this.blobUrl);
