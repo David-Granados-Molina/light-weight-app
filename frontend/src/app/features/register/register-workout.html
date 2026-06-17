@@ -12,12 +12,9 @@
     <div class="date-info">
       <span class="date-label" [class.today]="selectedDate() === todayIso">{{ selectedDateLabel() }}</span>
       @if (selectedDate() !== todayIso) {
-        <button type="button" class="today-link" (click)="pickDate(todayIso)">Volver a hoy</button>
+        <button type="button" class="today-link" (click)="goToToday()">Volver a hoy</button>
       }
     </div>
-    <button type="button" class="calendar-btn" (click)="openCalendar()" aria-label="Elegir fecha para editar un entreno">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-    </button>
   </div>
 
   @if (editingSessionId() && !loadingDay()) {
@@ -263,44 +260,3 @@
   />
 }
 
-@if (showCalendar()) {
-  <div class="calendar-overlay" (click)="closeCalendar()">
-    <div class="calendar-sheet" (click)="$event.stopPropagation()">
-      <div class="calendar-header">
-        <button type="button" class="cal-nav-btn" (click)="prevCalendarMonth()" aria-label="Mes anterior">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <span class="calendar-month-label">{{ calendarMonthLabel() }}</span>
-        <button type="button" class="cal-nav-btn" [disabled]="!canNextMonth()" (click)="nextCalendarMonth()" aria-label="Mes siguiente">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-
-      <div class="calendar-weekday-row">
-        @for (h of weekdayHeaders; track h) {
-          <span class="calendar-weekday">{{ h }}</span>
-        }
-      </div>
-
-      <div class="calendar-grid">
-        @for (week of calendarWeeks(); track $index) {
-          @for (cell of week; track cell.iso) {
-            <button
-              type="button"
-              class="calendar-day"
-              [class.out]="!cell.inMonth"
-              [class.today]="cell.isToday"
-              [class.selected]="selectedDate() === cell.iso"
-              [disabled]="cell.isFuture"
-              (click)="pickDate(cell.iso)"
-            >
-              {{ cell.day }}
-            </button>
-          }
-        }
-      </div>
-
-      <div class="calendar-hint">Elige un día para editar el entreno registrado ese día, o crear uno nuevo.</div>
-    </div>
-  </div>
-}

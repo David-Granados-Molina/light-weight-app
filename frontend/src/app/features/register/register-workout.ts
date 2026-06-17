@@ -19,25 +19,11 @@ interface LastSessionData {
   sets: SessionSet[];
 }
 
-interface DayCell {
-  iso: string;
-  day: number;
-  inMonth: boolean;
-  isToday: boolean;
-  isFuture: boolean;
-}
-
-const WEEKDAY_HEADERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-
 function isoDate(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
-}
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 const WORSE_MESSAGES = [
@@ -82,7 +68,6 @@ export class RegisterWorkout {
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
-  readonly weekdayHeaders = WEEKDAY_HEADERS;
   readonly todayIso = isoDate(new Date());
 
   readonly catalog = signal<Exercise[]>([]);
@@ -103,15 +88,11 @@ export class RegisterWorkout {
   readonly showReminder = signal(false);
   readonly reminderDismissed = signal(false);
   readonly pendingRoutine = signal<Routine | null>(null);
-  readonly showCalendar = signal(false);
   readonly showDateConfirm = signal(false);
-  readonly calendarMonth = signal(startOfMonth(new Date()));
 
   readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   readonly lastData = signal<Record<string, LastSessionData | null>>({});
-
-  private todaySnapshot: { added: AddedExercise[]; routineId: string | null } | null = null;
 
   readonly searchResults = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -138,46 +119,6 @@ export class RegisterWorkout {
       month: 'long',
     });
     return label.charAt(0).toUpperCase() + label.slice(1);
-  });
-
-  readonly calendarMonthLabel = computed(() => {
-    const label = this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-    return label.charAt(0).toUpperCase() + label.slice(1);
-  });
-
-  readonly canNextMonth = computed(() => {
-    const m = this.calendarMonth();
-    const now = startOfMonth(new Date());
-    return (
-      m.getFullYear() < now.getFullYear() || (m.getFullYear() === now.getFullYear() && m.getMonth() < now.getMonth())
-    );
-  });
-
-  readonly calendarWeeks = computed<DayCell[][]>(() => {
-    const month = this.calendarMonth();
-    const today = this.todayIso;
-    const firstWeekday = (month.getDay() + 6) % 7; // Lunes = 0
-    const gridStart = new Date(month);
-    gridStart.setDate(gridStart.getDate() - firstWeekday);
-
-    const cells: DayCell[] = [];
-    for (let i = 0; i < 42; i++) {
-      const d = new Date(gridStart);
-      d.setDate(d.getDate() + i);
-      const iso = isoDate(d);
-      cells.push({
-        iso,
-        day: d.getDate(),
-        inMonth: d.getMonth() === month.getMonth(),
-        isToday: iso === today,
-        isFuture: iso > today,
-      });
-    }
-
-    const weeks: DayCell[][] = [];
-    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
-    while (weeks.length > 4 && weeks[weeks.length - 1].every((c) => !c.inMonth)) weeks.pop();
-    return weeks;
   });
 
   readonly shareText = computed(() => {
@@ -347,50 +288,12 @@ export class RegisterWorkout {
     this.fetchLastSessions(added.map((item) => item.exercise.id));
   }
 
-  openCalendar(): void {
-    this.calendarMonth.set(startOfMonth(new Date(`${this.selectedDate() ?? this.todayIso}T00:00:00`)));
-    this.showCalendar.set(true);
-  }
-
-  closeCalendar(): void {
-    this.showCalendar.set(false);
-  }
-
-  prevCalendarMonth(): void {
-    const d = new Date(this.calendarMonth());
-    d.setMonth(d.getMonth() - 1);
-    this.calendarMonth.set(d);
-  }
-
-  nextCalendarMonth(): void {
-    if (!this.canNextMonth()) return;
-    const d = new Date(this.calendarMonth());
-    d.setMonth(d.getMonth() + 1);
-    this.calendarMonth.set(d);
-  }
-
-  pickDate(iso: string): void {
-    if (iso > this.todayIso) return;
-    this.showCalendar.set(false);
-    if (iso === this.selectedDate()) return;
-
-    const wasToday = (this.selectedDate() ?? this.todayIso) === this.todayIso && this.editingSessionId() === null;
-    if (wasToday) {
-      this.todaySnapshot = { added: this.added(), routineId: this.selectedRoutineId() };
-    }
-
-    if (iso === this.todayIso && this.todaySnapshot) {
-      this.selectedDate.set(iso);
-      this.added.set(this.todaySnapshot.added);
-      this.selectedRoutineId.set(this.todaySnapshot.routineId);
-      this.editingSessionId.set(null);
-      this.todaySnapshot = null;
-      this.fetchLastSessions(this.added().map((item) => item.exercise.id));
-      return;
-    }
-
-    this.selectedDate.set(iso);
-    this.loadSessionForDate(iso);
+  goToToday(): void {
+    this.editingSessionId.set(null);
+    this.selectedDate.set(this.todayIso);
+    this.added.set([]);
+    this.selectedRoutineId.set(null);
+    this.search.set('');
   }
 
   save(): void {
@@ -422,14 +325,8 @@ export class RegisterWorkout {
       return;
     }
     this.selectedDate.set(this.todayIso);
-    if (this.todaySnapshot) {
-      this.added.set(this.todaySnapshot.added);
-      this.selectedRoutineId.set(this.todaySnapshot.routineId);
-      this.todaySnapshot = null;
-    } else {
-      this.added.set([]);
-      this.selectedRoutineId.set(null);
-    }
+    this.added.set([]);
+    this.selectedRoutineId.set(null);
     this.search.set('');
   }
 
