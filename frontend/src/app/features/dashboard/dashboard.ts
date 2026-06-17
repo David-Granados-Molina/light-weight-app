@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
@@ -59,6 +60,8 @@ export class Dashboard {
   private readonly dashboardService = inject(DashboardService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly draft = inject(WorkoutDraftStore);
 
   readonly userName = computed(() => this.authService.currentUser()?.name ?? '');
   readonly avatarId = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
@@ -94,6 +97,13 @@ export class Dashboard {
 
   toggleExpand(id: string): void {
     this.expandedId.update((current) => (current === id ? null : id));
+  }
+
+  editSession(date: string, event: Event): void {
+    event.stopPropagation();
+    this.draft.reset();
+    this.draft.selectedDate.set(date.slice(0, 10));
+    this.router.navigate(['/registrar']);
   }
 
   constructor() {
