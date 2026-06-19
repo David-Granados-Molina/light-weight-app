@@ -3,6 +3,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
+  --p-form-field-focus-border-color: var(--color-accent);
   --p-multiselect-focus-border-color: var(--color-accent);
   --p-multiselect-focus-ring-color: var(--color-accent);
   --p-multiselect-option-selected-background: var(--color-surface-alt);
@@ -58,6 +59,13 @@
   font-family: inherit;
 }
 
+/* PrimeNG aplica su color "primary" (verde) al borde en foco; se fuerza el acento de la app. */
+.exercise-picker-panel .p-multiselect-filter:focus {
+  border-color: var(--color-accent) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .exercise-picker-panel .p-multiselect-filter::placeholder {
   color: var(--color-text-muted);
 }
@@ -82,11 +90,21 @@
 }
 
 .exercise-picker-panel .p-multiselect-option {
+  display: flex;
+  align-items: center;
   padding: 13px 14px;
   color: var(--color-text);
   font-size: 14px;
   font-weight: 600;
   border-bottom: 1px solid var(--color-border);
+}
+
+.picker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 10px;
 }
 
 .exercise-picker-panel .p-multiselect-option:last-child {

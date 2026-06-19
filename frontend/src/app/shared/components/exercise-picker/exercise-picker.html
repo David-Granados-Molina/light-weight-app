@@ -16,4 +16,10 @@
   emptyFilterMessage="Sin resultados"
   [ngModel]="selection()"
   (ngModelChange)="onSelectionChange($event)"
-/>
+>
+  <ng-template #item let-exercise>
+    <span class="picker-dot" [style.background]="dotColor(exercise)"></span>
+    {{ exercise.name }}
+  </ng-template>
+</p-multiselect>
+

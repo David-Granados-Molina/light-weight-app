@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, input,
 import { FormsModule } from '@angular/forms';
 import { MultiSelect } from 'primeng/multiselect';
 import { Exercise } from '../../../core/models/exercise.model';
-import { CATEGORY_LABEL } from '../../../core/models/labels';
+import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../../core/models/labels';
 
 interface ExerciseGroup {
   label: string;
@@ -26,6 +26,8 @@ interface ExerciseGroup {
   styleUrl: './exercise-picker.css',
 })
 export class ExercisePicker {
+  readonly categoryColor = CATEGORY_COLOR;
+
   readonly catalog = input.required<Exercise[]>();
   readonly excludeIds = input<string[]>([]);
   readonly placeholder = input('Buscar ejercicio…');
@@ -44,5 +46,9 @@ export class ExercisePicker {
   onSelectionChange(value: Exercise[]): void {
     for (const exercise of value) this.picked.emit(exercise);
     this.selection.set([]);
+  }
+
+  dotColor(exercise: Exercise): string {
+    return this.categoryColor[exercise.category];
   }
 }
