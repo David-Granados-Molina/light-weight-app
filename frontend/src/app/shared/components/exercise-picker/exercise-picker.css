@@ -1,8 +1,9 @@
 .exercise-picker {
   width: 100%;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border: 1px solid var(--color-border-strong) !important;
+  border-radius: 12px !important;
+  --p-multiselect-border-radius: 12px;
   --p-form-field-focus-border-color: var(--color-accent);
   --p-multiselect-focus-border-color: var(--color-accent);
   --p-multiselect-focus-ring-color: var(--color-accent);
@@ -15,9 +16,10 @@
 }
 
 .exercise-picker .p-multiselect-label {
-  padding: 13px 14px;
+  padding: 12px 14px;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
 }
 
@@ -32,8 +34,9 @@
 
 .exercise-picker-panel {
   background: #161616;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 12px;
+  border: 1px solid var(--color-border-strong) !important;
+  border-radius: 12px !important;
+  --p-multiselect-overlay-border-radius: 12px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
