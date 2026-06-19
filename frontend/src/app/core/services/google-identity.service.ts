@@ -18,6 +18,10 @@ export class GoogleIdentityService {
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: (response: { credential: string }) => onCredential(response.credential),
+      // Sin esto, el selector de cuenta de Google no se abre en navegadores móviles que
+      // bloquean cookies de terceros (Safari ITP, y crecientemente Chrome en Android).
+      itp_support: true,
+      use_fedcm_for_button: true,
     });
 
     google.accounts.id.renderButton(element, {
