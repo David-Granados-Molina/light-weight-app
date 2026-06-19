@@ -9,6 +9,7 @@ import { CATEGORY_COLOR, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
+import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -24,7 +25,7 @@ const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo', 'min'];
 
 @Component({
   selector: 'app-routine-form',
-  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel, ExerciseLoader],
+  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel, ExerciseLoader, ExercisePicker],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routine-form.html',
   styleUrl: './routine-form.css',
@@ -48,35 +49,20 @@ export class RoutineForm {
   readonly category = signal<Category>('gym');
   readonly exercises = signal<ExerciseRow[]>([]);
   readonly catalog = signal<Exercise[]>([]);
-  readonly search = signal('');
   readonly saving = signal(false);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
   readonly creatingExercise = signal(false);
+  readonly newExerciseName = signal('');
   readonly newExerciseType = signal<ExerciseType>('empuje');
   readonly newExerciseInputType = signal<InputType>('peso');
 
   readonly removeIndex = signal<number | null>(null);
   readonly confirmDeleteRoutine = signal(false);
 
-  readonly searchResults = computed(() => {
-    const q = this.search().trim().toLowerCase();
-    const addedIds = new Set(this.exercises().map((e) => e.exerciseId));
-    return this.catalog()
-      .filter(
-        (e) =>
-          e.category === this.category() &&
-          !addedIds.has(e.id) &&
-          (q === '' || e.name.toLowerCase().includes(q)),
-      )
-      .slice(0, 5);
-  });
-
-  readonly showResults = computed(() => this.search().trim() !== '' && this.searchResults().length > 0);
-  readonly showCreateOption = computed(
-    () => this.search().trim().length >= 2 && this.searchResults().length === 0 && !this.creatingExercise(),
-  );
+  readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
+  readonly catalogForCategory = computed(() => this.catalog().filter((e) => e.category === this.category()));
 
   readonly canSave = computed(() => this.name().trim().length >= 2 && this.exercises().length > 0 && !this.saving());
 
@@ -116,14 +102,8 @@ export class RoutineForm {
     this.name.set((event.target as HTMLInputElement).value);
   }
 
-  onSearchInput(event: Event): void {
-    this.search.set((event.target as HTMLInputElement).value);
-    this.creatingExercise.set(false);
-  }
-
   selectCategory(cat: Category): void {
     this.category.set(cat);
-    this.search.set('');
     this.creatingExercise.set(false);
   }
 
@@ -140,7 +120,6 @@ export class RoutineForm {
         targetWeight: null,
       },
     ]);
-    this.search.set('');
   }
 
   askRemoveExercise(index: number): void {
@@ -217,6 +196,11 @@ export class RoutineForm {
 
   cancelCreateExercise(): void {
     this.creatingExercise.set(false);
+    this.newExerciseName.set('');
+  }
+
+  onNewExerciseNameInput(event: Event): void {
+    this.newExerciseName.set((event.target as HTMLInputElement).value);
   }
 
   selectNewExerciseType(type: ExerciseType): void {
@@ -228,7 +212,7 @@ export class RoutineForm {
   }
 
   confirmCreateExercise(): void {
-    const name = this.search().trim();
+    const name = this.newExerciseName().trim();
     if (name.length < 2) return;
 
     this.exerciseService
@@ -243,6 +227,7 @@ export class RoutineForm {
           this.catalog.update((list) => [...list, exercise]);
           this.addExercise(exercise);
           this.creatingExercise.set(false);
+          this.newExerciseName.set('');
           this.newExerciseType.set('empuje');
           this.newExerciseInputType.set('peso');
         },

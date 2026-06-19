@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:seed": "tsx prisma/seed.ts",
+    "db:sync-exercises": "tsx prisma/sync-exercises.ts",
     "db:reset": "prisma migrate reset --force",
     "db:clear": "tsx prisma/clear-data.ts",
     "db:studio": "prisma studio"

@@ -1,0 +1,119 @@
+.exercise-picker {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  --p-multiselect-focus-border-color: var(--color-accent);
+  --p-multiselect-focus-ring-color: var(--color-accent);
+  --p-multiselect-option-selected-background: var(--color-surface-alt);
+  --p-multiselect-option-selected-focus-background: var(--color-surface-alt);
+}
+
+.exercise-picker .p-multiselect-label-container {
+  padding: 0;
+}
+
+.exercise-picker .p-multiselect-label {
+  padding: 13px 14px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.exercise-picker .p-multiselect-label.p-placeholder {
+  color: var(--color-text-muted);
+}
+
+.exercise-picker .p-multiselect-dropdown {
+  color: var(--color-text-muted);
+  width: 2.5rem;
+}
+
+.exercise-picker-panel {
+  background: #161616;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.exercise-picker-panel .p-multiselect-header {
+  background: #161616;
+  border-bottom: 1px solid var(--color-border);
+  padding: 10px;
+}
+
+.exercise-picker-panel .p-multiselect-filter-container {
+  flex: 1;
+}
+
+.exercise-picker-panel .p-multiselect-filter {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.exercise-picker-panel .p-multiselect-filter::placeholder {
+  color: var(--color-text-muted);
+}
+
+.exercise-picker-panel .p-checkbox-box {
+  display: none;
+}
+
+.exercise-picker-panel .p-multiselect-list-container {
+  max-height: 320px;
+}
+
+.exercise-picker-panel .p-multiselect-option-group {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: #161616;
+  padding: 10px 14px 6px;
+}
+
+.exercise-picker-panel .p-multiselect-option {
+  padding: 13px 14px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.exercise-picker-panel .p-multiselect-option:last-child {
+  border-bottom: none;
+}
+
+.exercise-picker-panel .p-multiselect-option.p-multiselect-option-selected {
+  background: var(--color-surface-alt);
+  color: var(--color-accent);
+}
+
+.exercise-picker-panel .p-multiselect-option:not(.p-multiselect-option-selected).p-focus {
+  background: var(--color-surface-alt);
+}
+
+.exercise-picker-panel .p-multiselect-empty-message {
+  padding: 16px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.exercise-picker .p-multiselect-chip-item {
+  background: var(--color-surface-alt);
+  border-radius: 8px;
+}
+
+.exercise-picker .p-multiselect-chip {
+  color: var(--color-text);
+  font-size: 13px;
+}

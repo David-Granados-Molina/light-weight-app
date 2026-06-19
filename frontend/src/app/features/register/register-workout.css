@@ -82,60 +82,8 @@
 
 
 .search-wrap {
-  position: relative;
+  display: block;
   margin-top: 12px;
-}
-
-.search-input {
-  width: 100%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 13px 14px;
-  color: var(--color-text);
-  font-size: 15px;
-  outline: none;
-  font-family: inherit;
-}
-
-.search-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.search-results {
-  position: absolute;
-  top: 54px;
-  left: 0;
-  right: 0;
-  z-index: 30;
-  background: #161616;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-}
-
-.result-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 13px 14px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.result-item:last-child {
-  border-bottom: none;
-}
-
-.result-name {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.result-type {
-  font-size: 11px;
-  font-weight: 600;
 }
 
 .added-list {

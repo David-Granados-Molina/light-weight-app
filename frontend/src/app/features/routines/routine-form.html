@@ -28,33 +28,26 @@
     </div>
 
     <label class="field-label">Ejercicios</label>
-    <div class="search-wrap">
-      <input
-        class="text-input"
-        type="text"
-        placeholder="Buscar ejercicio…"
-        [value]="search()"
-        (input)="onSearchInput($event)"
-      />
-      @if (showResults()) {
-        <div class="search-results">
-          @for (r of searchResults(); track r.id) {
-            <div class="result-item" (click)="addExercise(r)">
-              <span class="result-name">{{ r.name }}</span>
-              <span class="result-type" [style.color]="categoryColor[r.category]">{{ typeLabel[r.type] }}</span>
-            </div>
-          }
-        </div>
-      }
-      @if (showCreateOption()) {
-        <button type="button" class="create-option" (click)="startCreateExercise()">
-          + Crear ejercicio "{{ search() }}"
-        </button>
-      }
-    </div>
+    <app-exercise-picker
+      class="search-wrap"
+      [catalog]="catalogForCategory()"
+      [excludeIds]="exerciseIds()"
+      (picked)="addExercise($event)"
+    />
+    @if (!creatingExercise()) {
+      <button type="button" class="create-option" (click)="startCreateExercise()">+ Crear ejercicio nuevo</button>
+    }
 
     @if (creatingExercise()) {
       <div class="create-card">
+        <div class="field-label">Nombre</div>
+        <input
+          class="text-input"
+          type="text"
+          placeholder="Ej. Press declinado"
+          [value]="newExerciseName()"
+          (input)="onNewExerciseNameInput($event)"
+        />
         <div class="field-label">Tipo de movimiento</div>
         <div class="mini-chips">
           @for (type of exerciseTypes; track type) {
@@ -83,7 +76,14 @@
         </div>
         <div class="create-actions">
           <button type="button" class="ghost-btn" (click)="cancelCreateExercise()">Cancelar</button>
-          <button type="button" class="primary-btn" (click)="confirmCreateExercise()">Crear y añadir</button>
+          <button
+            type="button"
+            class="primary-btn"
+            [disabled]="newExerciseName().trim().length < 2"
+            (click)="confirmCreateExercise()"
+          >
+            Crear y añadir
+          </button>
         </div>
       </div>
     }

@@ -13,6 +13,7 @@ import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { RoutineSelect } from '../../shared/components/routine-select/routine-select';
+import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
 
 interface LastSessionData {
   date: string;
@@ -52,7 +53,7 @@ function pickRandom(list: string[]): string {
 
 @Component({
   selector: 'app-register-workout',
-  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect],
+  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect, ExercisePicker],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './register-workout.html',
   styleUrl: './register-workout.css',
@@ -74,11 +75,10 @@ export class RegisterWorkout {
   readonly routines = signal<Routine[]>([]);
   readonly loadingRoutines = signal(true);
   readonly loadingDay = signal(false);
-  readonly search = this.draft.search;
   readonly added = this.draft.added;
   readonly selectedDate = this.draft.selectedDate;
   readonly selectedRoutineId = this.draft.selectedRoutineId;
-  readonly editingSessionId = signal<string | null>(null);
+  readonly editingSessionId = this.draft.editingSessionId;
   readonly saving = signal(false);
   readonly saved = signal(false);
   readonly saveError = signal(false);
@@ -94,15 +94,7 @@ export class RegisterWorkout {
 
   readonly lastData = signal<Record<string, LastSessionData | null>>({});
 
-  readonly searchResults = computed(() => {
-    const q = this.search().trim().toLowerCase();
-    const addedIds = new Set(this.added().map((a) => a.exercise.id));
-    return this.catalog()
-      .filter((e) => !addedIds.has(e.id) && (q === '' || e.name.toLowerCase().includes(q)))
-      .slice(0, 5);
-  });
-
-  readonly showResults = computed(() => this.search().trim() !== '' && this.searchResults().length > 0);
+  readonly addedIds = computed(() => this.added().map((a) => a.exercise.id));
 
   readonly searchPlaceholder = computed(() =>
     this.added().length > 0 ? 'Añadir ejercicio adicional…' : 'Buscar ejercicio…',
@@ -167,13 +159,8 @@ export class RegisterWorkout {
     this.reminderDismissed.set(true);
   }
 
-  onSearchInput(event: Event): void {
-    this.search.set((event.target as HTMLInputElement).value);
-  }
-
   addExercise(exercise: Exercise): void {
     this.added.update((list) => [...list, { exercise, sets: [this.defaultSet(exercise.inputType)] }]);
-    this.search.set('');
     this.fetchLastSession(exercise.id);
   }
 
@@ -284,7 +271,6 @@ export class RegisterWorkout {
     this.added.set(added);
     this.selectedRoutineId.set(routine.id);
     this.editingSessionId.set(null);
-    this.search.set('');
     this.fetchLastSessions(added.map((item) => item.exercise.id));
   }
 
@@ -293,7 +279,6 @@ export class RegisterWorkout {
     this.selectedDate.set(this.todayIso);
     this.added.set([]);
     this.selectedRoutineId.set(null);
-    this.search.set('');
   }
 
   save(): void {
@@ -327,7 +312,6 @@ export class RegisterWorkout {
     this.selectedDate.set(this.todayIso);
     this.added.set([]);
     this.selectedRoutineId.set(null);
-    this.search.set('');
   }
 
   goHistorial(): void {
@@ -408,7 +392,6 @@ export class RegisterWorkout {
 
   private loadSessionForDate(iso: string): void {
     this.loadingDay.set(true);
-    this.search.set('');
     this.sessionService.getByDate(iso).subscribe({
       next: (session) => {
         this.editingSessionId.set(session.id);

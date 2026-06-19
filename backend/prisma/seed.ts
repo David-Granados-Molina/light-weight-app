@@ -2,7 +2,7 @@ import { PrismaClient, Category, ExerciseType, InputType } from '@prisma/client'
 
 const prisma = new PrismaClient();
 
-const CATALOG: {
+export const CATALOG: {
   name: string;
   category: Category;
   type: ExerciseType;
@@ -66,6 +66,23 @@ const CATALOG: {
   { name: 'Hollow body', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Superman', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda baja' },
   { name: 'Burpees', category: 'calistenia', type: 'core', inputType: 'peso', muscleGroup: 'Full body' },
+
+  // Progresiones intermedias de calistenia
+  { name: 'Tuck front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
+  { name: 'Advanced tuck front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
+  { name: 'Straddle front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
+  { name: 'Front lever a una pierna', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
+  { name: 'Tuck planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Advanced tuck planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Straddle planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Dominadas negativas', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda' },
+  { name: 'Dominadas asistidas con banda', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda' },
+  { name: 'Muscle-up negativo', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda/Pecho' },
+  { name: 'Tuck L-sit', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
+  { name: 'V-sit', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
+  { name: 'Pino a la pared', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core/Hombro' },
+  { name: 'Flexiones a pino', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Hombro/Tríceps' },
 
   // Cardio (gym)
   { name: 'Bici estática', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
@@ -347,11 +364,13 @@ async function main() {
   console.log('Seed: completado.');
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
