@@ -168,10 +168,10 @@ export class RoutineForm {
     return 'reps';
   }
 
-  /** En calistenia solo tiene sentido el peso para ejercicios lastrados (ej. "Fondos lastrados"). */
+  /** En calistenia solo tiene sentido el peso en ejercicios de gym, core (lastrados) o lastrados por nombre. */
   showWeight(exercise: Exercise): boolean {
     if (exercise.inputType === 'min' || exercise.type === 'cardio') return false;
-    return exercise.category === 'gym' || exercise.name.toLowerCase().includes('lastre');
+    return exercise.category === 'gym' || exercise.type === 'core' || exercise.name.toLowerCase().includes('lastre');
   }
 
   setTarget(index: number, field: 'targetSets' | 'targetRepsMin' | 'targetRepsMax', value: number | null): void {

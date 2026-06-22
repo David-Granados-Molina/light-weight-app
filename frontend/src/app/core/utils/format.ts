@@ -19,7 +19,10 @@ export function formatSet(s: SetLike, inputType?: InputType): string {
     const m = total % 60;
     return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`;
   }
-  if (s.time !== null && s.time !== undefined) return `${s.time}s`;
+  if (s.time !== null && s.time !== undefined) {
+    const weightPrefix = s.weight !== null && s.weight !== undefined && s.weight > 0 ? `${s.weight}kg×` : '';
+    return `${weightPrefix}${s.time}s`;
+  }
   if (s.weight !== null && s.weight !== undefined && s.weight > 0) return `${s.weight}kg×${s.reps ?? 0}`;
   return `${s.reps ?? 0}`;
 }

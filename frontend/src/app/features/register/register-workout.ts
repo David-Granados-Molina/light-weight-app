@@ -315,6 +315,7 @@ export class RegisterWorkout {
   }
 
   goHistorial(): void {
+    this.closeSaved();
     this.router.navigate(['/historial']);
   }
 
@@ -473,7 +474,7 @@ export class RegisterWorkout {
     if (inputType === 'reps') return { reps: targetReps ?? 10, weight: 0 };
     if (inputType === 'emom') return { time: 10, reps: targetReps ?? 8 };
     if (inputType === 'min') return { time: targetReps ?? 30 };
-    return { time: targetReps ?? 30 };
+    return { time: targetReps ?? 30, weight: 0 };
   }
 
   private emptySet(): SetEntry {
