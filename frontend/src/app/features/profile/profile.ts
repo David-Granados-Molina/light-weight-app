@@ -36,6 +36,7 @@ export class Profile implements OnDestroy {
 
   readonly name = signal('');
   readonly email = computed(() => this.user()?.email ?? '');
+  readonly isAdmin = computed(() => this.user()?.isAdmin ?? false);
   readonly avatarId = signal<string | null>(null);
   readonly themeColor = signal('#ffbf00');
   readonly initial = computed(() => (this.name().charAt(0) || '?').toUpperCase());

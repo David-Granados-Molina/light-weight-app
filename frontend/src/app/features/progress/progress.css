@@ -10,6 +10,26 @@
   margin: 0;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
 app-routine-select {
   display: block;
   margin-top: 18px;

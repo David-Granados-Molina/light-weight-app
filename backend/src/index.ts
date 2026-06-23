@@ -8,7 +8,9 @@ import { sessionsRouter } from './routes/sessions';
 import { dashboardRouter } from './routes/dashboard';
 import { progressRouter } from './routes/progress';
 import { whatsappRouter } from './routes/whatsapp';
+import { adminRouter } from './routes/admin';
 import { requireAuth } from './middleware/requireAuth';
+import { requireAdmin } from './middleware/requireAdmin';
 
 const app = express();
 
@@ -26,6 +28,7 @@ app.use('/api/routines', requireAuth, routinesRouter);
 app.use('/api/sessions', requireAuth, sessionsRouter);
 app.use('/api/dashboard', requireAuth, dashboardRouter);
 app.use('/api/progress', requireAuth, progressRouter);
+app.use('/api/admin', requireAuth, requireAdmin, adminRouter);
 
 const port = Number(process.env.PORT ?? 3000);
 app.listen(port, () => console.log(`fitness-api escuchando en http://localhost:${port}`));

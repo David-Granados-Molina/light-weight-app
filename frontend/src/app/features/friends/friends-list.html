@@ -1,0 +1,36 @@
+<div class="page">
+  <div class="header">
+    <a routerLink="/perfil" class="back" aria-label="Volver">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <h1 class="title">Amigos</h1>
+  </div>
+
+  @if (loading()) {
+    <app-exercise-loader />
+  } @else {
+    <div class="user-list">
+      @for (user of users(); track user.id) {
+        <div class="user-card">
+          <div class="user-avatar">
+            <app-avatar [avatarId]="user.avatarUrl" [fallback]="user.name.charAt(0)" />
+          </div>
+          <div class="user-info">
+            <div class="user-name">{{ user.name }}</div>
+            <div class="user-email">{{ user.email }}</div>
+          </div>
+          <div class="user-actions">
+            <a class="action-btn" [routerLink]="['/amigos', user.id, 'historial']" [queryParams]="{ name: user.name }">
+              Historial
+            </a>
+            <a class="action-btn" [routerLink]="['/amigos', user.id, 'progreso']" [queryParams]="{ name: user.name }">
+              Progreso
+            </a>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty">No hay más usuarios todavía.</div>
+      }
+    </div>
+  }
+</div>

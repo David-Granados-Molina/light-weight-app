@@ -25,6 +25,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: ADMIN_EMAIL
+        sync: false
       - key: CORS_ORIGIN
         value: https://light-weight-app.onrender.com
       - key: FRONTEND_URL

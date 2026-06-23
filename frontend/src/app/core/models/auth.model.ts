@@ -4,6 +4,7 @@ export interface AuthUser {
   email: string;
   avatarUrl: string | null;
   themeColor: string | null;
+  isAdmin: boolean;
 }
 
 export interface UpdateProfileInput {

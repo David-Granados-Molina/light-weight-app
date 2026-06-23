@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Observable, map } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
+import { AdminService } from '../../core/services/admin.service';
 import { ProgressService } from '../../core/services/progress.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
@@ -11,7 +15,7 @@ import { RoutineSelect } from '../../shared/components/routine-select/routine-se
 
 @Component({
   selector: 'app-progress',
-  imports: [ChartModule, ExerciseLoader, RoutineSelect],
+  imports: [ChartModule, ExerciseLoader, RoutineSelect, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './progress.html',
   styleUrl: './progress.css',
@@ -19,6 +23,15 @@ import { RoutineSelect } from '../../shared/components/routine-select/routine-se
 export class Progress {
   private readonly progressService = inject(ProgressService);
   private readonly routineService = inject(RoutineService);
+  private readonly adminService = inject(AdminService);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly targetUserId = toSignal(this.route.paramMap.pipe(map((p) => p.get('userId'))), {
+    initialValue: this.route.snapshot.paramMap.get('userId'),
+  });
+  readonly targetUserName = toSignal(this.route.queryParamMap.pipe(map((p) => p.get('name'))), {
+    initialValue: this.route.snapshot.queryParamMap.get('name'),
+  });
 
   readonly categoryColor = CATEGORY_COLOR;
 
@@ -29,13 +42,25 @@ export class Progress {
   readonly loading = signal(true);
 
   constructor() {
-    this.routineService.getAll().subscribe({
+    effect(() => {
+      this.targetUserId();
+      untracked(() => this.loadRoutines());
+    });
+  }
+
+  private loadRoutines(): void {
+    this.loading.set(true);
+    this.data.set(null);
+    const targetUserId = this.targetUserId();
+    const routines$ = targetUserId ? this.adminService.getRoutines(targetUserId) : this.routineService.getAll();
+    routines$.subscribe({
       next: (routines) => {
         this.routines.set(routines);
         if (routines.length) {
           this.selectedRoutineId.set(routines[0].id);
           this.loadProgress();
         } else {
+          this.selectedRoutineId.set(null);
           this.loading.set(false);
         }
       },
@@ -205,7 +230,11 @@ export class Progress {
     const id = this.selectedRoutineId();
     if (!id) return;
     this.loading.set(true);
-    this.progressService.getRoutineProgress(id).subscribe({
+    const targetUserId = this.targetUserId();
+    const progress$: Observable<RoutineProgressData> = targetUserId
+      ? this.adminService.getRoutineProgress(targetUserId, id)
+      : this.progressService.getRoutineProgress(id);
+    progress$.subscribe({
       next: (data) => {
         this.data.set(data);
         this.loading.set(false);

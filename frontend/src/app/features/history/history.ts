@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
+import { AdminService } from '../../core/services/admin.service';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { Category } from '../../core/models/exercise.model';
@@ -41,15 +44,24 @@ function subtractDays(iso: string, days: number): string {
 
 @Component({
   selector: 'app-history',
-  imports: [ExerciseLoader],
+  imports: [ExerciseLoader, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './history.html',
   styleUrl: './history.css',
 })
 export class History {
   private readonly sessionService = inject(SessionService);
+  private readonly adminService = inject(AdminService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly draft = inject(WorkoutDraftStore);
+
+  readonly targetUserId = toSignal(this.route.paramMap.pipe(map((p) => p.get('userId'))), {
+    initialValue: this.route.snapshot.paramMap.get('userId'),
+  });
+  readonly targetUserName = toSignal(this.route.queryParamMap.pipe(map((p) => p.get('name'))), {
+    initialValue: this.route.snapshot.queryParamMap.get('name'),
+  });
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly categoryLabel = CATEGORY_LABEL;
@@ -107,7 +119,10 @@ export class History {
   );
 
   constructor() {
-    this.reset();
+    effect(() => {
+      this.targetUserId();
+      untracked(() => this.reset());
+    });
   }
 
   toggleExpand(id: string): void {
@@ -116,6 +131,7 @@ export class History {
 
   editSession(date: string, event: Event): void {
     event.stopPropagation();
+    if (this.targetUserId()) return;
     this.draft.reset();
     this.draft.selectedDate.set(date.slice(0, 10));
     this.router.navigate(['/registrar']);
@@ -164,6 +180,11 @@ export class History {
     this.loadChunk(true);
   }
 
+  private fetchSessions(params: { category?: Category; q?: string; from?: string; to?: string }) {
+    const targetUserId = this.targetUserId();
+    return targetUserId ? this.adminService.getSessions(targetUserId, params) : this.sessionService.getAll(params);
+  }
+
   private loadChunk(isFirst: boolean): void {
     const mode = this.dateMode();
     const filterVal = this.filter();
@@ -173,7 +194,7 @@ export class History {
     if (mode !== 'todos') {
       this.loading.set(true);
       const { from, to } = this.dateRange();
-      this.sessionService.getAll({ category, q, from, to }).subscribe({
+      this.fetchSessions({ category, q, from, to }).subscribe({
         next: (sessions) => {
           this.sessions.set(sessions);
           this.loading.set(false);
@@ -190,7 +211,7 @@ export class History {
     if (isFirst) this.loading.set(true);
     else this.loadingMore.set(true);
 
-    this.sessionService.getAll({ category, q, from, to }).subscribe({
+    this.fetchSessions({ category, q, from, to }).subscribe({
       next: (sessions) => {
         if (isFirst) {
           this.sessions.set(sessions);

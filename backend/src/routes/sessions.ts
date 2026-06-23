@@ -27,12 +27,14 @@ const sessionSchema = z.object({
   exercises: z.array(sessionExerciseSchema).min(1),
 });
 
-const include = {
+export const sessionInclude = {
   exercises: {
     orderBy: { order: 'asc' as const },
     include: { exercise: true, sets: { orderBy: { setNumber: 'asc' as const } } },
   },
 };
+
+const include = sessionInclude;
 
 // GET /api/sessions?category=gym|calistenia&q=texto&exerciseId=...&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=20
 sessionsRouter.get('/', async (req, res) => {

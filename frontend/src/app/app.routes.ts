@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'inicio' },
@@ -62,6 +62,21 @@ export const routes: Routes = [
     path: 'rutinas/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./features/routines/routine-form').then((m) => m.RoutineForm),
+  },
+  {
+    path: 'amigos',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/friends/friends-list').then((m) => m.FriendsList),
+  },
+  {
+    path: 'amigos/:userId/historial',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/history/history').then((m) => m.History),
+  },
+  {
+    path: 'amigos/:userId/progreso',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/progress/progress').then((m) => m.Progress),
   },
   { path: '**', redirectTo: 'inicio' },
 ];

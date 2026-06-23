@@ -23,12 +23,14 @@ const routineSchema = z.object({
   exercises: z.array(routineExerciseSchema).default([]),
 });
 
-const include = {
+export const routineInclude = {
   exercises: {
     orderBy: { order: 'asc' as const },
     include: { exercise: true },
   },
 };
+
+const include = routineInclude;
 
 routinesRouter.get('/', async (req, res) => {
   const userId = req.userId!;

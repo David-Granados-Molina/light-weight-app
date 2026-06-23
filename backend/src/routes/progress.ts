@@ -62,7 +62,7 @@ progressRouter.get('/exercises', async (req, res) => {
 
 type ExerciseLike = { id: string; inputType: string };
 
-async function buildProgressData(userId: string, exercise: ExerciseLike, routineId?: string) {
+export async function buildProgressData(userId: string, exercise: ExerciseLike, routineId?: string) {
   const sessionExercises = await prisma.sessionExercise.findMany({
     where: { exerciseId: exercise.id, session: { userId, ...(routineId ? { routineId } : {}) } },
     include: { session: true, sets: true },

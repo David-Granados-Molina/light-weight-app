@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, Injector, Signal, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { map } from 'rxjs';
 import { avatarSrc } from '../utils/avatar';
@@ -20,7 +19,6 @@ function makeIdsUnique(svg: string, src: string): string {
 export class AvatarService {
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
-  private readonly injector = inject(Injector);
   private readonly cache = new Map<string, Signal<SafeHtml | null>>();
   private readonly rawCache = new Map<string, Signal<string | null>>();
 
@@ -30,10 +28,15 @@ export class AvatarService {
 
     let entry = this.cache.get(src);
     if (!entry) {
-      entry = toSignal(
-        this.http.get(src, { responseType: 'text' }).pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(makeIdsUnique(svg, src)))),
-        { initialValue: null, injector: this.injector },
-      );
+      // Un signal de escritura actualizado vía subscribe, en vez de toSignal(): este método se
+      // llama a menudo desde dentro de un computed() (AppAvatar), y toSignal() lanza NG0602 si
+      // se invoca por primera vez (cache vacía) en ese contexto reactivo.
+      const sig = signal<SafeHtml | null>(null);
+      this.http
+        .get(src, { responseType: 'text' })
+        .pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(makeIdsUnique(svg, src))))
+        .subscribe((html) => sig.set(html));
+      entry = sig;
       this.cache.set(src, entry);
     }
     return entry;
@@ -46,10 +49,9 @@ export class AvatarService {
 
     let entry = this.rawCache.get(src);
     if (!entry) {
-      entry = toSignal(
-        this.http.get(src, { responseType: 'text' }),
-        { initialValue: null, injector: this.injector },
-      );
+      const sig = signal<string | null>(null);
+      this.http.get(src, { responseType: 'text' }).subscribe((text) => sig.set(text));
+      entry = sig;
       this.rawCache.set(src, entry);
     }
     return entry;
