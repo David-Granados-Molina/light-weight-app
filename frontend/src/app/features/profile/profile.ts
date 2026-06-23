@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AvatarService } from '../../core/services/avatar.service';
 import { AVATAR_IDS, avatarSrc } from '../../core/utils/avatar';
@@ -30,13 +30,17 @@ const THEME_OPTIONS = [
 export class Profile implements OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly avatarService = inject(AvatarService);
-  private readonly router = inject(Router);
 
   private readonly user = this.authService.currentUser;
 
   readonly name = signal('');
   readonly email = computed(() => this.user()?.email ?? '');
   readonly isAdmin = computed(() => this.user()?.isAdmin ?? false);
+  readonly hasPassword = computed(() => this.user()?.hasPassword ?? false);
+
+  readonly passwordRequestSending = signal(false);
+  readonly passwordRequestSent = signal(false);
+  readonly passwordRequestError = signal<string | null>(null);
   readonly avatarId = signal<string | null>(null);
   readonly themeColor = signal('#ffbf00');
   readonly initial = computed(() => (this.name().charAt(0) || '?').toUpperCase());
@@ -134,8 +138,22 @@ export class Profile implements OnDestroy {
       });
   }
 
-  goRecover(): void {
-    this.router.navigate(['/recuperar']);
+  requestPasswordEmail(): void {
+    if (this.passwordRequestSending()) return;
+
+    this.passwordRequestSending.set(true);
+    this.passwordRequestSent.set(false);
+    this.passwordRequestError.set(null);
+    this.authService.forgotPassword(this.email()).subscribe({
+      next: () => {
+        this.passwordRequestSending.set(false);
+        this.passwordRequestSent.set(true);
+      },
+      error: () => {
+        this.passwordRequestSending.set(false);
+        this.passwordRequestError.set('No se ha podido enviar el email. Inténtalo de nuevo.');
+      },
+    });
   }
 
   logout(): void {

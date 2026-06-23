@@ -5,6 +5,7 @@ export interface AuthUser {
   avatarUrl: string | null;
   themeColor: string | null;
   isAdmin: boolean;
+  hasPassword: boolean;
 }
 
 export interface UpdateProfileInput {

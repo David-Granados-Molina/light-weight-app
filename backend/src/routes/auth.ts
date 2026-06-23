@@ -17,6 +17,7 @@ function toPublicUser(user: {
   email: string;
   avatarUrl?: string | null;
   themeColor?: string | null;
+  passwordHash?: string | null;
 }) {
   return {
     id: user.id,
@@ -25,6 +26,7 @@ function toPublicUser(user: {
     avatarUrl: user.avatarUrl ?? null,
     themeColor: user.themeColor ?? null,
     isAdmin: !!process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL,
+    hasPassword: !!user.passwordHash,
   };
 }
 
