@@ -136,7 +136,10 @@
   border-radius: 999px;
 }
 
-.google-btn-wrap iframe {
+/* El iframe lo inserta directamente el script de Google, no la plantilla de Angular, así que
+   nunca lleva el atributo de encapsulación que añaden las reglas normales de este componente
+   — sin ::ng-deep, este selector compila a algo que el iframe no puede cumplir nunca. */
+.google-btn-wrap ::ng-deep iframe {
   margin: 0 -14px !important;
 }
 
