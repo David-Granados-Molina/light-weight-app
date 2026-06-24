@@ -128,19 +128,8 @@
 .google-btn-wrap {
   display: flex;
   justify-content: center;
-  /* El iframe del botón de Google usa márgenes negativos para recortar su propio padding
-     interno; sin overflow:hidden aquí, asoma un borde blanco (el fondo por defecto del iframe)
-     alrededor del botón en algunos navegadores. El recorte de Google no es suficiente en todos
-     los casos, así que se fuerza uno algo mayor sobre el propio iframe. */
   overflow: hidden;
   border-radius: 999px;
-}
-
-/* El iframe lo inserta directamente el script de Google, no la plantilla de Angular, así que
-   nunca lleva el atributo de encapsulación que añaden las reglas normales de este componente
-   — sin ::ng-deep, este selector compila a algo que el iframe no puede cumplir nunca. */
-.google-btn-wrap ::ng-deep iframe {
-  margin: -2px -50px !important;
 }
 
 .footer-link {
