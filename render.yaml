@@ -15,13 +15,7 @@ services:
         value: 180d
       - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "465"
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
+      - key: RESEND_API_KEY
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false

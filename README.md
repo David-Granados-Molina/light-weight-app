@@ -144,10 +144,7 @@ JWT_EXPIRES_IN=180d
 
 GOOGLE_CLIENT_ID=tu_google_client_id
 
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_USER=tu_email@gmail.com
-SMTP_PASS=tu_app_password
+RESEND_API_KEY=tu_api_key_de_resend
 
 FRONTEND_URL=http://localhost:4200
 CORS_ORIGIN=http://localhost:4200

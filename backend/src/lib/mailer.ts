@@ -1,31 +1,23 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-function getTransporter() {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_USER || !SMTP_PASS) return null;
+// Render bloquea/no permite tráfico SMTP saliente de forma fiable, lo que dejaba la conexión a
+// Gmail colgada. Resend envía por HTTPS (puerto 443), que nunca está bloqueado.
+const FROM_ADDRESS = 'LIGHT WEIGHT <onboarding@resend.dev>';
 
-  return nodemailer.createTransport({
-    host: SMTP_HOST ?? 'smtp.gmail.com',
-    port: Number(SMTP_PORT ?? 465),
-    secure: true,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-    // Sin esto, una conexión SMTP bloqueada/lenta (p. ej. salida bloqueada en el host) deja la
-    // petición HTTP entera colgada para siempre en vez de fallar rápido.
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 8000,
-  });
+function getClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  return apiKey ? new Resend(apiKey) : null;
 }
 
 export async function sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
-  const transporter = getTransporter();
-  if (!transporter) {
-    console.warn(`[mailer] SMTP no configurado. Enlace de recuperación para ${to}: ${resetUrl}`);
+  const client = getClient();
+  if (!client) {
+    console.warn(`[mailer] RESEND_API_KEY no configurada. Enlace de recuperación para ${to}: ${resetUrl}`);
     return;
   }
 
-  await transporter.sendMail({
-    from: `LIGHT WEIGHT <${process.env.SMTP_USER}>`,
+  const { error } = await client.emails.send({
+    from: FROM_ADDRESS,
     to,
     subject: 'Recupera tu contraseña — LIGHT WEIGHT',
     html: `
@@ -44,4 +36,6 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string): Prom
       </div>
     `,
   });
+
+  if (error) throw new Error(`Resend: ${error.message}`);
 }
