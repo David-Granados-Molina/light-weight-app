@@ -130,9 +130,14 @@
   justify-content: center;
   /* El iframe del botón de Google usa márgenes negativos para recortar su propio padding
      interno; sin overflow:hidden aquí, asoma un borde blanco (el fondo por defecto del iframe)
-     alrededor del botón en algunos navegadores. */
+     alrededor del botón en algunos navegadores. El recorte de Google no es suficiente en todos
+     los casos, así que se fuerza uno algo mayor sobre el propio iframe. */
   overflow: hidden;
   border-radius: 999px;
+}
+
+.google-btn-wrap iframe {
+  margin: 0 -14px !important;
 }
 
 .footer-link {
