@@ -49,7 +49,8 @@ export class ResetPassword {
       next: () => {
         this.loading.set(false);
         this.success.set(true);
-        setTimeout(() => this.router.navigateByUrl('/login'), 2000);
+        const destination = this.authService.isAuthenticated() ? '/inicio' : '/login';
+        setTimeout(() => this.router.navigateByUrl(destination), 2000);
       },
       error: (err) => {
         this.loading.set(false);
