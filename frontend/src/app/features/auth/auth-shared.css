@@ -140,7 +140,7 @@
    nunca lleva el atributo de encapsulación que añaden las reglas normales de este componente
    — sin ::ng-deep, este selector compila a algo que el iframe no puede cumplir nunca. */
 .google-btn-wrap ::ng-deep iframe {
-  margin: 0 -14px !important;
+  margin: -2px -14px !important;
 }
 
 .footer-link {
