@@ -30,7 +30,9 @@ export class GoogleIdentityService {
       type: 'standard',
       theme: 'filled_black',
       size: 'large',
-      shape: 'pill',
+      // 'rectangular' en vez de 'pill': la forma totalmente redondeada deja un borde blanco
+      // visible en el recorte interno del iframe de Google en algunos navegadores en producción.
+      shape: 'rectangular',
       text: 'continue_with',
       locale: 'es',
       width: element.clientWidth || 320,

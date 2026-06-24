@@ -129,7 +129,7 @@
   display: flex;
   justify-content: center;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 12px;
 }
 
 .footer-link {
