@@ -18,10 +18,12 @@ export class GoogleIdentityService {
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: (response: { credential: string }) => onCredential(response.credential),
-      // Sin esto, el selector de cuenta de Google no se abre en navegadores móviles que
-      // bloquean cookies de terceros (Safari ITP, y crecientemente Chrome en Android).
+      // itp_support: necesario para que el selector de cuenta se abra en navegadores que
+      // bloquean cookies de terceros (Safari ITP).
+      // use_fedcm_for_button NO se activa: Brave desactiva la API FedCM por defecto (la trata
+      // como vector de tracking), y al pedirla igualmente el botón se queda sin hacer nada al
+      // pulsarlo en vez de usar el popup clásico como alternativa.
       itp_support: true,
-      use_fedcm_for_button: true,
     });
 
     google.accounts.id.renderButton(element, {

@@ -9,6 +9,11 @@ function getTransporter() {
     port: Number(SMTP_PORT ?? 465),
     secure: true,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
+    // Sin esto, una conexión SMTP bloqueada/lenta (p. ej. salida bloqueada en el host) deja la
+    // petición HTTP entera colgada para siempre en vez de fallar rápido.
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 8000,
   });
 }
 

@@ -137,7 +137,11 @@ authRouter.post('/forgot-password', async (req, res) => {
     await prisma.passwordResetToken.create({ data: { userId: user.id, token, expiresAt } });
 
     const resetUrl = `${process.env.FRONTEND_URL ?? 'http://localhost:4200'}/restablecer?token=${token}`;
-    await sendPasswordResetEmail(user.email, resetUrl);
+    try {
+      await sendPasswordResetEmail(user.email, resetUrl);
+    } catch (err) {
+      console.error('[forgot-password] No se ha podido enviar el email:', err);
+    }
   }
 
   res.json({ message: 'Si existe una cuenta con ese email, recibirás un enlace para restablecer tu contraseña.' });
