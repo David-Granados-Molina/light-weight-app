@@ -37,16 +37,6 @@ Abre `http://localhost:4200` en el navegador (o desde el móvil en la misma red,
 - **Progreso** (`/progreso`) — gráficos de evolución (peso/volumen) por ejercicio
 - **Rutinas** (`/rutinas`) — CRUD de rutinas (días) y sus ejercicios objetivo (series/reps)
 
-## Registro por WhatsApp + Claude
-
-Además de la entrada manual, el backend incluye un stub funcional para registrar entrenos enviando un mensaje de WhatsApp en lenguaje natural (p. ej. "Hoy pecho: press banca 80x8, 80x8, 82.5x6"), que Claude interpreta y guarda automáticamente.
-
-Para activarlo, sigue la sección "Registro de entrenos por WhatsApp + Claude" en `../backend/README.md`:
-
-1. Añade tu `ANTHROPIC_API_KEY` al `.env` de `backend`.
-2. Prueba `POST /api/whatsapp/parse` para verificar que Claude interpreta bien tus mensajes.
-3. Configura un sandbox de Twilio WhatsApp y expón el backend (ngrok/Cloudflare Tunnel) apuntando su webhook a `/api/whatsapp/webhook`.
-
 ## Comandos útiles
 
 ```bash

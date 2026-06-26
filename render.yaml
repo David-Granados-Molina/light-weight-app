@@ -17,8 +17,6 @@ services:
         sync: false
       - key: RESEND_API_KEY
         sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
       - key: ADMIN_EMAIL
         sync: false
       - key: CORS_ORIGIN

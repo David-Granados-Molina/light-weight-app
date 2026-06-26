@@ -21,7 +21,6 @@ const sessionSchema = z.object({
   date: z.coerce.date().optional(),
   category: z.enum(['gym', 'calistenia']),
   type: z.enum(['empuje', 'tiron', 'pierna', 'core', 'cardio']),
-  source: z.enum(['manual', 'whatsapp']).default('manual'),
   notes: z.string().optional().nullable(),
   routineId: z.string().optional().nullable(),
   exercises: z.array(sessionExerciseSchema).min(1),

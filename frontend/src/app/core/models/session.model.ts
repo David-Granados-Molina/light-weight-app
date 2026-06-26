@@ -21,7 +21,7 @@ export interface WorkoutSession {
   date: string;
   category: Category;
   type: ExerciseType;
-  source: 'manual' | 'whatsapp';
+  source: string;
   notes: string | null;
   routineId: string | null;
   createdAt: string;
@@ -44,7 +44,6 @@ export interface SessionInput {
   date?: string;
   category: Category;
   type: ExerciseType;
-  source?: 'manual' | 'whatsapp';
   notes?: string | null;
   routineId?: string | null;
   exercises: SessionExerciseInput[];

@@ -59,8 +59,7 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 | Zod | Validación de esquemas en los endpoints |
 | JSON Web Tokens | Autenticación stateless |
 | Google Auth Library | Verificación de tokens de Google OAuth |
-| Nodemailer | Envío de emails para recuperación de contraseña |
-| Anthropic SDK | Parsing de entrenamientos con Claude |
+| Resend | Envío de emails para recuperación de contraseña |
 | bcryptjs | Hash de contraseñas |
 
 ### Infraestructura

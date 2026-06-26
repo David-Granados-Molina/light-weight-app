@@ -21,7 +21,6 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
     "@prisma/client": "^6.3.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",

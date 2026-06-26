@@ -7,7 +7,6 @@ import { routinesRouter } from './routes/routines';
 import { sessionsRouter } from './routes/sessions';
 import { dashboardRouter } from './routes/dashboard';
 import { progressRouter } from './routes/progress';
-import { whatsappRouter } from './routes/whatsapp';
 import { adminRouter } from './routes/admin';
 import { requireAuth } from './middleware/requireAuth';
 import { requireAdmin } from './middleware/requireAdmin';
@@ -21,7 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 app.use('/api/auth', authRouter);
-app.use('/api/whatsapp', whatsappRouter);
 
 app.use('/api/exercises', requireAuth, exercisesRouter);
 app.use('/api/routines', requireAuth, routinesRouter);
