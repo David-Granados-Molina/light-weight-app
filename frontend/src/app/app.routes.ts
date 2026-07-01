@@ -77,5 +77,10 @@ export const routes: Routes = [
     canActivate: [adminGuard],
     loadComponent: () => import('./features/progress/progress').then((m) => m.Progress),
   },
+  {
+    path: 'amigos/:userId/rutinas',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/friends/friend-routines').then((m) => m.FriendRoutines),
+  },
   { path: '**', redirectTo: 'inicio' },
 ];

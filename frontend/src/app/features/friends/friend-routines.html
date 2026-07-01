@@ -1,0 +1,31 @@
+<div class="page">
+  <div class="header">
+    <a routerLink="/amigos" class="back" aria-label="Volver">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <h1 class="title">Rutinas de {{ targetUserName() }}</h1>
+  </div>
+
+  @if (loading()) {
+    <app-exercise-loader />
+  } @else {
+    <div class="routine-list">
+      @for (r of rows(); track r.id) {
+        <div class="routine-card" [style.border-left-color]="categoryColor[r.category]">
+          <div class="routine-top">
+            <span class="routine-cat" [style.color]="categoryColor[r.category]">
+              <span class="dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
+            </span>
+          </div>
+          <div class="routine-name">{{ r.name }}</div>
+          @if (r.count) {
+            <div class="routine-exercises">{{ r.exercisesText }}</div>
+          }
+          <div class="routine-count">{{ r.count }} ejercicios</div>
+        </div>
+      } @empty {
+        <div class="empty">Este usuario no tiene rutinas todavía.</div>
+      }
+    </div>
+  }
+</div>

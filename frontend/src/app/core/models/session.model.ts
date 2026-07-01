@@ -12,6 +12,7 @@ export interface SessionExercise {
   id: string;
   exerciseId: string;
   exercise: Exercise;
+  note: string | null;
   order: number;
   sets: SessionSet[];
 }
@@ -37,6 +38,7 @@ export interface SessionSetInput {
 
 export interface SessionExerciseInput {
   exerciseId: string;
+  note?: string | null;
   sets: SessionSetInput[];
 }
 

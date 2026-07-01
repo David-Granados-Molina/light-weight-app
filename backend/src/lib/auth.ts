@@ -20,7 +20,12 @@ export function verifyToken(token: string): string | null {
   try {
     const payload = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
     return typeof payload.sub === 'string' ? payload.sub : null;
-  } catch {
+  } catch (err) {
+    // Solo se registra en el servidor (caducado, firma inválida, mal formado...);
+    // al cliente le sigue llegando un genérico "No autenticado" desde requireAuth,
+    // para no darle pistas sobre qué falló exactamente en su token.
+    const reason = err instanceof Error ? err.message : 'error desconocido';
+    console.warn(`[auth] Token rechazado: ${reason}`);
     return null;
   }
 }

@@ -255,13 +255,45 @@
 
 .targets {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   width: 100%;
 }
 
 .targets app-number-wheel {
   min-width: 0;
+}
+
+.targets-single {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.targets-top {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.targets-bottom {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.exercise-note-input {
+  width: 100%;
+  margin-top: 6px;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: 8px 0 2px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.exercise-note-input::placeholder {
+  color: var(--color-text-muted);
 }
 
 .remove-btn {

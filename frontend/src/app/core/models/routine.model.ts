@@ -8,6 +8,8 @@ export interface RoutineExercise {
   targetRepsMin: number;
   targetRepsMax: number;
   targetWeight: number | null;
+  targetRIR: number | null;
+  note: string | null;
   order: number;
 }
 
@@ -26,6 +28,8 @@ export interface RoutineExerciseInput {
   targetRepsMin: number;
   targetRepsMax: number;
   targetWeight?: number | null;
+  targetRIR?: number | null;
+  note?: string | null;
 }
 
 export interface RoutineInput {

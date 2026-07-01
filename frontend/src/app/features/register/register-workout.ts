@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
 import { RoutineService } from '../../core/services/routine.service';
@@ -53,7 +54,7 @@ function pickRandom(list: string[]): string {
 
 @Component({
   selector: 'app-register-workout',
-  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect, ExercisePicker],
+  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect, ExercisePicker, CdkDropList, CdkDrag, CdkDragHandle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './register-workout.html',
   styleUrl: './register-workout.css',
@@ -168,6 +169,14 @@ export class RegisterWorkout {
     this.added.update((list) => list.filter((_, i) => i !== index));
   }
 
+  onDrop(event: CdkDragDrop<AddedExercise[]>): void {
+    this.added.update((list) => {
+      const copy = [...list];
+      moveItemInArray(copy, event.previousIndex, event.currentIndex);
+      return copy;
+    });
+  }
+
   addSet(index: number): void {
     this.added.update((list) =>
       list.map((a, i) => {
@@ -193,7 +202,7 @@ export class RegisterWorkout {
     );
   }
 
-  /** Grupo muscular y rango objetivo de la rutina, p. ej. "Pecho · 8-12 reps". */
+  /** Grupo muscular y rango objetivo de la rutina, p. ej. "Pecho · 8-12 reps · RIR 2". */
   exerciseInfo(item: AddedExercise): string {
     const parts: string[] = [];
     if (item.exercise.muscleGroup) parts.push(item.exercise.muscleGroup);
@@ -208,10 +217,11 @@ export class RegisterWorkout {
         if (item.targetRepsMin === item.targetRepsMax) {
           parts.push(`${item.targetRepsMin} ${unit}`);
         } else {
-          parts.push(`min: ${item.targetRepsMin} - max: ${item.targetRepsMax} ${unit}`);
+          parts.push(`${item.targetRepsMin}-${item.targetRepsMax} ${unit}`);
         }
       }
     }
+    if (item.targetRIR !== undefined) parts.push(`RIR ${item.targetRIR}`);
     return parts.join(' · ');
   }
 
@@ -267,6 +277,8 @@ export class RegisterWorkout {
       sets: Array.from({ length: re.targetSets }, () => this.emptySet()),
       targetRepsMin: re.targetRepsMin,
       targetRepsMax: re.targetRepsMax,
+      targetRIR: re.targetRIR ?? undefined,
+      note: re.note ?? undefined,
     }));
     this.added.set(added);
     this.selectedRoutineId.set(routine.id);
@@ -361,6 +373,7 @@ export class RegisterWorkout {
       routineId: this.selectedRoutineId(),
       exercises: added.map((a) => ({
         exerciseId: a.exercise.id,
+        note: a.note ?? null,
         sets: a.sets.map((s, i) => ({
           setNumber: i + 1,
           weight: s.weight ?? null,

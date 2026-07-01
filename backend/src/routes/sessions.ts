@@ -14,6 +14,7 @@ const setSchema = z.object({
 
 const sessionExerciseSchema = z.object({
   exerciseId: z.string(),
+  note: z.string().max(500).optional().nullable(),
   sets: z.array(setSchema).min(1),
 });
 
@@ -168,6 +169,7 @@ sessionsRouter.put('/:id', async (req, res) => {
         exercises: {
           create: exercises.map((e, i) => ({
             exerciseId: e.exerciseId,
+            note: e.note ?? null,
             order: i,
             sets: {
               create: e.sets.map((s) => ({

@@ -29,7 +29,7 @@ export const CATALOG: {
   { name: 'Remo invertido', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda' },
   { name: 'Sentadilla pistol', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
   { name: 'Sentadilla búlgara', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
-  { name: 'Zancadas', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Zancadas', category: 'calistenia', type: 'pierna', inputType: 'peso', muscleGroup: 'Pierna' },
   { name: 'Pino', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core/Hombro' },
   { name: 'L-sit', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Plancha', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
@@ -54,6 +54,8 @@ export const CATALOG: {
   { name: 'Encogimientos', category: 'gym', type: 'tiron', inputType: 'peso', muscleGroup: 'Trapecio' },
   { name: 'Hiperextensiones', category: 'gym', type: 'core', inputType: 'peso', muscleGroup: 'Espalda baja/Glúteo' },
   { name: 'Crunch en polea', category: 'gym', type: 'core', inputType: 'peso', muscleGroup: 'Core' },
+  { name: 'Curl de isquios', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Femoral' },
+  { name: 'Reverse crunch', category: 'calistenia', type: 'core', inputType: 'reps', muscleGroup: 'Core' },
   { name: 'Fondos en banco', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Tríceps' },
   { name: 'Flexiones diamante', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Tríceps' },
   { name: 'Flexiones declinadas', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Pecho/Hombro' },
@@ -168,7 +170,7 @@ async function main() {
   for (const ex of CATALOG) {
     const created = await prisma.exercise.upsert({
       where: { name: ex.name },
-      update: {},
+      update: { inputType: ex.inputType },
       create: ex,
     });
     exerciseByName.set(ex.name, created.id);

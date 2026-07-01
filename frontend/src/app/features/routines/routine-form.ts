@@ -18,6 +18,8 @@ interface ExerciseRow {
   targetRepsMin: number;
   targetRepsMax: number;
   targetWeight: number | null;
+  targetRIR: number | null;
+  note: string;
 }
 
 const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core', 'cardio'];
@@ -46,15 +48,23 @@ export class RoutineForm {
   readonly isEdit = computed(() => this.routineId() !== null);
 
   readonly name = signal('');
-  readonly category = signal<Category>('gym');
   readonly exercises = signal<ExerciseRow[]>([]);
   readonly catalog = signal<Exercise[]>([]);
   readonly saving = signal(false);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
+  // Category is auto-detected from exercises (majority wins)
+  readonly category = computed<Category>(() => {
+    const rows = this.exercises();
+    if (!rows.length) return 'gym';
+    const caliCount = rows.filter((r) => r.exercise.category === 'calistenia').length;
+    return caliCount * 2 > rows.length ? 'calistenia' : 'gym';
+  });
+
   readonly creatingExercise = signal(false);
   readonly newExerciseName = signal('');
+  readonly newExerciseCategory = signal<Category>('gym');
   readonly newExerciseType = signal<ExerciseType>('empuje');
   readonly newExerciseInputType = signal<InputType>('peso');
 
@@ -62,7 +72,6 @@ export class RoutineForm {
   readonly confirmDeleteRoutine = signal(false);
 
   readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
-  readonly catalogForCategory = computed(() => this.catalog().filter((e) => e.category === this.category()));
 
   readonly canSave = computed(() => this.name().trim().length >= 2 && this.exercises().length > 0 && !this.saving());
 
@@ -75,7 +84,6 @@ export class RoutineForm {
       this.routineService.getOne(id).subscribe({
         next: (routine) => {
           this.name.set(routine.name);
-          this.category.set(routine.category);
           this.exercises.set(
             routine.exercises.map((e) => ({
               exerciseId: e.exerciseId,
@@ -84,6 +92,8 @@ export class RoutineForm {
               targetRepsMin: e.targetRepsMin,
               targetRepsMax: e.targetRepsMax,
               targetWeight: e.targetWeight,
+              targetRIR: e.targetRIR,
+              note: e.note ?? '',
             })),
           );
           this.loading.set(false);
@@ -102,11 +112,6 @@ export class RoutineForm {
     this.name.set((event.target as HTMLInputElement).value);
   }
 
-  selectCategory(cat: Category): void {
-    this.category.set(cat);
-    this.creatingExercise.set(false);
-  }
-
   addExercise(exercise: Exercise): void {
     const isCardio = exercise.inputType === 'min';
     this.exercises.update((list) => [
@@ -118,6 +123,8 @@ export class RoutineForm {
         targetRepsMin: isCardio ? 30 : 8,
         targetRepsMax: isCardio ? 30 : 12,
         targetWeight: null,
+        targetRIR: null,
+        note: '',
       },
     ]);
   }
@@ -168,10 +175,13 @@ export class RoutineForm {
     return 'reps';
   }
 
-  /** En calistenia solo tiene sentido el peso en ejercicios de gym, core (lastrados) o lastrados por nombre. */
   showWeight(exercise: Exercise): boolean {
     if (exercise.inputType === 'min' || exercise.type === 'cardio') return false;
-    return exercise.category === 'gym' || exercise.type === 'core' || exercise.name.toLowerCase().includes('lastre');
+    return exercise.category === 'gym' || exercise.inputType === 'peso' || exercise.name.toLowerCase().includes('lastre');
+  }
+
+  isTimeExercise(exercise: Exercise): boolean {
+    return exercise.inputType === 'tiempo' || exercise.inputType === 'min' || exercise.inputType === 'emom';
   }
 
   setTarget(index: number, field: 'targetSets' | 'targetRepsMin' | 'targetRepsMax', value: number | null): void {
@@ -190,6 +200,15 @@ export class RoutineForm {
     this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, targetWeight: value } : row)));
   }
 
+  setTargetRIR(index: number, value: number | null): void {
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, targetRIR: value } : row)));
+  }
+
+  setNote(index: number, event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, note: value } : row)));
+  }
+
   startCreateExercise(): void {
     this.creatingExercise.set(true);
   }
@@ -201,6 +220,10 @@ export class RoutineForm {
 
   onNewExerciseNameInput(event: Event): void {
     this.newExerciseName.set((event.target as HTMLInputElement).value);
+  }
+
+  selectNewExerciseCategory(cat: Category): void {
+    this.newExerciseCategory.set(cat);
   }
 
   selectNewExerciseType(type: ExerciseType): void {
@@ -218,7 +241,7 @@ export class RoutineForm {
     this.exerciseService
       .create({
         name,
-        category: this.category(),
+        category: this.newExerciseCategory(),
         type: this.newExerciseType(),
         inputType: this.newExerciseInputType(),
       })
@@ -228,6 +251,7 @@ export class RoutineForm {
           this.addExercise(exercise);
           this.creatingExercise.set(false);
           this.newExerciseName.set('');
+          this.newExerciseCategory.set('gym');
           this.newExerciseType.set('empuje');
           this.newExerciseInputType.set('peso');
         },
@@ -247,6 +271,8 @@ export class RoutineForm {
         targetRepsMin: e.targetRepsMin,
         targetRepsMax: e.targetRepsMax,
         targetWeight: e.targetWeight,
+        targetRIR: e.targetRIR,
+        note: e.note.trim() || null,
       })),
     };
 

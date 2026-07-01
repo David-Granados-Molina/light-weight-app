@@ -12,6 +12,8 @@ export interface AddedExercise {
   sets: SetEntry[];
   targetRepsMin?: number;
   targetRepsMax?: number;
+  targetRIR?: number;
+  note?: string;
 }
 
 interface DraftSnapshot {

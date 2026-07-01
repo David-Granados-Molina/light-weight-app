@@ -213,10 +213,16 @@
 
 .session-exercise {
   display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+}
+
+.session-exercise-row {
+  display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  font-size: 13px;
 }
 
 .session-exercise-name {
@@ -228,6 +234,12 @@
   color: var(--color-text-secondary);
   text-align: right;
   font-size: 12px;
+}
+
+.session-exercise-note {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .empty {

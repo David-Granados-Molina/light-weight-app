@@ -49,11 +49,14 @@
     (picked)="addExercise($event)"
   />
 
-  <div class="added-list">
+  <div class="added-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
     @for (item of added(); track item.exercise.id; let exIndex = $index) {
-      <div class="exercise-card" [style.border-left-color]="categoryColor[item.exercise.category]">
+      <div class="exercise-card" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
         <div class="exercise-head">
-          <div>
+          <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
+          </div>
+          <div class="exercise-head-info">
             <div class="exercise-name">
               {{ item.exercise.name }}
               @if (exerciseInfo(item)) {
@@ -68,6 +71,10 @@
             ✕
           </button>
         </div>
+
+        @if (item.note) {
+          <div class="exercise-note">{{ item.note }}</div>
+        }
 
         @if (lastSummary(item); as last) {
           <div class="last-session">

@@ -11,6 +11,8 @@ const routineExerciseSchema = z
     targetRepsMin: z.number().int().min(1).max(200),
     targetRepsMax: z.number().int().min(1).max(200),
     targetWeight: z.number().min(0).max(300).optional().nullable(),
+    targetRIR: z.number().int().min(0).max(10).optional().nullable(),
+    note: z.string().max(500).optional().nullable(),
   })
   .refine((data) => data.targetRepsMax >= data.targetRepsMin, {
     message: 'targetRepsMax debe ser mayor o igual que targetRepsMin',

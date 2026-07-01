@@ -26,6 +26,9 @@
             <a class="action-btn" [routerLink]="['/amigos', user.id, 'progreso']" [queryParams]="{ name: user.name }">
               Progreso
             </a>
+            <a class="action-btn" [routerLink]="['/amigos', user.id, 'rutinas']" [queryParams]="{ name: user.name }">
+              Rutinas
+            </a>
           </div>
         </div>
       } @empty {
