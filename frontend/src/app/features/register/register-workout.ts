@@ -89,6 +89,7 @@ export class RegisterWorkout {
   readonly showReminder = signal(false);
   readonly reminderDismissed = signal(false);
   readonly pendingRoutine = signal<Routine | null>(null);
+  readonly pendingDate = signal<string | null>(null);
   readonly showDateConfirm = signal(false);
 
   readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
@@ -284,6 +285,37 @@ export class RegisterWorkout {
     this.selectedRoutineId.set(routine.id);
     this.editingSessionId.set(null);
     this.fetchLastSessions(added.map((item) => item.exercise.id));
+  }
+
+  onDatePick(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    if (!value || value === (this.selectedDate() ?? this.todayIso)) return;
+    if (this.added().length > 0) {
+      this.pendingDate.set(value);
+      return;
+    }
+    this.applyDateChange(value);
+  }
+
+  confirmDateChange(): void {
+    const date = this.pendingDate();
+    if (!date) return;
+    this.pendingDate.set(null);
+    this.applyDateChange(date);
+  }
+
+  cancelDateChange(): void {
+    this.pendingDate.set(null);
+  }
+
+  private applyDateChange(iso: string): void {
+    this.added.set([]);
+    this.selectedRoutineId.set(null);
+    this.editingSessionId.set(null);
+    this.selectedDate.set(iso);
+    if (iso !== this.todayIso) {
+      this.loadSessionForDate(iso);
+    }
   }
 
   goToToday(): void {
