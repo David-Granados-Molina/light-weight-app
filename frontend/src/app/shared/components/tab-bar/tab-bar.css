@@ -41,6 +41,7 @@
 }
 
 .add-button {
+  position: relative;
   background: var(--color-accent);
   color: var(--color-accent-contrast);
   width: 46px;
@@ -48,6 +49,27 @@
   border-radius: 15px;
   justify-content: center;
   align-items: center;
+}
+
+.draft-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-text);
+  border: 2px solid var(--color-bg);
+  animation: draftDotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes draftDotPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .add-button.active {

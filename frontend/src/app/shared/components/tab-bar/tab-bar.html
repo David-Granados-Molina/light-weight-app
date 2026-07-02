@@ -16,6 +16,9 @@
 
   <a routerLink="/registrar" routerLinkActive="active" class="tab-link add-button" aria-label="Registrar entreno">
     <i class="pi pi-plus plus"></i>
+    @if (hasDraftInProgress()) {
+      <span class="draft-dot" aria-label="Entreno en proceso sin guardar"></span>
+    }
   </a>
 
   <a routerLink="/progreso" routerLinkActive="active" class="tab-link">

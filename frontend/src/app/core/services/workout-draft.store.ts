@@ -1,4 +1,4 @@
-import { effect, Injectable, signal } from '@angular/core';
+import { computed, effect, Injectable, signal } from '@angular/core';
 import { Exercise } from '../models/exercise.model';
 
 export interface SetEntry {
@@ -37,6 +37,9 @@ export class WorkoutDraftStore {
   readonly added = signal<AddedExercise[]>([]);
   readonly selectedRoutineId = signal<string | null>(null);
   readonly editingSessionId = signal<string | null>(null);
+
+  /** Hay ejercicios añadidos sin guardar: el registro de un entreno está a medias. */
+  readonly hasInProgress = computed(() => this.added().length > 0);
 
   constructor() {
     this.hydrate();

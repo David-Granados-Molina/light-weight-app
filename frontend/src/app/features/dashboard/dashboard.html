@@ -67,7 +67,12 @@
       </div>
     </div>
 
-    <a routerLink="/registrar" class="cta">+ Registrar entreno de hoy</a>
+    <a routerLink="/registrar" class="cta">
+      + Registrar entreno de hoy
+      @if (hasDraftInProgress()) {
+        <span class="draft-dot" aria-label="Entreno en proceso sin guardar"></span>
+      }
+    </a>
 
     <div class="recent-header">
       <span class="muted-label">Últimos entrenos</span>

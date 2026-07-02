@@ -274,6 +274,7 @@
 }
 
 .cta {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,6 +295,27 @@
 .cta:focus-visible {
   outline: 2px solid var(--color-text);
   outline-offset: 2px;
+}
+
+.draft-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--color-text);
+  border: 2px solid var(--color-bg);
+  animation: draftDotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes draftDotPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .recent-header {

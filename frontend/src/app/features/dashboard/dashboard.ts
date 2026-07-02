@@ -80,6 +80,8 @@ export class Dashboard {
   readonly tipProgress = signal(0);
   readonly currentTip = computed(() => TIPS[this.tipIndex()]);
 
+  readonly hasDraftInProgress = this.draft.hasInProgress;
+
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
   readonly recent = computed(() =>
     (this.summary()?.recent ?? []).map((s) => ({
