@@ -159,30 +159,32 @@ sessionsRouter.put('/:id', async (req, res) => {
   const { exercises, date, ...rest } = parsed.data;
 
   try {
-    await prisma.sessionExercise.deleteMany({ where: { sessionId: req.params.id } });
+    const session = await prisma.$transaction(async (tx) => {
+      await tx.sessionExercise.deleteMany({ where: { sessionId: req.params.id } });
 
-    const session = await prisma.workoutSession.update({
-      where: { id: req.params.id },
-      data: {
-        ...rest,
-        date: date ?? new Date(),
-        exercises: {
-          create: exercises.map((e, i) => ({
-            exerciseId: e.exerciseId,
-            note: e.note ?? null,
-            order: i,
-            sets: {
-              create: e.sets.map((s) => ({
-                setNumber: s.setNumber,
-                weight: s.weight ?? null,
-                reps: s.reps ?? null,
-                time: s.time ?? null,
-              })),
-            },
-          })),
+      return tx.workoutSession.update({
+        where: { id: req.params.id },
+        data: {
+          ...rest,
+          date: date ?? new Date(),
+          exercises: {
+            create: exercises.map((e, i) => ({
+              exerciseId: e.exerciseId,
+              note: e.note ?? null,
+              order: i,
+              sets: {
+                create: e.sets.map((s) => ({
+                  setNumber: s.setNumber,
+                  weight: s.weight ?? null,
+                  reps: s.reps ?? null,
+                  time: s.time ?? null,
+                })),
+              },
+            })),
+          },
         },
-      },
-      include,
+        include,
+      });
     });
 
     res.json(session);

@@ -15,13 +15,57 @@
         <button type="button" class="today-link" (click)="goToToday()">Volver a hoy</button>
       }
     </div>
-    <label class="date-pick-btn" aria-label="Cambiar fecha">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="3" y="4" width="18" height="18" rx="2"/>
-        <path d="M16 2v4M8 2v4M3 10h18"/>
-      </svg>
-      <input type="date" class="sr-only" [max]="todayIso" [value]="selectedDate() ?? todayIso" (change)="onDatePick($event)" aria-label="Seleccionar fecha" />
-    </label>
+    <div class="calendar-pop-wrap">
+      <button type="button" class="date-pick-btn" (click)="openCalendar()" aria-label="Elegir día">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      </button>
+      @if (showCalendar()) {
+        <div class="calendar-backdrop" (click)="closeCalendar()"></div>
+        <div class="calendar-pop">
+          <div class="month-nav">
+            <button type="button" class="nav-btn" (click)="calendarPrevMonth()" aria-label="Mes anterior">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span class="month-label">{{ calendarMonthLabel() }}</span>
+            <button type="button" class="nav-btn" (click)="calendarNextMonth()" aria-label="Mes siguiente">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <div class="weekday-row">
+            @for (h of weekdayHeaders; track h) {
+              <span class="weekday">{{ h }}</span>
+            }
+          </div>
+
+          <div class="month-grid">
+            @for (week of calendarWeeks(); track $index) {
+              @for (cell of week; track cell.iso) {
+                <button
+                  type="button"
+                  class="day-cell"
+                  [class.out]="!cell.inMonth"
+                  [class.today]="cell.isToday"
+                  [class.selected]="selectedDate() === cell.iso"
+                  [class.has-data]="cell.categories.length > 0"
+                  [disabled]="cell.disabled"
+                  (click)="pickCalendarDay(cell)"
+                >
+                  <span class="day-number">{{ cell.day }}</span>
+                  @if (cell.categories.length > 0) {
+                    <span class="day-dots">
+                      @for (cat of cell.categories; track cat) {
+                        <span class="dot" [style.background]="categoryColor[cat]"></span>
+                      }
+                    </span>
+                  }
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
   </div>
 
   @if (editingSessionId() && !loadingDay()) {

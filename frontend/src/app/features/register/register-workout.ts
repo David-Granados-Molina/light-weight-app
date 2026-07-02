@@ -4,8 +4,8 @@ import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } fro
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
 import { RoutineService } from '../../core/services/routine.service';
-import { Exercise, InputType } from '../../core/models/exercise.model';
-import { SessionInput, SessionSet } from '../../core/models/session.model';
+import { Category, Exercise, InputType } from '../../core/models/exercise.model';
+import { SessionInput, SessionSet, WorkoutSession } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
 import { formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
@@ -21,11 +21,26 @@ interface LastSessionData {
   sets: SessionSet[];
 }
 
+interface CalendarDay {
+  iso: string;
+  day: number;
+  inMonth: boolean;
+  isToday: boolean;
+  disabled: boolean;
+  categories: Category[];
+}
+
+const WEEKDAY_HEADERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
 function isoDate(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
+}
+
+function startOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 const WORSE_MESSAGES = [
@@ -71,6 +86,7 @@ export class RegisterWorkout {
   readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
   readonly todayIso = isoDate(new Date());
+  readonly weekdayHeaders = WEEKDAY_HEADERS;
 
   readonly catalog = signal<Exercise[]>([]);
   readonly routines = signal<Routine[]>([]);
@@ -91,6 +107,11 @@ export class RegisterWorkout {
   readonly pendingRoutine = signal<Routine | null>(null);
   readonly pendingDate = signal<string | null>(null);
   readonly showDateConfirm = signal(false);
+
+  readonly showCalendar = signal(false);
+  readonly calendarMonth = signal(startOfMonth(new Date()));
+  readonly calendarSessions = signal<WorkoutSession[]>([]);
+  readonly calendarLoading = signal(false);
 
   readonly canShareNative = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
@@ -113,6 +134,51 @@ export class RegisterWorkout {
       month: 'long',
     });
     return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+
+  readonly calendarMonthLabel = computed(() => {
+    const label = this.calendarMonth().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+
+  readonly calendarCategoriesByDay = computed(() => {
+    const map = new Map<string, Category[]>();
+    for (const s of this.calendarSessions()) {
+      const iso = s.date.slice(0, 10);
+      const list = map.get(iso) ?? [];
+      if (!list.includes(s.category)) list.push(s.category);
+      map.set(iso, list);
+    }
+    return map;
+  });
+
+  readonly calendarWeeks = computed(() => {
+    const month = this.calendarMonth();
+    const byDay = this.calendarCategoriesByDay();
+
+    const firstWeekday = (month.getDay() + 6) % 7; // Lunes = 0
+    const gridStart = new Date(month);
+    gridStart.setDate(gridStart.getDate() - firstWeekday);
+
+    const cells: CalendarDay[] = [];
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(gridStart);
+      d.setDate(d.getDate() + i);
+      const iso = isoDate(d);
+      cells.push({
+        iso,
+        day: d.getDate(),
+        inMonth: d.getMonth() === month.getMonth(),
+        isToday: iso === this.todayIso,
+        disabled: iso > this.todayIso,
+        categories: byDay.get(iso) ?? [],
+      });
+    }
+
+    const weeks: CalendarDay[][] = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+    while (weeks.length > 4 && weeks[weeks.length - 1].every((c) => !c.inMonth)) weeks.pop();
+    return weeks;
   });
 
   readonly shareText = computed(() => {
@@ -287,14 +353,51 @@ export class RegisterWorkout {
     this.fetchLastSessions(added.map((item) => item.exercise.id));
   }
 
-  onDatePick(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (!value || value === (this.selectedDate() ?? this.todayIso)) return;
+  goToToday(): void {
+    this.editingSessionId.set(null);
+    this.selectedDate.set(this.todayIso);
+    this.added.set([]);
+    this.selectedRoutineId.set(null);
+  }
+
+  openCalendar(): void {
+    const base = new Date(`${this.selectedDate() ?? this.todayIso}T00:00:00`);
+    this.calendarMonth.set(startOfMonth(base));
+    this.loadCalendarMonth();
+    this.showCalendar.set(true);
+  }
+
+  closeCalendar(): void {
+    this.showCalendar.set(false);
+  }
+
+  calendarPrevMonth(): void {
+    const d = new Date(this.calendarMonth());
+    d.setMonth(d.getMonth() - 1);
+    this.calendarMonth.set(d);
+    this.loadCalendarMonth();
+  }
+
+  calendarNextMonth(): void {
+    const d = new Date(this.calendarMonth());
+    d.setMonth(d.getMonth() + 1);
+    this.calendarMonth.set(d);
+    this.loadCalendarMonth();
+  }
+
+  pickCalendarDay(cell: CalendarDay): void {
+    if (cell.disabled) return;
+    this.showCalendar.set(false);
+    this.onDatePick(cell.iso);
+  }
+
+  onDatePick(iso: string): void {
+    if (!iso || iso === (this.selectedDate() ?? this.todayIso)) return;
     if (this.added().length > 0) {
-      this.pendingDate.set(value);
+      this.pendingDate.set(iso);
       return;
     }
-    this.applyDateChange(value);
+    this.applyDateChange(iso);
   }
 
   confirmDateChange(): void {
@@ -318,11 +421,18 @@ export class RegisterWorkout {
     }
   }
 
-  goToToday(): void {
-    this.editingSessionId.set(null);
-    this.selectedDate.set(this.todayIso);
-    this.added.set([]);
-    this.selectedRoutineId.set(null);
+  private loadCalendarMonth(): void {
+    const month = this.calendarMonth();
+    const from = new Date(month.getFullYear(), month.getMonth(), 1);
+    const to = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+    this.calendarLoading.set(true);
+    this.sessionService.getAll({ from: isoDate(from), to: isoDate(to) }).subscribe({
+      next: (sessions) => {
+        this.calendarSessions.set(sessions);
+        this.calendarLoading.set(false);
+      },
+      error: () => this.calendarLoading.set(false),
+    });
   }
 
   save(): void {

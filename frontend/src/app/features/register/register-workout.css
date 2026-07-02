@@ -70,15 +70,126 @@
   color: var(--color-text);
 }
 
-.sr-only {
+.calendar-pop-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.calendar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  background: transparent;
+}
+
+.calendar-pop {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 80;
+  width: 300px;
+  max-width: calc(100vw - 32px);
+  background: #161616;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  animation: popIn 0.2s ease both;
+}
+
+.calendar-pop .month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.calendar-pop .nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.calendar-pop .month-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.calendar-pop .weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.calendar-pop .weekday {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.calendar-pop .month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-pop .day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.calendar-pop .day-cell.out {
+  color: var(--color-text-muted);
+  opacity: 0.35;
+}
+
+.calendar-pop .day-cell.today {
+  border-color: var(--color-accent);
+}
+
+.calendar-pop .day-cell.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.calendar-pop .day-cell:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.calendar-pop .day-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.calendar-pop .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 .edit-banner {
