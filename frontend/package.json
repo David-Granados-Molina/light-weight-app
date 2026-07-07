@@ -24,6 +24,7 @@
     "@primeuix/themes": "^2.0.3",
     "chart.js": "^4.5.1",
     "express": "^5.1.0",
+    "graphify": "^1.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.9",
     "rxjs": "~7.8.0",

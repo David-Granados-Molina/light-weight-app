@@ -123,6 +123,17 @@
           </button>
         </div>
 
+        @if (canToggleEmom(item)) {
+          <button
+            type="button"
+            class="emom-toggle"
+            [class.active]="item.inputTypeOverride === 'emom'"
+            (click)="toggleEmom(exIndex)"
+          >
+            {{ item.inputTypeOverride === 'emom' ? 'MODO EMOM' : 'MODO EMOM' }}
+          </button>
+        }
+
         @if (item.note) {
           <div class="exercise-note">{{ item.note }}</div>
         }
@@ -139,7 +150,7 @@
               <span class="set-label">{{ setIndex + 1 }}</span>
 
               <div class="wheels">
-                @switch (item.exercise.inputType) {
+                @switch (effectiveInputType(item)) {
                   @case ('tiempo') {
                     <app-number-wheel
                       [min]="0"
@@ -182,7 +193,7 @@
                       [min]="1"
                       [max]="60"
                       [step]="1"
-                      unit="rondas"
+                      unit="min"
                       [value]="set.time ?? null"
                       (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
                     />
@@ -190,7 +201,7 @@
                       [min]="0"
                       [max]="100"
                       [step]="1"
-                      unit="reps"
+                      unit="reps/min"
                       [value]="set.reps ?? null"
                       (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
                     />

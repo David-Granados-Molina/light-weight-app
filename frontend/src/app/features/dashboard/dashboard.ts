@@ -8,7 +8,7 @@ import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
 import { sessionTypeLabel } from '../../core/models/labels';
-import { dayLetter, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
+import { dayLetter, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
 interface WeekCheckView extends WeekBar {
   letter: string;
@@ -67,6 +67,7 @@ export class Dashboard {
   readonly avatarId = computed(() => this.authService.currentUser()?.avatarUrl ?? null);
   readonly todayLabel = todayLabel();
   readonly formatSets = formatSets;
+  readonly effectiveInputType = effectiveInputType;
   readonly relativeDayLabel = relativeDayLabel;
 
   private readonly summary = signal<DashboardSummary | null>(null);

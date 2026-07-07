@@ -48,6 +48,7 @@ dashboardRouter.get('/', async (req, res) => {
       exerciseId: e.exerciseId,
       exercise: e.exercise,
       order: e.order,
+      inputTypeOverride: e.inputTypeOverride,
       sets: e.sets,
     })),
   }));

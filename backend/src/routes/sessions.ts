@@ -15,6 +15,7 @@ const setSchema = z.object({
 const sessionExerciseSchema = z.object({
   exerciseId: z.string(),
   note: z.string().max(500).optional().nullable(),
+  inputTypeOverride: z.enum(['peso', 'reps', 'tiempo', 'emom', 'min']).optional().nullable(),
   sets: z.array(setSchema).min(1),
 });
 
@@ -78,7 +79,7 @@ sessionsRouter.get('/last', async (req, res) => {
     .map((id) => id.trim())
     .filter(Boolean);
 
-  const result: Record<string, { date: string; sets: unknown[] } | null> = {};
+  const result: Record<string, { date: string; sets: unknown[]; inputTypeOverride: string | null } | null> = {};
   for (const id of ids) result[id] = null;
   if (!ids.length) return res.json(result);
 
@@ -90,7 +91,7 @@ sessionsRouter.get('/last', async (req, res) => {
 
   for (const se of sessionExercises) {
     if (result[se.exerciseId] === null) {
-      result[se.exerciseId] = { date: se.session.date.toISOString(), sets: se.sets };
+      result[se.exerciseId] = { date: se.session.date.toISOString(), sets: se.sets, inputTypeOverride: se.inputTypeOverride };
     }
   }
 
@@ -135,6 +136,7 @@ sessionsRouter.post('/', async (req, res) => {
         create: exercises.map((e, i) => ({
           exerciseId: e.exerciseId,
           order: i,
+          inputTypeOverride: e.inputTypeOverride ?? null,
           sets: {
             create: e.sets.map((s) => ({
               setNumber: s.setNumber,
@@ -172,6 +174,7 @@ sessionsRouter.put('/:id', async (req, res) => {
               exerciseId: e.exerciseId,
               note: e.note ?? null,
               order: i,
+              inputTypeOverride: e.inputTypeOverride ?? null,
               sets: {
                 create: e.sets.map((s) => ({
                   setNumber: s.setNumber,

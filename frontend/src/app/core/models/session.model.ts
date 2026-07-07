@@ -1,4 +1,4 @@
-import { Category, Exercise, ExerciseType } from './exercise.model';
+import { Category, Exercise, ExerciseType, InputType } from './exercise.model';
 
 export interface SessionSet {
   id: string;
@@ -14,6 +14,8 @@ export interface SessionExercise {
   exercise: Exercise;
   note: string | null;
   order: number;
+  /** Si no es null, sustituye al inputType del ejercicio solo para este entreno (ver EMOM puntual). */
+  inputTypeOverride: InputType | null;
   sets: SessionSet[];
 }
 
@@ -39,6 +41,7 @@ export interface SessionSetInput {
 export interface SessionExerciseInput {
   exerciseId: string;
   note?: string | null;
+  inputTypeOverride?: InputType | null;
   sets: SessionSetInput[];
 }
 

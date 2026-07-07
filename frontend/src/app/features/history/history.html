@@ -104,7 +104,7 @@
                 <div class="session-exercise">
                   <div class="session-exercise-row">
                     <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                    <span class="session-exercise-sets">{{ formatSets(e.sets, e.exercise.inputType) }}</span>
+                    <span class="session-exercise-sets">{{ formatSets(e.sets, effectiveInputType(e)) }}</span>
                   </div>
                   @if (e.note) {
                     <div class="session-exercise-note">{{ e.note }}</div>

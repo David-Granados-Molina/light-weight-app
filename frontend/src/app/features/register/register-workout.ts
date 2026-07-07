@@ -8,7 +8,7 @@ import { Category, Exercise, InputType } from '../../core/models/exercise.model'
 import { SessionInput, SessionSet, WorkoutSession } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
-import { formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
 import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -19,6 +19,7 @@ import { ExercisePicker } from '../../shared/components/exercise-picker/exercise
 interface LastSessionData {
   date: string;
   sets: SessionSet[];
+  inputTypeOverride: InputType | null;
 }
 
 interface CalendarDay {
@@ -85,6 +86,7 @@ export class RegisterWorkout {
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
   readonly relativeDayLabel = relativeDayLabel;
+  readonly effectiveInputType = effectiveInputType;
   readonly todayIso = isoDate(new Date());
   readonly weekdayHeaders = WEEKDAY_HEADERS;
 
@@ -192,7 +194,7 @@ export class RegisterWorkout {
     });
     const capitalized = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
     const type = sessionTypeLabel(added.map((a) => a.exercise.type));
-    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets, a.exercise.inputType)}`);
+    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets, effectiveInputType(a))}`);
     return `💪 Entreno · ${capitalized} (${type})\n\n${lines.join('\n')}\n\n— Light Weight`;
   });
 
@@ -265,6 +267,23 @@ export class RegisterWorkout {
       list.map((a, i) => {
         if (i !== exIndex) return a;
         return { ...a, sets: a.sets.map((s, j) => (j === setIndex ? { ...s, [field]: value ?? undefined } : s)) };
+      }),
+    );
+  }
+
+  /** Solo tiene sentido alternar a modo EMOM en ejercicios de peso/reps; tiempo, cardio y EMOM ya tienen su propio modo. */
+  canToggleEmom(item: AddedExercise): boolean {
+    return item.exercise.inputType === 'peso' || item.exercise.inputType === 'reps';
+  }
+
+  /** Activa/desactiva el modo EMOM solo para este entreno, sin cambiar el inputType del ejercicio en el catálogo. */
+  toggleEmom(index: number): void {
+    this.added.update((list) =>
+      list.map((a, i) => {
+        if (i !== index) return a;
+        const nextOverride: InputType | null = a.inputTypeOverride === 'emom' ? null : 'emom';
+        const nextType = nextOverride ?? a.exercise.inputType;
+        return { ...a, inputTypeOverride: nextOverride, sets: [this.defaultSet(nextType, a.targetRepsMin)] };
       }),
     );
   }
@@ -499,7 +518,7 @@ export class RegisterWorkout {
     const data = this.lastData()[item.exercise.id];
     if (!data) return null;
     return {
-      sets: data.sets.map((s) => formatSet(s, item.exercise.inputType)).join(' · '),
+      sets: formatSets(data.sets, data.inputTypeOverride ?? item.exercise.inputType),
       when: relativeDayLabel(data.date),
     };
   }
@@ -516,6 +535,7 @@ export class RegisterWorkout {
       exercises: added.map((a) => ({
         exerciseId: a.exercise.id,
         note: a.note ?? null,
+        inputTypeOverride: a.inputTypeOverride ?? null,
         sets: a.sets.map((s, i) => ({
           setNumber: i + 1,
           weight: s.weight ?? null,
@@ -555,6 +575,7 @@ export class RegisterWorkout {
         this.added.set(
           session.exercises.map((e) => ({
             exercise: e.exercise,
+            inputTypeOverride: e.inputTypeOverride,
             sets: e.sets.map((s) => ({
               weight: s.weight ?? undefined,
               reps: s.reps ?? undefined,
@@ -583,8 +604,8 @@ export class RegisterWorkout {
       const last = lastData[item.exercise.id];
       if (!last) continue;
       comparisons++;
-      const todayScore = this.exerciseScore(item.exercise.inputType, item.sets);
-      const lastScore = this.exerciseScore(item.exercise.inputType, last.sets);
+      const todayScore = this.exerciseScore(effectiveInputType(item), item.sets);
+      const lastScore = this.exerciseScore(last.inputTypeOverride ?? item.exercise.inputType, last.sets);
       if (todayScore > lastScore) delta++;
       else if (todayScore < lastScore) delta--;
     }
@@ -610,7 +631,10 @@ export class RegisterWorkout {
     this.sessionService.getAll({ exerciseId, limit: 1 }).subscribe((sessions) => {
       const session = sessions[0];
       const sessionExercise = session?.exercises.find((e) => e.exerciseId === exerciseId);
-      const data = session && sessionExercise ? { date: session.date, sets: sessionExercise.sets } : null;
+      const data =
+        session && sessionExercise
+          ? { date: session.date, sets: sessionExercise.sets, inputTypeOverride: sessionExercise.inputTypeOverride }
+          : null;
       this.lastData.update((m) => ({ ...m, [exerciseId]: data }));
     });
   }

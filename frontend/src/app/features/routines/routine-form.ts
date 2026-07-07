@@ -23,7 +23,7 @@ interface ExerciseRow {
 }
 
 const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core', 'cardio'];
-const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo', 'min'];
+const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo', 'min', 'emom'];
 
 @Component({
   selector: 'app-routine-form',

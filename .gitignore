@@ -7,3 +7,9 @@ dist/
 .vscode/
 .idea/
 .DS_Store
+
+# understand-anything plugin output (analysis cache/knowledge graph)
+.understand-anything/
+
+# graphify output
+/graphify-out/

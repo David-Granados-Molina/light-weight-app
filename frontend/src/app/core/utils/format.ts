@@ -4,15 +4,25 @@ export function formatNumber(value: number): string {
   return value.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 }
 
+interface HasInputTypeOverride {
+  inputTypeOverride?: InputType | null;
+  exercise: { inputType: InputType };
+}
+
+/** Modo real con el que se registró este ejercicio: el override puntual de la sesión, o si no el del catálogo. */
+export function effectiveInputType(e: HasInputTypeOverride): InputType {
+  return e.inputTypeOverride ?? e.exercise.inputType;
+}
+
 interface SetLike {
   weight?: number | null;
   reps?: number | null;
   time?: number | null;
 }
 
-/** "20kg×8", "12 reps", "45s", "30min" o "5 EMOM×8" según el tipo de serie. */
+/** "20kg×8", "12 reps", "45s", "30min" o "8'· 4 reps" según el tipo de serie. */
 export function formatSet(s: SetLike, inputType?: InputType): string {
-  if (inputType === 'emom') return `${s.time ?? 0} EMOM×${s.reps ?? 0}`;
+  if (inputType === 'emom') return `${s.time ?? 0}' · ${s.reps ?? 0} reps`;
   if (inputType === 'min') {
     const total = s.time ?? 0;
     const h = Math.floor(total / 60);
@@ -27,8 +37,17 @@ export function formatSet(s: SetLike, inputType?: InputType): string {
   return `${s.reps ?? 0}`;
 }
 
-/** Une las series de un ejercicio, ej. "20kg×8 · 20kg×8 · 18kg×6". */
+/**
+ * Une las series de un ejercicio, ej. "20kg×8 · 20kg×8 · 18kg×6".
+ * Para EMOM con más de un bloque, antepone la duración total, ej.
+ * "12' TOTAL: 8'· 4 reps - 4'· 3 reps".
+ */
 export function formatSets(sets: SetLike[], inputType?: InputType): string {
+  if (inputType === 'emom' && sets.length > 1) {
+    const total = sets.reduce((sum, s) => sum + (s.time ?? 0), 0);
+    const blocks = sets.map((s) => formatSet(s, inputType)).join(' - ');
+    return `${total}' TOTAL: ${blocks}`;
+  }
   return sets.map((s) => formatSet(s, inputType)).join(' · ');
 }
 

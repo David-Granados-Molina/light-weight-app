@@ -71,7 +71,7 @@ export async function buildProgressData(userId: string, exercise: ExerciseLike, 
 
   const points = sessionExercises.map((se) => ({
     date: se.session.date.toISOString(),
-    ...bestValue(se.sets, exercise.inputType),
+    ...bestValue(se.sets, se.inputTypeOverride ?? exercise.inputType),
   }));
 
   const pr = points.reduce<BestValue>((acc, p) => (p.value > acc.value ? p : acc), { value: 0, reps: null });

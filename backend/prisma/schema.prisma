@@ -107,14 +107,19 @@ model WorkoutSession {
 }
 
 model SessionExercise {
-  id         String         @id @default(uuid())
-  sessionId  String
-  session    WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  exerciseId String
-  exercise   Exercise       @relation(fields: [exerciseId], references: [id])
-  note       String?
-  order      Int            @default(0)
-  sets       SessionSet[]
+  id                String         @id @default(uuid())
+  sessionId         String
+  session           WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exerciseId        String
+  exercise          Exercise       @relation(fields: [exerciseId], references: [id])
+  note              String?
+  order             Int            @default(0)
+  // Permite registrar este ejercicio con un modo distinto al inputType por
+  // defecto del catálogo (p. ej. hacer "Dominadas" -- normalmente reps -- como
+  // EMOM solo en este entreno), sin duplicar el ejercicio ni cambiar su tipo
+  // por defecto para el resto de entrenos.
+  inputTypeOverride InputType?
+  sets              SessionSet[]
 }
 
 model SessionSet {

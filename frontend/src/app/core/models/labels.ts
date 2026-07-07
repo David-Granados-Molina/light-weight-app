@@ -26,10 +26,10 @@ export function sessionTypeLabel(types: ExerciseType[]): string {
 }
 
 export const INPUT_TYPE_LABEL: Record<InputType, string> = {
-  peso: 'Peso',
+  peso: 'Peso y repeticiones',
   reps: 'Repeticiones',
   tiempo: 'Tiempo',
-  emom: 'EMOM',
+  emom: 'EMOM (min y reps)',
   min: 'Minutos',
 };
 

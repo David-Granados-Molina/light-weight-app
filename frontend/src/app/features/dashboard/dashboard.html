@@ -105,7 +105,7 @@
               @for (e of s.exercises; track e.id) {
                 <div class="session-exercise">
                   <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                  <span class="session-exercise-sets">{{ formatSets(e.sets, e.exercise.inputType) }}</span>
+                  <span class="session-exercise-sets">{{ formatSets(e.sets, effectiveInputType(e)) }}</span>
                 </div>
               }
             </div>

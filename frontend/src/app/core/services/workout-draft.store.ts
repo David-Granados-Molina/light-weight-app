@@ -1,5 +1,5 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
-import { Exercise } from '../models/exercise.model';
+import { Exercise, InputType } from '../models/exercise.model';
 
 export interface SetEntry {
   weight?: number;
@@ -14,6 +14,8 @@ export interface AddedExercise {
   targetRepsMax?: number;
   targetRIR?: number;
   note?: string;
+  /** Si no es null, sustituye al inputType del ejercicio solo para este entreno (ver EMOM puntual). */
+  inputTypeOverride?: InputType | null;
 }
 
 interface DraftSnapshot {
