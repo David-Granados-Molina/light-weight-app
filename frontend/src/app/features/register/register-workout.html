@@ -103,6 +103,11 @@
   <div class="added-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
     @for (item of added(); track item.exercise.id; let exIndex = $index) {
       <div class="exercise-card" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
+        @if (item.note) {
+          <button type="button" class="note-bookmark has-note" (click)="openNoteView(exIndex)" aria-label="Ver nota">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        }
         <div class="exercise-head">
           <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
@@ -132,10 +137,6 @@
           >
             {{ item.inputTypeOverride === 'emom' ? 'MODO EMOM' : 'MODO EMOM' }}
           </button>
-        }
-
-        @if (item.note) {
-          <div class="exercise-note">{{ item.note }}</div>
         }
 
         @if (lastSummary(item); as last) {
@@ -245,9 +246,16 @@
   </div>
 
   @if (added().length > 0) {
-    <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">
-      Guardar entreno
-    </button>
+    @if (editingSessionId()) {
+      <div class="edit-actions">
+        <button type="button" class="cancel-edit-btn" [disabled]="saving()" (click)="cancelEdit()">Cancelar edición</button>
+        <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">Editar entreno</button>
+      </div>
+    } @else {
+      <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">
+        Guardar entreno
+      </button>
+    }
     @if (saveError()) {
       <div class="save-error">No se ha podido guardar el entreno. Comprueba tu conexión e inténtalo de nuevo.</div>
     }
@@ -335,4 +343,21 @@
     (cancelled)="cancelSaveDate()"
   />
 }
+
+<p-dialog
+  [visible]="noteViewIndex() !== null"
+  (visibleChange)="onNoteViewVisibleChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  appendTo="body"
+  position="center"
+  header="Nota del ejercicio"
+  [style]="{ width: '90vw', maxWidth: '420px', maxHeight: '80vh' }"
+  [contentStyle]="{ overflowY: 'auto' }"
+>
+  @if (noteViewIndex() !== null) {
+    <p class="note-view-text">{{ added()[noteViewIndex()!].note }}</p>
+  }
+</p-dialog>
 

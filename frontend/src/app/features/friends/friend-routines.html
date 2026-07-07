@@ -19,7 +19,22 @@
           </div>
           <div class="routine-name">{{ r.name }}</div>
           @if (r.count) {
-            <div class="routine-exercises">{{ r.exercisesText }}</div>
+            <div class="routine-exercise-list">
+              @for (e of r.exercises; track e.id) {
+                <div class="routine-exercise-row">
+                  <div class="routine-exercise-top">
+                    <span class="routine-exercise-name">{{ e.name }}</span>
+                    @if (e.muscleGroup) {
+                      <span class="routine-exercise-muscle">{{ e.muscleGroup }}</span>
+                    }
+                  </div>
+                  <div class="routine-exercise-target">{{ e.target }}</div>
+                  @if (e.note) {
+                    <div class="routine-exercise-note">{{ e.note }}</div>
+                  }
+                </div>
+              }
+            </div>
           }
           <div class="routine-count">{{ r.count }} ejercicios</div>
         </div>

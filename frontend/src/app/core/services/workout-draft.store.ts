@@ -40,6 +40,15 @@ export class WorkoutDraftStore {
   readonly selectedRoutineId = signal<string | null>(null);
   readonly editingSessionId = signal<string | null>(null);
 
+  /**
+   * Marca que se quiere editar explícitamente el entreno de esta fecha (puesta
+   * por el botón "Editar" de Historial/Inicio). No se persiste: es una señal de
+   * un solo uso que Registrar consume y borra al arrancar. Sin ella, visitar
+   * Registrar para hoy siempre parte de una pantalla en blanco, aunque ya
+   * exista un entreno guardado hoy.
+   */
+  readonly pendingEditDate = signal<string | null>(null);
+
   /** Hay ejercicios añadidos sin guardar: el registro de un entreno está a medias. */
   readonly hasInProgress = computed(() => this.added().length > 0);
 

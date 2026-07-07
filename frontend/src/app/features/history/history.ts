@@ -133,8 +133,10 @@ export class History {
   editSession(date: string, event: Event): void {
     event.stopPropagation();
     if (this.targetUserId()) return;
+    const iso = date.slice(0, 10);
     this.draft.reset();
-    this.draft.selectedDate.set(date.slice(0, 10));
+    this.draft.selectedDate.set(iso);
+    this.draft.pendingEditDate.set(iso);
     this.router.navigate(['/registrar']);
   }
 

@@ -75,11 +75,52 @@
   margin-top: 9px;
 }
 
-.routine-exercises {
+.routine-exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.routine-exercise-row {
+  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+}
+
+.routine-exercise-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.routine-exercise-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.routine-exercise-name {
+  font-weight: 600;
   font-size: 13px;
+}
+
+.routine-exercise-muscle {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.routine-exercise-target {
+  font-size: 12px;
   color: var(--color-text-secondary);
-  margin-top: 6px;
-  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.routine-exercise-note {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-top: 3px;
 }
 
 .routine-count {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Dialog } from 'primeng/dialog';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Category, Exercise, ExerciseType, InputType } from '../../core/models/exercise.model';
@@ -27,7 +28,7 @@ const INPUT_TYPES: InputType[] = ['peso', 'reps', 'tiempo', 'min', 'emom'];
 
 @Component({
   selector: 'app-routine-form',
-  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel, ExerciseLoader, ExercisePicker],
+  imports: [RouterLink, CdkDropList, CdkDrag, CdkDragHandle, ConfirmDialog, NumberWheel, ExerciseLoader, ExercisePicker, Dialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './routine-form.html',
   styleUrl: './routine-form.css',
@@ -70,6 +71,7 @@ export class RoutineForm {
 
   readonly removeIndex = signal<number | null>(null);
   readonly confirmDeleteRoutine = signal(false);
+  readonly noteDialogIndex = signal<number | null>(null);
 
   readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
 
@@ -207,6 +209,18 @@ export class RoutineForm {
   setNote(index: number, event: Event): void {
     const value = (event.target as HTMLTextAreaElement).value;
     this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, note: value } : row)));
+  }
+
+  openNoteDialog(index: number): void {
+    this.noteDialogIndex.set(index);
+  }
+
+  closeNoteDialog(): void {
+    this.noteDialogIndex.set(null);
+  }
+
+  onNoteDialogVisibleChange(visible: boolean): void {
+    if (!visible) this.closeNoteDialog();
   }
 
   startCreateExercise(): void {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Dialog } from 'primeng/dialog';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
 import { RoutineService } from '../../core/services/routine.service';
@@ -70,7 +71,7 @@ function pickRandom(list: string[]): string {
 
 @Component({
   selector: 'app-register-workout',
-  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect, ExercisePicker, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [NumberWheel, ConfirmDialog, ExerciseLoader, RoutineSelect, ExercisePicker, CdkDropList, CdkDrag, CdkDragHandle, Dialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './register-workout.html',
   styleUrl: './register-workout.css',
@@ -109,6 +110,7 @@ export class RegisterWorkout {
   readonly pendingRoutine = signal<Routine | null>(null);
   readonly pendingDate = signal<string | null>(null);
   readonly showDateConfirm = signal(false);
+  readonly noteViewIndex = signal<number | null>(null);
 
   readonly showCalendar = signal(false);
   readonly calendarMonth = signal(startOfMonth(new Date()));
@@ -211,7 +213,15 @@ export class RegisterWorkout {
       this.selectedDate.set(this.todayIso);
     }
     const initialDate = this.selectedDate();
-    if (initialDate && initialDate !== this.todayIso && this.added().length === 0) {
+    const pendingEditDate = this.draft.pendingEditDate();
+    this.draft.pendingEditDate.set(null);
+    // Para hoy, solo se carga el entreno ya guardado si se llegó con intención
+    // explícita de editar (botón "Editar" de Historial/Inicio) — de lo
+    // contrario, entrar a Registrar para hoy siempre parte de cero, aunque ya
+    // exista un entreno guardado. Para cualquier otra fecha, sí se carga
+    // siempre (no hay otra forma de "empezar de cero" en un día pasado).
+    const shouldLoad = initialDate !== this.todayIso || pendingEditDate === initialDate;
+    if (initialDate && this.added().length === 0 && shouldLoad) {
       this.loadSessionForDate(initialDate);
     }
     this.fetchLastSessions(this.added().map((a) => a.exercise.id));
@@ -286,6 +296,18 @@ export class RegisterWorkout {
         return { ...a, inputTypeOverride: nextOverride, sets: [this.defaultSet(nextType, a.targetRepsMin)] };
       }),
     );
+  }
+
+  openNoteView(index: number): void {
+    this.noteViewIndex.set(index);
+  }
+
+  closeNoteView(): void {
+    this.noteViewIndex.set(null);
+  }
+
+  onNoteViewVisibleChange(visible: boolean): void {
+    if (!visible) this.closeNoteView();
   }
 
   /** Grupo muscular y rango objetivo de la rutina, p. ej. "Pecho · 8-12 reps · RIR 2". */
@@ -373,10 +395,7 @@ export class RegisterWorkout {
   }
 
   goToToday(): void {
-    this.editingSessionId.set(null);
-    this.selectedDate.set(this.todayIso);
-    this.added.set([]);
-    this.selectedRoutineId.set(null);
+    this.applyDateChange(this.todayIso);
   }
 
   openCalendar(): void {
@@ -435,9 +454,7 @@ export class RegisterWorkout {
     this.selectedRoutineId.set(null);
     this.editingSessionId.set(null);
     this.selectedDate.set(iso);
-    if (iso !== this.todayIso) {
-      this.loadSessionForDate(iso);
-    }
+    this.loadSessionForDate(iso);
   }
 
   private loadCalendarMonth(): void {
@@ -452,6 +469,11 @@ export class RegisterWorkout {
       },
       error: () => this.calendarLoading.set(false),
     });
+  }
+
+  /** Descarta la edición en curso y deja una pantalla en blanco para esta fecha. */
+  cancelEdit(): void {
+    this.draft.reset();
   }
 
   save(): void {
