@@ -86,6 +86,18 @@ export const CATALOG: {
   { name: 'Pino a la pared', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core/Hombro' },
   { name: 'Flexiones a pino', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Hombro/Tríceps' },
 
+  // Nuevas variantes de sentadilla y progresiones (calistenia)
+  { name: 'Sentadilla profunda', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Sentadilla profunda con salto', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Sentadilla búlgara con salto', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Sentadilla búlgara libre con salto', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Peso muerto rumano bilateral', category: 'calistenia', type: 'pierna', inputType: 'peso', muscleGroup: 'Femoral/Glúteo' },
+  { name: 'Sentadilla unilateral', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
+  { name: 'Sentadilla isométrica', category: 'calistenia', type: 'pierna', inputType: 'tiempo', muscleGroup: 'Pierna' },
+  { name: 'Curl femoral unilateral', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Femoral' },
+  { name: 'Sentadilla sumo', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna/Aductor' },
+  { name: 'Lean planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+
   // Cardio (gym)
   { name: 'Bici estática', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
   { name: 'Cinta de correr', category: 'gym', type: 'cardio', inputType: 'min', muscleGroup: 'Cardio' },
