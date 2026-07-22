@@ -71,6 +71,12 @@ export class WorkoutDraftStore {
     this.editingSessionId.set(null);
   }
 
+  resetAll(): void {
+    this.reset();
+    this.selectedDate.set(null);
+    this.pendingEditDate.set(null);
+  }
+
   private hydrate(): void {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);

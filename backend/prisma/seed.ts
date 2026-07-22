@@ -12,6 +12,7 @@ export const CATALOG: {
   { name: 'Press banca', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho' },
   { name: 'Press militar', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Hombro' },
   { name: 'Press inclinado', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho' },
+  { name: 'Aperturas en máquina', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho' },
   { name: 'Fondos lastrados', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho/Tríceps' },
   { name: 'Extensión tríceps', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Tríceps' },
   { name: 'Sentadilla', category: 'gym', type: 'pierna', inputType: 'peso', muscleGroup: 'Pierna' },
@@ -33,8 +34,6 @@ export const CATALOG: {
   { name: 'Pino', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core/Hombro' },
   { name: 'L-sit', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Plancha', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
-
-  // Ampliación del catálogo
   { name: 'Press banca con mancuernas', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho' },
   { name: 'Aperturas con mancuernas', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho' },
   { name: 'Press Arnold', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Hombro' },
@@ -74,10 +73,10 @@ export const CATALOG: {
   { name: 'Advanced tuck front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
   { name: 'Straddle front lever', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
   { name: 'Front lever a una pierna', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Espalda/Core' },
-  { name: 'Tuck planche (gimnasia)', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
-  { name: 'Advanced tuck planche (gimnasia)', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
-  { name: 'Straddle planche (gimnasia)', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
-  { name: 'Planche (gimnasia)', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Tuck planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Advanced tuck planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Straddle planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
+  { name: 'Planche', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Hombro/Core' },
   { name: 'Dominadas negativas', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda' },
   { name: 'Dominadas asistidas con banda', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda' },
   { name: 'Muscle-up negativo', category: 'calistenia', type: 'tiron', inputType: 'reps', muscleGroup: 'Espalda/Pecho' },
@@ -85,8 +84,6 @@ export const CATALOG: {
   { name: 'V-sit', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core' },
   { name: 'Pino a la pared', category: 'calistenia', type: 'core', inputType: 'tiempo', muscleGroup: 'Core/Hombro' },
   { name: 'Flexiones a pino', category: 'calistenia', type: 'empuje', inputType: 'reps', muscleGroup: 'Hombro/Tríceps' },
-
-  // Nuevas variantes de sentadilla y progresiones (calistenia)
   { name: 'Sentadilla profunda', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
   { name: 'Sentadilla profunda con salto', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },
   { name: 'Sentadilla búlgara con salto', category: 'calistenia', type: 'pierna', inputType: 'reps', muscleGroup: 'Pierna' },

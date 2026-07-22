@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { AuthResponse, AuthUser, LoginInput, UpdateProfileInput } from '../models/auth.model';
+import { WorkoutDraftStore } from './workout-draft.store';
 
 const TOKEN_KEY = 'lw_token';
 
@@ -11,6 +12,7 @@ const TOKEN_KEY = 'lw_token';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly draftStore = inject(WorkoutDraftStore);
   private readonly baseUrl = `${API_BASE_URL}/auth`;
 
   readonly currentUser = signal<AuthUser | null>(null);
@@ -69,11 +71,13 @@ export class AuthService {
   }
 
   private setSession(res: AuthResponse): void {
+    this.draftStore.resetAll();
     localStorage.setItem(TOKEN_KEY, res.token);
     this.currentUser.set(res.user);
   }
 
   private clearSession(): void {
+    this.draftStore.resetAll();
     localStorage.removeItem(TOKEN_KEY);
     this.currentUser.set(null);
   }
