@@ -10,22 +10,40 @@
   </header>
 
   @if (loading()) {
-    <div class="rt-grid" aria-busy="true">
-      <div class="lw-skel lw-skel-card rt-skel"></div>
-      <div class="lw-skel lw-skel-card rt-skel"></div>
-      <div class="lw-skel lw-skel-card rt-skel"></div>
+    <div class="lw-skel-list" aria-busy="true">
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
     </div>
   } @else {
-    <div class="rt-grid">
-      @for (r of rows(); track r.id) {
-        <article class="lw-card lw-spine rt-card" [style.border-left-color]="categoryColor[r.category]">
-          <div class="rt-card-top">
-            <span class="rt-cat" [style.color]="categoryColor[r.category]">
-              <span class="lw-dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
-            </span>
+    <section class="sheet">
+      @if (rows().length) {
+        <div class="sheet-cols" aria-hidden="true">
+          <span>Rutina</span>
+          <span>Categoría</span>
+          <span>Ejercicios</span>
+          <span></span>
+        </div>
+      }
+
+      <div class="sheet-rows">
+        @for (r of rows(); track r.id) {
+          <article class="sheet-row">
+            <a [routerLink]="['/rutinas', r.id]" class="row-main">
+              <span class="cell-name">{{ r.name }}</span>
+
+              <span class="cell-cat" [style.color]="categoryColor[r.category]">
+                <span class="lw-dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
+              </span>
+
+              <span class="cell-list">{{ r.exercisesText }}</span>
+
+              <span class="cell-count lw-num">{{ r.count }}</span>
+            </a>
+
             <button
               type="button"
-              class="lw-icon-btn rt-delete"
+              class="row-delete"
               [attr.aria-label]="'Eliminar la rutina ' + r.name"
               (click)="askDeleteRoutine(r.id, $event)"
             >
@@ -33,32 +51,22 @@
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
+          </article>
+        } @empty {
+          <div class="sheet-empty">
+            <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
+            </svg>
+            <p class="lw-empty-title">Todavía no tienes rutinas</p>
+            <p class="lw-empty-text">
+              Una rutina es la plantilla de un entreno: sus ejercicios, sus series y sus repeticiones objetivo. Al
+              registrar podrás cargarla y solo rellenar lo que hiciste.
+            </p>
+            <a routerLink="/rutinas/nueva" class="lw-btn-secondary">Crear la primera</a>
           </div>
-
-          <h2 class="rt-name">
-            <a [routerLink]="['/rutinas', r.id]" class="rt-link">{{ r.name }}</a>
-          </h2>
-
-          @if (r.count) {
-            <p class="rt-exercises">{{ r.exercisesText }}</p>
-          }
-
-          <p class="rt-count lw-num">{{ r.count }} {{ r.count === 1 ? 'ejercicio' : 'ejercicios' }}</p>
-        </article>
-      } @empty {
-        <div class="lw-empty rt-empty">
-          <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
-          </svg>
-          <p class="lw-empty-title">Todavía no tienes rutinas</p>
-          <p class="lw-empty-text">
-            Una rutina es la plantilla de un entreno: sus ejercicios, sus series y sus repeticiones objetivo. Al
-            registrar podrás cargarla y solo rellenar lo que hiciste.
-          </p>
-          <a routerLink="/rutinas/nueva" class="lw-btn-secondary">Crear la primera</a>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    </section>
   }
 </div>
 

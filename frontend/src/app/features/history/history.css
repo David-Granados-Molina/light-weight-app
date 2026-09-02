@@ -1,55 +1,29 @@
-/* Historial. En móvil los filtros se apilan encima de la lista; en escritorio
-   pasan a una columna fija a la izquierda, porque filtrar y leer resultados es
-   un ciclo y no debería obligar a subir la página cada vez. */
+/* Historial con la misma retícula que la hoja de Registrar: filas ruladas dentro
+   de un solo marco, con cabecera de columnas en escritorio. En móvil cada fila se
+   pliega en tarjeta, igual que allí. */
 
-.hist-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s-5);
-}
+/* --- Banda de filtros -------------------------------------------------------- */
 
 .hist-filters {
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
-  min-width: 0;
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
 }
 
-.hist-results {
+.hist-filter {
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  gap: var(--s-2);
   min-width: 0;
 }
 
-@media (min-width: 1024px) {
-  .hist-grid {
-    grid-template-columns: 260px minmax(0, 1fr);
-    gap: var(--s-8);
-    align-items: start;
-  }
-
-  .hist-filters {
-    position: sticky;
-    top: var(--s-8);
-    padding: var(--s-5);
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    background: var(--surface);
-  }
-}
-
-/* En móvil la tira de periodos se desplaza en horizontal en vez de partirse en
-   dos filas y empujar la lista hacia abajo. */
 .hist-period {
   flex-wrap: nowrap;
   padding-bottom: var(--s-1);
-}
-
-@media (min-width: 1024px) {
-  .hist-period {
-    flex-wrap: wrap;
-  }
 }
 
 .hist-selects {
@@ -58,27 +32,55 @@
   gap: var(--s-2);
 }
 
-@media (min-width: 1024px) {
-  .hist-selects {
-    grid-template-columns: 1fr;
+@media (min-width: 900px) {
+  .hist-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--s-5);
+    padding: var(--s-5);
+  }
+
+  .hist-period {
+    flex-wrap: wrap;
+  }
+
+  .hist-filter-search {
+    flex: 1;
+    min-width: 200px;
   }
 }
 
-/* --- Lista ------------------------------------------------------------------ */
+/* --- La hoja ------------------------------------------------------------------ */
 
-.hist-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-
-.hist-session {
-  position: relative;
-  padding: 0;
+.sheet {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
   overflow: hidden;
 }
 
-.hist-session-toggle {
+.sheet-cols {
+  display: none;
+}
+
+.sheet-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Fila: presentación móvil ------------------------------------------------- */
+
+.sheet-row {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet-row:last-child {
+  border-bottom: 0;
+}
+
+.row-main {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
@@ -90,18 +92,22 @@
   transition: background var(--dur) var(--ease-out);
 }
 
-.hist-session-toggle:hover {
+.row-main:hover {
   background: var(--surface-raised);
 }
 
-.hist-session-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
+.cell-day {
+  display: inline-block;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  order: -1;
 }
 
-.hist-session-cat {
+.cell-day::first-letter {
+  text-transform: uppercase;
+}
+
+.cell-cat {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
@@ -109,26 +115,17 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  order: -2;
 }
 
-.hist-session-date {
-  display: inline-block;
-  font-size: var(--t-sm);
-  color: var(--text-muted);
-}
-
-.hist-session-date::first-letter {
-  text-transform: uppercase;
-}
-
-.hist-session-type {
+.cell-type {
   font-size: var(--t-lead);
   font-weight: 600;
   letter-spacing: -0.012em;
   color: var(--text);
 }
 
-.hist-session-preview {
+.cell-list {
   font-size: var(--t-sm);
   color: var(--text-secondary);
   overflow: hidden;
@@ -136,53 +133,74 @@
   white-space: nowrap;
 }
 
-.hist-session-count {
+/* `rows().count` ya llega formateado como "4 ejercicios" desde el componente. */
+.cell-count {
   font-size: var(--t-xs);
   color: var(--text-muted);
 }
 
-.hist-session-edit {
+.row-edit {
   position: absolute;
   top: var(--s-3);
   right: var(--s-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
 }
 
-.hist-detail {
+.row-edit:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+/* --- Detalle desplegado -------------------------------------------------------- */
+
+.row-detail {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
   margin: 0;
   padding: var(--s-4);
   border-top: 1px solid var(--line);
-  animation: hist-detail-in var(--dur) var(--ease-out);
+  background: var(--chrome);
+  animation: detail-in var(--dur) var(--ease-out);
 }
 
-@keyframes hist-detail-in {
+@keyframes detail-in {
   from {
     opacity: 0;
   }
 }
 
-.hist-detail-row {
+.detail-line {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--s-1) var(--s-4);
   font-size: var(--t-sm);
 }
 
-.hist-detail-name {
+.detail-name {
   color: var(--text-secondary);
   min-width: 0;
 }
 
-.hist-detail-sets {
+.detail-sets {
   margin: 0;
   color: var(--text);
   font-weight: 550;
   text-align: right;
 }
 
-.hist-detail-note {
+.detail-note {
   grid-column: 1 / -1;
   margin: 0;
   padding-left: var(--s-3);
@@ -193,7 +211,88 @@
   max-width: 68ch;
 }
 
+/* --- Estado vacío y pie --------------------------------------------------------- */
+
+.sheet-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-12) var(--s-5);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.sheet-foot {
+  display: flex;
+  justify-content: center;
+  padding: var(--s-4);
+  border-top: 1px solid var(--line-strong);
+  background: var(--chrome);
+}
+
 .hist-more {
-  align-self: center;
   min-width: 180px;
+}
+
+/* ============================================================================
+   ESCRITORIO: la retícula
+   ========================================================================== */
+
+@media (min-width: 900px) {
+  .sheet-cols,
+  .row-main {
+    display: grid;
+    grid-template-columns: 132px 128px minmax(140px, 0.9fr) minmax(0, 1.4fr) 104px;
+    align-items: center;
+    gap: var(--s-4);
+  }
+
+  .sheet-cols {
+    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--chrome);
+    font-size: var(--t-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .row-main {
+    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    min-height: 56px;
+  }
+
+  /* En la retícula el orden lo dan las columnas, no el orden visual del móvil. */
+  .cell-day,
+  .cell-cat {
+    order: 0;
+  }
+
+  .cell-type {
+    font-size: var(--t-body);
+  }
+
+  .cell-count {
+    text-align: right;
+  }
+
+  .row-edit {
+    top: 50%;
+    right: var(--s-4);
+    transform: translateY(-50%);
+  }
+
+  .row-detail {
+    padding: var(--s-4) var(--s-5) var(--s-5);
+  }
+
+  .detail-line {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  }
+
+  .detail-sets {
+    text-align: left;
+  }
 }

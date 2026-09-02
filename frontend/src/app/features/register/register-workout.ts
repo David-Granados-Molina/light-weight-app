@@ -9,7 +9,7 @@ import { Category, Exercise, InputType } from '../../core/models/exercise.model'
 import { SessionInput, SessionSet, WorkoutSession } from '../../core/models/session.model';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
-import { effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { effectiveInputType, formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
 import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -128,6 +128,16 @@ export class RegisterWorkout {
   );
 
   readonly totalSeries = computed(() => this.added().reduce((total, a) => total + a.sets.length, 0));
+
+  /**
+   * Número de columnas de la hoja: la serie más larga de todo el entreno. Todos
+   * los ejercicios comparten la misma retícula aunque hagan menos series, que es
+   * lo que permite leer la hoja en vertical, columna a columna, igual que la de
+   * papel del gimnasio.
+   */
+  readonly maxSets = computed(() => this.added().reduce((max, a) => Math.max(max, a.sets.length), 1));
+
+  readonly setColumns = computed(() => Array.from({ length: this.maxSets() }, (_, i) => i));
 
   readonly selectedDateLabel = computed(() => {
     const iso = this.selectedDate() ?? this.todayIso;
@@ -534,6 +544,23 @@ export class RegisterWorkout {
     } catch {
       // clipboard no disponible
     }
+  }
+
+  /**
+   * Valor de esa misma serie el último día que se hizo el ejercicio. Es lo que
+   * el usuario compara mentalmente entre serie y serie; puesto en la misma
+   * columna, la comparación deja de necesitar memoria.
+   */
+  lastSetValue(item: AddedExercise, setIndex: number): string | null {
+    const data = this.lastData()[item.exercise.id];
+    const set = data?.sets[setIndex];
+    if (!set) return null;
+    return formatSet(set, data.inputTypeOverride ?? item.exercise.inputType);
+  }
+
+  lastWhen(item: AddedExercise): string | null {
+    const data = this.lastData()[item.exercise.id];
+    return data ? relativeDayLabel(data.date) : null;
   }
 
   lastSummary(item: AddedExercise): { sets: string; when: string } | null {

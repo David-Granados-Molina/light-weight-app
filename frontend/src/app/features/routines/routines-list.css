@@ -1,5 +1,5 @@
-/* Listado de rutinas. Rejilla que se llena sola: una columna en el móvil, tres
-   en una pantalla ancha, sin breakpoints intermedios que mantener. */
+/* Rutinas con la misma retícula que la hoja de Registrar: filas ruladas dentro de
+   un marco, con cabecera de columnas en escritorio y plegado a tarjeta en móvil. */
 
 .rt-head {
   display: flex;
@@ -19,39 +19,57 @@
   }
 }
 
-.rt-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--s-3);
+/* --- La hoja ------------------------------------------------------------------ */
+
+.sheet {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
 }
 
-.rt-skel {
-  height: 148px;
+.sheet-cols {
+  display: none;
 }
 
-.rt-card {
+.sheet-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-row {
   position: relative;
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet-row:last-child {
+  border-bottom: 0;
+}
+
+/* --- Fila: presentación móvil -------------------------------------------------- */
+
+.row-main {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  transition:
-    background var(--dur) var(--ease-out),
-    border-color var(--dur) var(--ease-out);
+  width: 100%;
+  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  transition: background var(--dur) var(--ease-out);
 }
 
-.rt-card:hover {
+.row-main:hover {
   background: var(--surface-raised);
-  border-color: var(--line-strong);
 }
 
-.rt-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
+.cell-name {
+  font-size: var(--t-title);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.016em;
+  color: var(--text);
 }
 
-.rt-cat {
+.cell-cat {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
@@ -59,45 +77,10 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  order: -1;
 }
 
-.rt-name {
-  font-size: var(--t-title);
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.016em;
-}
-
-/* El enlace se estira sobre toda la tarjeta para que el objetivo táctil sea la
-   tarjeta entera, pero sigue siendo un enlace con su propio texto: la tarjeta
-   no puede ser un <a> porque contiene el botón de eliminar. */
-.rt-link::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-}
-
-.rt-link:focus-visible {
-  outline: none;
-}
-
-.rt-link:focus-visible::after {
-  outline: 2px solid var(--accent-text);
-  outline-offset: 2px;
-}
-
-.rt-delete {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-}
-
-.rt-delete:hover {
-  color: var(--color-negative);
-}
-
-.rt-exercises {
+.cell-list {
   font-size: var(--t-sm);
   color: var(--text-secondary);
   line-height: 1.55;
@@ -107,13 +90,98 @@
   overflow: hidden;
 }
 
-.rt-count {
-  margin-top: auto;
-  padding-top: var(--s-2);
+.cell-count {
   font-size: var(--t-xs);
   color: var(--text-muted);
 }
 
-.rt-empty {
-  grid-column: 1 / -1;
+.cell-count::after {
+  content: ' ejercicios';
+}
+
+.row-delete {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.row-delete:hover {
+  background: var(--surface-hover);
+  color: var(--color-negative);
+}
+
+.sheet-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-12) var(--s-5);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* ============================================================================
+   ESCRITORIO: la retícula
+   ========================================================================== */
+
+@media (min-width: 900px) {
+  .sheet-cols,
+  .row-main {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.1fr) 128px minmax(0, 1.6fr) 104px;
+    align-items: center;
+    gap: var(--s-4);
+  }
+
+  .sheet-cols {
+    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--chrome);
+    font-size: var(--t-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .row-main {
+    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    min-height: 60px;
+  }
+
+  .cell-name {
+    font-size: var(--t-lead);
+    font-weight: 600;
+    letter-spacing: -0.012em;
+  }
+
+  .cell-cat {
+    order: 0;
+  }
+
+  .cell-list {
+    -webkit-line-clamp: 1;
+  }
+
+  .cell-count {
+    text-align: right;
+  }
+
+  .row-delete {
+    top: 50%;
+    right: var(--s-4);
+    transform: translateY(-50%);
+  }
 }

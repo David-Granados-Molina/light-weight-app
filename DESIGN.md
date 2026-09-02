@@ -128,8 +128,12 @@ components:
 
 <!-- Contrato de dirección de esta reconstrucción. Sesión code-led: no hubo ronda de comps
      (este entorno no dispone de generación de imagen), así que la ambición vive aquí y se
-     audita contra el resultado construido. Estructura fijada por el usuario desde la tirada
-     92170c1f de concept-seed: "Consola de sesión persistente". -->
+     audita contra el resultado construido.
+
+     VARIANTE DE ESTA RAMA: "Hoja de registro", el lead de la tirada 92170c1f de
+     concept-seed. La otra estructura repartida, "Consola de sesión persistente",
+     está construida en la rama rediseno/consola-de-sesion. Ambas comparten el
+     mismo sistema de diseño; solo cambia la composición. -->
 
 ## Overview
 
@@ -137,7 +141,9 @@ Light Weight es una superficie **Operate**: el usuario está dentro de una tarea
 
 El mundo es un **panel de instrumento oscuro**: negro azulado con capas de elevación reales, retículas de tipo industrial, y color usado exclusivamente como significado. Nada brilla porque sí. La única fuente de calidez es el acento del usuario, y aparece únicamente donde hay estado: acción primaria, selección actual, indicador de progreso.
 
-La estructura de toda la aplicación es la **consola de sesión persistente**: el entreno en curso deja de ser una pantalla y pasa a ser un objeto visible desde cualquier parte de la app. Lo que antes era un punto de 6 px sobre un icono ahora es una columna (escritorio) o una barra acoplada (móvil) que dice qué llevas hecho hoy y te devuelve al registro en un toque. `WorkoutDraftStore` ya guardaba ese estado; el rediseño lo hace visible.
+La estructura de toda la aplicación es la **hoja de registro**: la libreta de entreno que se lleva al gimnasio, con ejercicios en filas y series en columnas. Registrar deja de ser una lista de tarjetas y pasa a ser una retícula donde todos los ejercicios comparten las mismas columnas, y encima de cada casilla aparece lo que se levantó en esa misma serie el último día. Comparar deja de depender de la memoria: la serie de hoy y la de la última vez ocupan la misma columna.
+
+Historial y Rutinas heredan esa retícula —filas ruladas dentro de un solo marco, con cabecera de columnas— para que las tres pantallas de datos se lean con el mismo gesto.
 
 Dos escenas, no dos anchos:
 
@@ -175,7 +181,7 @@ Hay un bloque de reserva estático antes del `@supports` de color relativo, para
 Cinco planos, no dos. La diferencia entre `chrome` y `surface` es lo que hace que el rail y la consola se lean como cromo de aplicación y no como contenido:
 
 - `--ground #0A0B0D` — fondo de la aplicación
-- `--chrome #0D0F13` — rail lateral, consola de sesión, tab-bar (capa neutra más fría, per Operate)
+- `--chrome #0D0F13` — rail lateral, tab-bar, cabecera y pie de la hoja (capa neutra más fría, per Operate)
 - `--surface #101319` — tarjetas y contenedores de contenido
 - `--surface-raised #161A22` — inputs, chips, elementos dentro de una tarjeta
 - `--surface-hover #1D222C` — hover y pulsado
@@ -219,19 +225,19 @@ Tres regímenes, conmutados por estructura y no por escala tipográfica.
 **Móvil (`< 900px`) — el gimnasio.**
 Una columna con canalones de 16 px. Tab-bar inferior fija de 5 destinos con el botón central de registrar elevado (afordancia probada; se conserva). Sobre ella, cuando existe borrador y no estás en `/registrar`, se acopla la **barra de sesión**: 56 px, muestra fecha, `N ejercicios · M series` y devuelve a `/registrar`. Ambas respetan `env(safe-area-inset-bottom)`.
 
-**Escritorio medio (`900–1279px`) — la mesa.**
-Rail de navegación izquierdo de 224 px, fijo, con logo arriba, los cinco destinos, calendario, y el perfil abajo. Sin tab-bar. El contenido se centra en `--content-max: 880px`. La consola de sesión, cuando hay borrador, es una **tarjeta fija abajo a la derecha** de 320 px.
+**Escritorio (`≥ 900px`) — la mesa.**
+Rail de navegación izquierdo de 224 px, fijo (68 px, solo iconos, entre 900 y 1099 px), con logo arriba, los cinco destinos, calendario, y el perfil abajo. Sin tab-bar. El contenido se centra en `--content-max: 880px` y crece a `--content-wide: 1040px` en las pantallas con retícula o gráfica.
 
-**Escritorio ancho (`≥ 1280px`) — la mesa entera.**
-Rail + contenido + la consola de sesión como **tercera columna real** de 336 px, `position: sticky`, presente solo cuando hay borrador y no estás en `/registrar`. El contenido crece a `--content-wide: 1040px` en Progreso, Historial y Calendario, que son las pantallas con rejilla o gráfica.
+A partir de 1024 px Registrar despliega la retícula completa: columna de ejercicio, una columna por serie de `168px`, columna de añadir y columna de quitar. Cuando el entreno tiene más series de las que caben, **la hoja se desplaza en horizontal dentro de su propio marco**; la página nunca lo hace.
 
 Composición por pantalla en escritorio (todas apiladas en una columna en móvil):
 
 - **Inicio**: 2 columnas — resumen de semana + días entrenados + CTA a la izquierda; últimos entrenos a la derecha.
-- **Registrar**: 2 columnas — columna izquierda pegajosa con fecha, calendario, rutina, buscador y guardar; lista de ejercicios y sus series a la derecha.
-- **Historial**: filtros en columna izquierda pegajosa de 260 px; lista de sesiones a la derecha.
+- **Registrar**: la hoja completa a lo ancho — cabecera de día, rutina y catálogo; retícula de ejercicios por series; totales y guardar al pie. Dentro de cada casilla el peso va encima de las repeticiones, como se anota en papel.
+- **Historial**: banda de filtros arriba y hoja de sesiones debajo, con columnas Día, Categoría, Entreno y Ejercicios.
 - **Progreso**: bloques de ejercicio en rejilla de 2 columnas desde 1280 px, gráfica más alta.
-- **Rutinas / Amigos**: rejilla de tarjetas `auto-fill` con mínimo de 300 px.
+- **Rutinas**: la misma hoja rulada, con columnas Rutina, Categoría y Ejercicios.
+- **Amigos**: rejilla de tarjetas `auto-fill` con mínimo de 300 px.
 - **Formulario de rutina**: nombre + buscador + creación de ejercicio a la izquierda; lista reordenable a la derecha, lo bastante ancha para que las ruedas numéricas quepan en una fila.
 - **Calendario**: rejilla del mes a la izquierda, panel de resumen del día a la derecha.
 - **Perfil**: identidad a la izquierda, preferencias y cuenta a la derecha.
@@ -249,7 +255,7 @@ Composición por pantalla en escritorio (todas apiladas en una columna en móvil
 Cuatro niveles. Todas las sombras llevan desplazamiento y desenfoque; un halo de color a desplazamiento cero es decoración y está prohibido.
 
 - `--shadow-1: 0 1px 2px rgba(0,0,0,.5), 0 2px 6px -2px rgba(0,0,0,.4)` — tarjetas apoyadas.
-- `--shadow-2: 0 2px 4px rgba(0,0,0,.4), 0 10px 24px -10px rgba(0,0,0,.7)` — consola de sesión, desplegables.
+- `--shadow-2: 0 2px 4px rgba(0,0,0,.4), 0 10px 24px -10px rgba(0,0,0,.7)` — desplegables y avisos flotantes.
 - `--shadow-3: 0 4px 8px rgba(0,0,0,.5), 0 24px 56px -16px rgba(0,0,0,.8)` — modales y overlays.
 - `--shadow-rail: 1px 0 0 var(--line)` — el cromo se separa con una regla, no con una sombra.
 
@@ -297,7 +303,15 @@ Filtros de categoría y de modo de fecha. Reposo: `--surface-raised` + texto sec
 
 - **Rail (escritorio)**: `--chrome`, 224 px, `border-right: 1px solid var(--line)`. Enlace activo: fondo `--accent-soft`, texto `--accent-text`, y un filete de 2 px del acento pegado al borde izquierdo del enlace. Registrar es un botón primario dentro del rail, no un enlace más.
 - **Tab-bar (móvil)**: `--chrome` con `backdrop-filter`, 5 destinos, botón central elevado relleno de acento. El punto de borrador conserva su sitio, pero ahora la barra de sesión lo explica.
-- **Barra/consola de sesión**: componente nuevo. Muestra fecha del borrador, recuento de ejercicios y series, los tres primeros nombres de ejercicio, y "Continuar entreno". Solo existe si `hasInProgress()` es cierto y la ruta no es `/registrar`.
+- **Indicador de borrador**: un punto sobre el botón de registrar, en la tab-bar y en el rail, cuando `hasInProgress()` es cierto.
+
+### Signature Component — la hoja
+
+`.sheet` es un único marco con cabecera, cuerpo rulado y pie; no una pila de tarjetas. Las filas se separan con una regla de 1 px y las casillas de serie con un filete vertical, igual que la cuadrícula impresa. Las series que un ejercicio no hace no se dejan en blanco: se rayan en diagonal al 2 % de blanco, para que la retícula siga leyéndose como una tabla y no como un hueco.
+
+La **casilla fantasma** —el valor de esa misma serie el último día, en `--t-xs` y `--text-muted` justo encima de la rueda— es la razón de ser de esta composición. Cuando no hay historial se dibuja un guion en `--line-strong` para no romper la altura de la fila.
+
+En móvil la retícula se pliega: cada ejercicio es una tarjeta, cada serie una línea de rótulo (ordinal y quitar) con las dos ruedas debajo a ancho completo, y la última vez vuelve a resumirse en una sola línea.
 
 ### Signature Component — number-wheel
 
@@ -317,7 +331,7 @@ El componente que más se toca en el gimnasio. Rediseñado como instrumento: `�
 - Usar cifras tabulares en cualquier número que pueda cambiar.
 - Tematizar las superficies del navegador: selección, cursor de texto, anillo de foco, barras de scroll, `color-scheme`.
 - Escribir el estado activo, el hover, el foco, el deshabilitado y el cargando de cada control interactivo antes de darlo por hecho.
-- Reservar la animación a un momento con autoría: la entrada y salida de la consola de sesión (translación + desenfoque, salida exponencial de 260 ms). El resto son transiciones de estado de 150–200 ms.
+- Reservar la animación a los cambios de estado: 150–200 ms. La hoja no se anima al entrar; el usuario llega a ella para escribir, no para verla aparecer.
 - Respetar `prefers-reduced-motion: reduce` desactivando translaciones y dejando solo cambios de opacidad.
 
 ### Don't:

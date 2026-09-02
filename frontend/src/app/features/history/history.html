@@ -10,43 +10,48 @@
     }
   </header>
 
-  <div class="hist-grid">
-    <aside class="hist-filters" aria-label="Filtros del historial">
-      <div class="lw-field">
-        <span class="lw-label">Categoría</span>
-        <div class="lw-chips">
-          @for (chip of filterChips; track chip.key) {
-            <button
-              type="button"
-              class="lw-chip"
-              [class.is-active]="filter() === chip.key"
-              [class.is-gym]="chip.key === 'gym'"
-              [class.is-cali]="chip.key === 'calistenia'"
-              [attr.aria-pressed]="filter() === chip.key"
-              (click)="selectFilter(chip.key)"
-            >
-              {{ chip.label }}
-            </button>
-          }
-        </div>
+  <!-- Banda de filtros: en la hoja los filtros son la cabecera del cuaderno, no
+       una columna aparte. -->
+  <div class="hist-filters" aria-label="Filtros del historial">
+    <div class="hist-filter">
+      <span class="lw-label">Categoría</span>
+      <div class="lw-chips">
+        @for (chip of filterChips; track chip.key) {
+          <button
+            type="button"
+            class="lw-chip"
+            [class.is-active]="filter() === chip.key"
+            [class.is-gym]="chip.key === 'gym'"
+            [class.is-cali]="chip.key === 'calistenia'"
+            [attr.aria-pressed]="filter() === chip.key"
+            (click)="selectFilter(chip.key)"
+          >
+            {{ chip.label }}
+          </button>
+        }
       </div>
+    </div>
 
-      <div class="lw-field">
-        <span class="lw-label">Periodo</span>
-        <div class="lw-chips hist-period app-scroll">
-          @for (chip of dateModeChips; track chip.key) {
-            <button
-              type="button"
-              class="lw-chip"
-              [class.is-active]="dateMode() === chip.key"
-              [attr.aria-pressed]="dateMode() === chip.key"
-              (click)="selectDateMode(chip.key)"
-            >
-              {{ chip.label }}
-            </button>
-          }
-        </div>
+    <div class="hist-filter">
+      <span class="lw-label">Periodo</span>
+      <div class="lw-chips hist-period app-scroll">
+        @for (chip of dateModeChips; track chip.key) {
+          <button
+            type="button"
+            class="lw-chip"
+            [class.is-active]="dateMode() === chip.key"
+            [attr.aria-pressed]="dateMode() === chip.key"
+            (click)="selectDateMode(chip.key)"
+          >
+            {{ chip.label }}
+          </button>
+        }
+      </div>
+    </div>
 
+    @if (dateMode() !== 'todos') {
+      <div class="hist-filter">
+        <span class="lw-label">Fecha</span>
         @if (dateMode() === 'dia') {
           <input
             class="lw-input"
@@ -69,7 +74,7 @@
               }
             </select>
           </div>
-        } @else if (dateMode() === 'anio') {
+        } @else {
           <select class="lw-select" aria-label="Año" [value]="selectedYear()" (change)="onYearInput($event)">
             @for (y of years(); track y) {
               <option [value]="y">{{ y }}</option>
@@ -77,99 +82,109 @@
           </select>
         }
       </div>
+    }
 
-      <div class="lw-field">
-        <label class="lw-label" for="hist-search">Buscar</label>
-        <input
-          id="hist-search"
-          class="lw-input"
-          type="search"
-          placeholder="Nombre del ejercicio…"
-          [value]="search()"
-          (input)="onSearchInput($event)"
-        />
-      </div>
-    </aside>
+    <div class="hist-filter hist-filter-search">
+      <label class="lw-label" for="hist-search">Buscar</label>
+      <input
+        id="hist-search"
+        class="lw-input"
+        type="search"
+        placeholder="Nombre del ejercicio…"
+        [value]="search()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+  </div>
 
-    <div class="hist-results">
-      @if (loading()) {
-        <div class="lw-skel-list" aria-busy="true">
-          <div class="lw-skel lw-skel-card"></div>
-          <div class="lw-skel lw-skel-card"></div>
-          <div class="lw-skel lw-skel-card"></div>
-          <div class="lw-skel lw-skel-card"></div>
+  @if (loading()) {
+    <div class="lw-skel-list" aria-busy="true">
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+    </div>
+  } @else {
+    <section class="sheet">
+      @if (rows().length) {
+        <div class="sheet-cols" aria-hidden="true">
+          <span>Día</span>
+          <span>Categoría</span>
+          <span>Entreno</span>
+          <span>Ejercicios</span>
+          <span></span>
         </div>
-      } @else {
-        <div class="hist-list">
-          @for (s of rows(); track s.id) {
-            <article class="lw-card lw-spine hist-session" [style.border-left-color]="categoryColor[s.category]">
+      }
+
+      <div class="sheet-rows">
+        @for (s of rows(); track s.id) {
+          <article class="sheet-row" [class.is-open]="expandedId() === s.id">
+            <button
+              type="button"
+              class="row-main"
+              [attr.aria-expanded]="expandedId() === s.id"
+              (click)="toggleExpand(s.id)"
+            >
+              <span class="cell-day lw-num">{{ s.dateLabel }}</span>
+
+              <span class="cell-cat" [style.color]="categoryColor[s.category]">
+                <span class="lw-dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
+              </span>
+
+              <span class="cell-type">{{ s.typeLabel }}</span>
+
+              <span class="cell-list">{{ s.exercisesText }}</span>
+
+              <span class="cell-count lw-num">{{ s.count }}</span>
+            </button>
+
+            @if (!targetUserId()) {
               <button
                 type="button"
-                class="hist-session-toggle"
-                [attr.aria-expanded]="expandedId() === s.id"
-                (click)="toggleExpand(s.id)"
+                class="row-edit"
+                [attr.aria-label]="'Editar el entreno del ' + s.dateLabel"
+                (click)="editSession(s.date, $event)"
               >
-                <span class="hist-session-top">
-                  <span class="hist-session-cat" [style.color]="categoryColor[s.category]">
-                    <span class="lw-dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
-                  </span>
-                  <span class="hist-session-date lw-num">{{ s.dateLabel }}</span>
-                </span>
-
-                <span class="hist-session-type">{{ s.typeLabel }}</span>
-
-                @if (expandedId() !== s.id) {
-                  <span class="hist-session-preview">{{ s.exercisesText }}</span>
-                  <span class="hist-session-count lw-num">{{ s.count }}</span>
-                }
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
               </button>
+            }
 
-              @if (!targetUserId()) {
-                <button
-                  type="button"
-                  class="lw-icon-btn hist-session-edit"
-                  [attr.aria-label]="'Editar el entreno del ' + s.dateLabel"
-                  (click)="editSession(s.date, $event)"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                </button>
-              }
+            @if (expandedId() === s.id) {
+              <dl class="row-detail">
+                @for (e of s.exercises; track e.id) {
+                  <div class="detail-line">
+                    <dt class="detail-name">{{ e.exercise.name }}</dt>
+                    <dd class="detail-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                    @if (e.note) {
+                      <dd class="detail-note">{{ e.note }}</dd>
+                    }
+                  </div>
+                }
+              </dl>
+            }
+          </article>
+        } @empty {
+          <div class="sheet-empty">
+            <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
+            <p class="lw-empty-title">Ningún entreno con estos filtros</p>
+            <p class="lw-empty-text">Prueba con otra categoría, otro periodo, o borra el texto de búsqueda.</p>
+          </div>
+        }
+      </div>
 
-              @if (expandedId() === s.id) {
-                <dl class="hist-detail">
-                  @for (e of s.exercises; track e.id) {
-                    <div class="hist-detail-row">
-                      <dt class="hist-detail-name">{{ e.exercise.name }}</dt>
-                      <dd class="hist-detail-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
-                      @if (e.note) {
-                        <dd class="hist-detail-note">{{ e.note }}</dd>
-                      }
-                    </div>
-                  }
-                </dl>
-              }
-            </article>
-          } @empty {
-            <div class="lw-empty">
-              <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" />
-              </svg>
-              <p class="lw-empty-title">Ningún entreno con estos filtros</p>
-              <p class="lw-empty-text">Prueba con otra categoría, otro periodo, o borra el texto de búsqueda.</p>
-            </div>
-          }
-        </div>
-
-        @if (hasMore()) {
+      @if (hasMore()) {
+        <footer class="sheet-foot">
           <button type="button" class="lw-btn-secondary hist-more" [disabled]="loadingMore()" (click)="loadMore()">
             {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
           </button>
-        }
+        </footer>
       }
-    </div>
-  </div>
+    </section>
+  }
 </div>

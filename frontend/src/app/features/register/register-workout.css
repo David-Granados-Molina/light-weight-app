@@ -1,9 +1,15 @@
-/* Registrar entreno. La pantalla más usada del producto y la que más
-   restricciones tiene: en móvil se rellena de pie, entre serie y serie, con una
-   mano. En escritorio se separa en dos columnas: a la izquierda la preparación
-   (día, rutina, catálogo), que se queda fija, y a la derecha el entreno real. */
+/* Registrar entreno como HOJA DE REGISTRO.
+   La composición viene de la hoja de papel que se lleva al gimnasio: ejercicios
+   en filas, series en columnas, cabecera de día y rutina, totales al pie.
+   Todos los ejercicios comparten la misma retícula de columnas aunque hagan
+   menos series, y encima de cada casilla va lo que se levantó en esa misma
+   serie el último día.
 
-/* --- Aviso de entreno sin guardar ------------------------------------------ */
+   En móvil la retícula no cabe ni tiene sentido con el pulgar: cada fila se
+   pliega en tarjeta y las series se apilan, con el resumen de la última vez en
+   una sola línea. */
+
+/* --- Aviso de hoja sin guardar ---------------------------------------------- */
 
 .reg-reminder {
   position: fixed;
@@ -49,97 +55,94 @@
   }
 }
 
-/* --- Rejilla ---------------------------------------------------------------- */
+/* --- La hoja ----------------------------------------------------------------
+   Un solo objeto con borde propio, no una pila de tarjetas sueltas: es lo que
+   hace que se lea como una hoja y no como una lista. */
 
-.reg-grid {
+.sheet {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* Ancho de la columna de cada serie y de la de acciones. En un solo sitio,
+   porque cabecera y filas tienen que cuadrar al píxel. */
+.sheet-cols,
+.sheet-row {
+  --col-set: 168px;
+  --col-add: 88px;
+  --col-remove: 44px;
+}
+
+/* --- Cabecera: día, rutina, catálogo ---------------------------------------- */
+
+.sheet-head {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--s-5);
+  gap: var(--s-4);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--chrome);
 }
 
-.reg-panel {
+.sheet-field {
   display: flex;
   flex-direction: column;
-  gap: var(--s-4);
+  gap: var(--s-2);
   min-width: 0;
 }
 
-.reg-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
-  min-width: 0;
-}
-
-@media (min-width: 1024px) {
-  .reg-grid {
-    grid-template-columns: 320px minmax(0, 1fr);
-    gap: var(--s-8);
-    align-items: start;
-  }
-
-  .reg-panel {
-    position: sticky;
-    top: var(--s-8);
-  }
-}
-
-/* --- Fecha ------------------------------------------------------------------ */
-
-.reg-date {
+.sheet-date {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--s-3);
+  min-height: 46px;
 }
 
-.reg-date-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-  min-width: 0;
-}
-
-.reg-date-value {
+.sheet-date-value {
   display: inline-block;
+  flex: 1;
+  min-width: 0;
   font-size: var(--t-lead);
   font-weight: 600;
   letter-spacing: -0.012em;
 }
 
-.reg-date-value::first-letter {
+.sheet-date-value::first-letter {
   text-transform: uppercase;
 }
 
-.reg-date-value.is-today {
+.sheet-date-value.is-today {
   color: var(--accent-text);
 }
 
-.reg-date-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  flex-shrink: 0;
-}
-
-.reg-today {
+.sheet-today {
   font-size: var(--t-sm);
   white-space: nowrap;
 }
 
+@media (min-width: 900px) {
+  .sheet-head {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: end;
+    padding: var(--s-5);
+  }
+}
+
 /* --- Calendario emergente ---------------------------------------------------- */
 
-.reg-cal-anchor {
+.sheet-cal-anchor {
   position: relative;
 }
 
-.reg-cal-backdrop {
+.sheet-cal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 99;
 }
 
-.reg-cal {
+.sheet-cal {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -160,35 +163,35 @@
   }
 }
 
-.reg-cal-nav {
+.sheet-cal-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--s-3);
 }
 
-.reg-cal-month {
+.sheet-cal-month {
   display: inline-block;
   font-size: var(--t-body);
   font-weight: 600;
 }
 
-.reg-cal-month::first-letter {
+.sheet-cal-month::first-letter {
   text-transform: uppercase;
 }
 
-.reg-cal-weekdays,
-.reg-cal-grid {
+.sheet-cal-weekdays,
+.sheet-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
 }
 
-.reg-cal-weekdays {
+.sheet-cal-weekdays {
   margin-bottom: var(--s-2);
 }
 
-.reg-cal-weekdays span {
+.sheet-cal-weekdays span {
   text-align: center;
   font-size: var(--t-xs);
   font-weight: 600;
@@ -196,7 +199,7 @@
   color: var(--text-muted);
 }
 
-.reg-cal-day {
+.sheet-cal-day {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -215,99 +218,120 @@
     border-color var(--dur-fast) var(--ease-out);
 }
 
-.reg-cal-day:hover:not(:disabled) {
+.sheet-cal-day:hover:not(:disabled) {
   background: var(--surface-hover);
 }
 
-.reg-cal-day.is-out {
+.sheet-cal-day.is-out {
   color: var(--text-muted);
   opacity: 0.5;
 }
 
-.reg-cal-day.is-today {
+.sheet-cal-day.is-today {
   border-color: var(--line-strong);
 }
 
-.reg-cal-day.is-selected {
+.sheet-cal-day.is-selected {
   background: var(--accent-solid);
   color: var(--accent-ink);
   border-color: transparent;
 }
 
-.reg-cal-day:disabled {
+.sheet-cal-day:disabled {
   color: var(--text-muted);
   opacity: 0.28;
   cursor: not-allowed;
 }
 
-.reg-cal-dots {
+.sheet-cal-dots {
   display: flex;
   gap: 2px;
   height: 5px;
 }
 
-.reg-cal-dots .lw-dot {
+.sheet-cal-dots .lw-dot {
   width: 4px;
   height: 4px;
 }
 
-/* --- Aviso de edición -------------------------------------------------------- */
+/* --- Avisos dentro de la hoja ------------------------------------------------ */
 
-.reg-editing {
+.sheet-editing {
   display: flex;
   align-items: center;
   gap: var(--s-2);
   padding: var(--s-3) var(--s-4);
-  border: 1px solid var(--accent-line);
-  border-radius: var(--r-sm);
+  border-bottom: 1px solid var(--line);
   background: var(--accent-soft);
   color: var(--accent-text);
   font-size: var(--t-sm);
   font-weight: 550;
 }
 
-.reg-loading {
+.sheet-loading {
   display: flex;
   justify-content: center;
   padding: var(--s-6);
+  border-bottom: 1px solid var(--line);
 }
 
-/* --- Ejercicio ---------------------------------------------------------------- */
+/* --- Cabecera de columnas ----------------------------------------------------
+   Solo existe cuando hay retícula, es decir, en escritorio. */
 
-.reg-list {
+.sheet-cols {
+  display: none;
+}
+
+.sheet-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.sheet-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Fila de ejercicio: presentación móvil (tarjeta plegada) ------------------ */
+
+.sheet-row {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--line);
 }
 
-.reg-ex {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
+.sheet-row:last-child {
+  border-bottom: 0;
 }
 
-.reg-ex.cdk-drag-preview {
+.sheet-row.cdk-drag-preview {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
   box-shadow: var(--shadow-3);
-  border-color: var(--line-strong);
 }
 
-.reg-ex.cdk-drag-placeholder {
+.sheet-row.cdk-drag-placeholder {
   opacity: 0.35;
 }
 
-.reg-ex-head {
+.row-ex {
   display: flex;
   align-items: flex-start;
   gap: var(--s-2);
+  min-width: 0;
 }
 
-.reg-drag {
+.row-drag {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-left: -6px;
+  width: 26px;
+  height: 26px;
+  margin-left: -5px;
+  flex-shrink: 0;
   border: 0;
   border-radius: var(--r-xs);
   background: transparent;
@@ -317,116 +341,182 @@
   transition: color var(--dur) var(--ease-out);
 }
 
-.reg-drag:hover {
+.row-drag:hover {
   color: var(--text-secondary);
 }
 
-.reg-drag:active {
+.row-drag:active {
   cursor: grabbing;
 }
 
-.reg-ex-title {
+.row-ex-text {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--s-2);
 }
 
-.reg-ex-name {
+.row-ex-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s-2);
   font-size: var(--t-lead);
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.012em;
 }
 
-.reg-ex-info {
+/* La categoría, que en esta app es dato, entra como marca de 1 px en el nombre
+   en vez de como filete lateral de la fila: aquí el filete lo ocupa la retícula. */
+.row-ex-mark {
+  width: 3px;
+  height: 14px;
+  border-radius: var(--r-full);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.row-ex-info {
   font-size: var(--t-sm);
   font-weight: 450;
   color: var(--text-muted);
-  margin-left: var(--s-1);
 }
 
-.reg-ex-type {
+.row-ex-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.row-ex-type {
   font-size: var(--t-label);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.reg-note,
-.reg-remove {
-  flex-shrink: 0;
-}
-
-.reg-note {
-  color: var(--accent-text);
-}
-
-.reg-emom {
-  align-self: flex-start;
-}
-
-/* --- Última vez ---------------------------------------------------------------
-   Lo que el usuario compara mentalmente entre serie y serie. Va justo encima de
-   las ruedas, no escondido en un desplegable. */
-
-.reg-last {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-  padding: var(--s-3);
-  border-radius: var(--r-xs);
+.row-emom,
+.row-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-height: 24px;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-full);
   background: var(--surface-raised);
-  font-size: var(--t-sm);
+  color: var(--text-secondary);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.row-emom:hover,
+.row-note:hover {
+  background: var(--surface-hover);
   color: var(--text);
 }
 
-.reg-last-label {
-  color: var(--text-muted);
-  font-weight: 550;
+.row-emom.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-text);
 }
 
-/* --- Series -------------------------------------------------------------------- */
-
-.reg-sets {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
+.row-note {
+  color: var(--accent-text);
 }
 
-.reg-set {
+/* --- Casilla de serie --------------------------------------------------------- */
+
+/* En móvil el ordinal y el botón de quitar van en una línea de rótulo encima, y
+   las dos ruedas ocupan el ancho entero. Puestas en fila junto al rótulo, la
+   caja del valor se quedaba en 24 px y recortaba el peso: "127,5" no cabe. */
+.cell {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) 32px;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'n drop'
+    'wheels wheels';
   align-items: center;
-  gap: var(--s-2);
-}
-
-.reg-set-n {
-  font-size: var(--t-sm);
-  font-weight: 600;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.reg-wheels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-2);
+  gap: var(--s-1) var(--s-2);
   min-width: 0;
 }
 
-.reg-set-remove {
-  width: 32px;
-  height: 32px;
+/* En móvil no se reserva sitio para series que este ejercicio no hace. */
+.cell.is-empty {
+  display: none;
 }
 
-.reg-add-set {
+/* Solo el ordinal: en 375 px cada píxel que se lleve el rótulo se lo quita a la
+   rueda, y una rueda estrecha recorta el peso. La palabra "serie" queda para
+   los lectores de pantalla. */
+.cell-n {
+  grid-area: n;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* La abreviatura ordinal femenina va en minúscula: el text-transform de la
+   línea de rótulo la convertía en "1ᴬ". */
+.cell-n sup {
+  font-size: 0.72em;
+  vertical-align: super;
+  text-transform: none;
+}
+
+.cell-ghost {
+  display: none;
+}
+
+.cell-wheels {
+  grid-area: wheels;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
+
+.cell-drop {
+  grid-area: drop;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.cell-drop:hover {
+  background: var(--surface-hover);
+  color: var(--color-negative);
+}
+
+/* --- Añadir serie y quitar ejercicio ------------------------------------------ */
+
+.row-add {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--s-2);
-  min-height: 42px;
+  min-height: 40px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--r-sm);
   background: transparent;
@@ -439,62 +529,270 @@
     color var(--dur) var(--ease-out);
 }
 
-.reg-add-set:hover {
+.row-add:hover {
   background: var(--surface-raised);
   border-color: var(--accent-line);
   color: var(--accent-text);
 }
 
-/* --- Guardar --------------------------------------------------------------------
-   En escritorio se queda pegado al pie de la columna: la lista puede ser larga y
-   el botón no debería obligar a bajar hasta el final para verlo. */
+.row-remove {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
 
-.reg-commit {
+.row-remove:hover {
+  background: var(--surface-hover);
+  color: var(--color-negative);
+}
+
+.sheet-row {
+  position: relative;
+}
+
+.row-ex {
+  padding-right: var(--s-8);
+}
+
+.row-last {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-radius: var(--r-xs);
+  background: var(--surface-raised);
+  font-size: var(--t-sm);
+  color: var(--text);
+}
+
+.row-last-label {
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+/* --- Estado vacío y pie -------------------------------------------------------- */
+
+.sheet-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-12) var(--s-5);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.sheet-foot {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
   padding: var(--s-4);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
+  border-top: 1px solid var(--line-strong);
+  background: var(--chrome);
 }
 
-.reg-commit-count {
+.sheet-total {
   font-size: var(--t-sm);
   color: var(--text-secondary);
 }
 
-.reg-commit-actions {
+.sheet-actions {
   display: flex;
   gap: var(--s-2);
 }
 
-.reg-commit-actions > * {
+.sheet-actions > * {
   flex: 1;
 }
 
-.reg-save {
+.sheet-save {
   width: 100%;
 }
 
+/* ============================================================================
+   ESCRITORIO: la retícula real
+   ========================================================================== */
+
 @media (min-width: 1024px) {
-  .reg-commit {
-    position: sticky;
-    bottom: var(--s-6);
+  .sheet {
+    overflow: visible;
+  }
+
+  .sheet-cols,
+  .sheet-row {
+    display: grid;
+    grid-template-columns:
+      minmax(240px, auto)
+      repeat(var(--sheet-cols, 1), var(--col-set))
+      var(--col-add)
+      var(--col-remove);
+    align-items: stretch;
+    /* Se estira hasta llenar el marco y crece más allá cuando hacen falta más
+       columnas; el marco es el que hace scroll. */
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* Cabecera de columnas: la regla que ordena la lectura vertical. */
+  .sheet-cols {
+    padding: var(--s-3) var(--s-5);
+    border-bottom: 1px solid var(--line-strong);
+    background: var(--chrome);
+    font-size: var(--t-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .sheet-col-name {
+    align-self: center;
+  }
+
+  .sheet-col-n {
+    align-self: center;
+    padding-left: var(--s-3);
+    border-left: 1px solid var(--line);
+  }
+
+  .sheet-col-n sup {
+    font-size: 0.72em;
+    vertical-align: super;
+    text-transform: none;
+  }
+
+  .sheet-row {
+    gap: 0;
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .sheet-row:hover {
+    background: color-mix(in srgb, var(--surface-raised) 55%, transparent);
+  }
+
+  .row-ex {
+    padding: var(--s-4) var(--s-4) var(--s-4) var(--s-5);
+    align-items: center;
+  }
+
+  /* En la hoja el ejercicio manda sobre su fila entera: la casilla arranca donde
+     acaba el nombre y cada serie queda separada por su propio filete. */
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--s-1);
+    padding: var(--s-3);
+    border-left: 1px solid var(--line);
+  }
+
+  .cell.is-empty {
+    display: block;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 7px,
+      rgb(255 255 255 / 2%) 7px,
+      rgb(255 255 255 / 2%) 8px
+    );
+  }
+
+  /* La rotulación de la serie ya la lleva la cabecera de columnas. */
+  .cell-n {
+    display: none;
+  }
+
+  /* Fila fantasma: el valor de esa misma serie el último día, justo encima del
+     que se está escribiendo. Es el motivo de que esta variante exista. */
+  .cell-ghost {
+    display: block;
+    font-size: var(--t-xs);
+    font-weight: 550;
+    color: var(--text-muted);
+    text-align: center;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cell-ghost.is-blank {
+    color: var(--line-strong);
+  }
+
+  /* Peso encima de repeticiones, como se anota en la hoja de papel: en columna
+     caben más series por pantalla y el par se lee como una sola cifra. */
+  .cell-wheels {
+    flex: none;
+    grid-template-columns: 1fr;
+    gap: var(--s-1);
+  }
+
+  .cell-drop {
+    align-self: center;
+    width: 26px;
+    height: 22px;
+  }
+
+  .row-add {
+    margin: var(--s-3);
+    border-radius: var(--r-xs);
+  }
+
+  .row-add-text {
+    display: none;
+  }
+
+  .row-remove {
+    position: static;
+    align-self: center;
+    justify-self: center;
+    margin-right: var(--s-2);
+  }
+
+  .row-ex {
+    padding-right: var(--s-4);
+  }
+
+  /* El resumen de la última vez sobra: cada serie ya lleva la suya encima. */
+  .row-last {
+    display: none;
+  }
+
+  .sheet-foot {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    box-shadow: var(--shadow-2);
+    padding: var(--s-4) var(--s-5);
   }
 
-  .reg-commit-actions,
-  .reg-save {
+  .sheet-actions,
+  .sheet-save {
     width: auto;
     flex: none;
   }
+
+  .sheet-actions > * {
+    flex: none;
+  }
+
 }
 
-/* --- Hojas de guardado / guardado correcto -------------------------------------- */
+/* --- Hojas de guardado ---------------------------------------------------------- */
 
 .reg-sheet {
   display: flex;
