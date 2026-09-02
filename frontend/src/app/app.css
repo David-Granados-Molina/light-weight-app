@@ -1,26 +1,83 @@
+:host {
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+   Tres regímenes, conmutados por estructura y no por escala tipográfica.
+   < 900px   : una columna + tab-bar inferior          (el gimnasio)
+   900–1279  : rail + contenido, consola flotante      (la mesa)
+   >= 1280   : rail + contenido + consola en columna   (la mesa entera)
+   --------------------------------------------------------------------------- */
+
 .app-shell {
-  min-height: 100vh;
-  background: radial-gradient(circle at 50% 0, #161616, #0b0b0b 70%);
   display: flex;
+  align-items: stretch;
+  min-height: 100dvh;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-6) var(--gutter) calc(var(--tabbar-h) + var(--safe-b) + var(--s-8));
+}
+
+/* Hueco para la barra de sesión acoplada, solo cuando existe. Sin esto la
+   consola tapa el último elemento de la lista. */
+.app-shell.has-console .app-main {
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 96px);
+}
+
+/* --- Autenticación: sin rail, sin tab-bar, sin consola --------------------- */
+
+.app-shell.is-auth {
+  display: block;
+}
+
+.app-shell.is-auth .app-main {
+  display: flex;
+  align-items: center;
   justify-content: center;
+  padding: var(--s-6) var(--gutter);
+  min-height: 100dvh;
 }
 
-.app-content {
-  width: 100%;
-  max-width: 480px;
-  min-height: 100vh;
-  background: var(--color-bg);
-  padding: 24px 18px 110px;
-  position: relative;
-}
+/* --- Escritorio ------------------------------------------------------------ */
 
-.app-content.auth-content {
-  padding-bottom: 24px;
-}
-
-@media (min-width: 600px) {
-  .app-content {
-    border-left: 1px solid var(--color-border);
-    border-right: 1px solid var(--color-border);
+@media (min-width: 900px) {
+  .app-main {
+    padding: var(--s-10) var(--gutter) var(--s-12);
   }
+
+  .app-shell.has-console .app-main {
+    /* La consola flota abajo a la derecha; solo hay que dejar aire, no una
+       banda completa. */
+    padding-bottom: 160px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-shell.has-console .app-main {
+    padding-bottom: var(--s-12);
+  }
+}
+
+/* --- Salto al contenido ---------------------------------------------------- */
+
+.skip-link {
+  position: fixed;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 200;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-sm);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
 }

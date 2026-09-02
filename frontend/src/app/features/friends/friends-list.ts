@@ -3,11 +3,10 @@ import { RouterLink } from '@angular/router';
 import { AdminService } from '../../core/services/admin.service';
 import { AdminUser } from '../../core/models/admin.model';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
-import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 @Component({
   selector: 'app-friends-list',
-  imports: [RouterLink, AppAvatar, ExerciseLoader],
+  imports: [RouterLink, AppAvatar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './friends-list.html',
   styleUrl: './friends-list.css',

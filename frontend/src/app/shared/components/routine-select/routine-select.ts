@@ -2,100 +2,206 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { Routine } from '../../../core/models/routine.model';
 import { CATEGORY_COLOR } from '../../../core/models/labels';
 
+/**
+ * Desplegable de rutinas. No es un `<select>` nativo porque cada opción lleva el
+ * color de su categoría, que en esta app es dato. El padre controla el estado
+ * seleccionado; este componente solo lo muestra y emite la elección.
+ */
 @Component({
   selector: 'app-routine-select',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class.open]': 'open()' },
-  styles: [`
-    :host { display: block; position: relative; }
+  styles: [
+    `
+      :host {
+        display: block;
+        position: relative;
+      }
 
-    .trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px;
-      background: var(--color-surface);
-      color: var(--color-text);
-      border: 1px solid var(--color-border-strong);
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: left;
-    }
+      .trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: var(--s-3);
+        min-height: 46px;
+        padding: 0 var(--s-4);
+        background: var(--surface-raised);
+        color: var(--text);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r-sm);
+        font-size: var(--t-body);
+        font-weight: 550;
+        text-align: left;
+        transition:
+          background var(--dur) var(--ease-out),
+          border-color var(--dur) var(--ease-out);
+      }
 
-    .trigger-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .trigger-placeholder { flex: 1; color: var(--color-text-muted); }
+      .trigger:hover {
+        background: var(--surface-hover);
+      }
 
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+      :host(.open) .trigger {
+        border-color: var(--accent-line);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
 
-    .chevron {
-      flex-shrink: 0;
-      color: var(--color-text-muted);
-      transition: transform 0.15s;
-    }
-    :host.open .chevron { transform: rotate(180deg); }
+      .trigger-name {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
-    .backdrop { position: fixed; inset: 0; z-index: 99; }
+      .trigger-placeholder {
+        flex: 1;
+        color: var(--text-muted);
+      }
 
-    .panel {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      right: 0;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border-strong);
-      border-radius: 12px;
-      overflow: hidden;
-      z-index: 100;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: var(--r-full);
+        flex-shrink: 0;
+      }
 
-    .option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      padding: 13px 14px;
-      background: transparent;
-      color: var(--color-text);
-      border: none;
-      border-bottom: 1px solid var(--color-border);
-      font-size: 14px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: left;
-    }
-    .option:last-child { border-bottom: none; }
-    .option:active { background: var(--color-border); }
-    .option.active { font-weight: 700; }
-    .option.empty { color: var(--color-text-muted); }
-  `],
+      .chevron {
+        flex-shrink: 0;
+        color: var(--text-secondary);
+        transition: transform var(--dur) var(--ease-out);
+      }
+
+      :host(.open) .chevron {
+        transform: rotate(180deg);
+      }
+
+      /* Capta el clic fuera para cerrar. Fija, no absoluta, para que no la
+         recorte ningún ancestro con overflow. */
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 99;
+      }
+
+      .panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        max-height: 320px;
+        overflow-y: auto;
+        background: var(--surface);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--r-md);
+        z-index: 100;
+        box-shadow: var(--shadow-3);
+        padding: var(--s-1) 0;
+        animation: panel-in var(--dur) var(--ease-out);
+      }
+
+      @keyframes panel-in {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+      }
+
+      .option {
+        display: flex;
+        align-items: center;
+        gap: var(--s-3);
+        width: 100%;
+        min-height: 44px;
+        padding: 0 var(--s-4);
+        background: transparent;
+        color: var(--text);
+        border: none;
+        font-size: var(--t-body);
+        font-weight: 500;
+        text-align: left;
+        transition: background var(--dur-fast) var(--ease-out);
+      }
+
+      .option:hover {
+        background: var(--surface-hover);
+      }
+
+      .option.active {
+        background: var(--accent-soft);
+        color: var(--accent-text);
+        font-weight: 650;
+      }
+
+      .option.empty {
+        color: var(--text-muted);
+      }
+
+      .option-name {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    `,
+  ],
   template: `
-    <button type="button" class="trigger" (click)="toggle()" [attr.aria-expanded]="open()" aria-haspopup="listbox">
+    <button
+      type="button"
+      class="trigger"
+      (click)="toggle()"
+      [attr.aria-expanded]="open()"
+      aria-haspopup="listbox"
+      aria-label="Elegir rutina"
+    >
       @if (selected()) {
-        <span class="dot" [style.background]="categoryColor[selected()!.category]"></span>
+        <span class="dot" [style.background]="categoryColor[selected()!.category]" aria-hidden="true"></span>
         <span class="trigger-name">{{ selected()!.name }}</span>
       } @else {
-        <span class="trigger-placeholder">— Sin rutina —</span>
+        <span class="trigger-placeholder">Sin rutina</span>
       }
-      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9l6 6 6-6"/>
+      <svg
+        class="chevron"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M6 9l6 6 6-6" />
       </svg>
     </button>
     @if (open()) {
       <div class="backdrop" (click)="close()"></div>
       <div class="panel" role="listbox">
         @if (allowEmpty()) {
-          <button type="button" class="option empty" [class.active]="!selected()" role="option" (click)="select(null)">— Sin rutina —</button>
+          <button
+            type="button"
+            class="option empty"
+            [class.active]="!selected()"
+            [attr.aria-selected]="!selected()"
+            role="option"
+            (click)="select(null)"
+          >
+            Sin rutina
+          </button>
         }
         @for (r of routines(); track r.id) {
-          <button type="button" class="option" [class.active]="selectedId() === r.id" role="option" (click)="select(r.id)">
-            <span class="dot" [style.background]="categoryColor[r.category]"></span>
-            {{ r.name }}
+          <button
+            type="button"
+            class="option"
+            [class.active]="selectedId() === r.id"
+            [attr.aria-selected]="selectedId() === r.id"
+            role="option"
+            (click)="select(r.id)"
+          >
+            <span class="dot" [style.background]="categoryColor[r.category]" aria-hidden="true"></span>
+            <span class="option-name">{{ r.name }}</span>
           </button>
         }
       </div>

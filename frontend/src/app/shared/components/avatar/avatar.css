@@ -1,36 +1,43 @@
 :host {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
+  display: block;
   width: 100%;
   height: 100%;
-  color: var(--color-accent);
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--surface-raised);
+  color: var(--accent-text);
 }
 
 .avatar-glyph {
   display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  background: #fff;
+}
+
+/* El SVG del avatar se inyecta con [innerHTML], así que no lleva el atributo de
+   encapsulación de Angular y un selector normal no llega hasta él. Los avatares
+   no son cuadrados (viewBox 351×291), por eso se ajustan por ancho y se centran
+   en la caja en vez de estirarse. */
+:host ::ng-deep .avatar-glyph > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
 }
 
 .avatar-initial {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: inherit;
-}
-
-.avatar-glyph ::ng-deep svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  display: block;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 22%;
-  background: #fff;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }

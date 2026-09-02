@@ -1,274 +1,199 @@
-.page {
-  animation: fadeUp 0.4s ease both;
+/* Historial. En móvil los filtros se apilan encima de la lista; en escritorio
+   pasan a una columna fija a la izquierda, porque filtrar y leer resultados es
+   un ciclo y no debería obligar a subir la página cada vez. */
+
+.hist-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-5);
 }
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.back {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.chip {
-  font-weight: 600;
-  font-size: 13px;
-  border: 1px solid var(--color-border-strong);
-  background: transparent;
-  color: #c8c8c8;
-  border-radius: 999px;
-  padding: 9px 16px;
-  cursor: pointer;
-}
-
-.chip.active {
-  background: var(--color-text);
-  border-color: var(--color-text);
-  color: var(--color-accent-contrast);
-}
-
-.chip.active.gym {
-  background: rgba(0, 229, 255, 0.1);
-  border-color: var(--color-gym);
-  color: var(--color-gym);
-}
-
-.chip.active.calistenia {
-  background: rgba(255, 107, 0, 0.1);
-  border-color: var(--color-cali);
-  color: var(--color-cali);
-}
-
-.date-mode-chips {
-  margin-top: 10px;
-}
-
-.date-mode-chips .chip {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.search-input {
-  width: 100%;
-  margin-top: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 13px 14px;
-  color: var(--color-text);
-  font-size: 15px;
-  outline: none;
-  font-family: inherit;
-}
-
-.search-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.date-input {
-  color-scheme: dark;
-}
-
-.date-selects {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.date-select {
-  flex: 1;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 13px 14px;
-  color: var(--color-text);
-  font-size: 15px;
-  outline: none;
-  font-family: inherit;
-}
-
-.date-select-full {
-  width: 100%;
-  margin-top: 12px;
-}
-
-.session-list {
+.hist-filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
+  gap: var(--s-4);
+  min-width: 0;
 }
 
-.session-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 15px;
-  border-left: 3px solid;
-  cursor: pointer;
-}
-
-.session-top {
+.hist-results {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
 }
 
-.session-cat {
+@media (min-width: 1024px) {
+  .hist-grid {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--s-8);
+    align-items: start;
+  }
+
+  .hist-filters {
+    position: sticky;
+    top: var(--s-8);
+    padding: var(--s-5);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface);
+  }
+}
+
+/* En móvil la tira de periodos se desplaza en horizontal en vez de partirse en
+   dos filas y empujar la lista hacia abajo. */
+.hist-period {
+  flex-wrap: nowrap;
+  padding-bottom: var(--s-1);
+}
+
+@media (min-width: 1024px) {
+  .hist-period {
+    flex-wrap: wrap;
+  }
+}
+
+.hist-selects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
+
+@media (min-width: 1024px) {
+  .hist-selects {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Lista ------------------------------------------------------------------ */
+
+.hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.hist-session {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.hist-session-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.hist-session-toggle:hover {
+  background: var(--surface-raised);
+}
+
+.hist-session-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.hist-session-cat {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
+  gap: var(--s-2);
+  font-size: var(--t-label);
   font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+.hist-session-date {
   display: inline-block;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
 }
 
-.session-top-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.hist-session-date::first-letter {
+  text-transform: uppercase;
 }
 
-.session-date {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.session-edit-btn {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  border-radius: 6px;
-  transition: color 0.15s ease;
-}
-
-.session-edit-btn:hover {
-  color: var(--color-accent);
-}
-
-.session-type {
-  font-weight: 700;
-  font-size: 17px;
-  margin-top: 9px;
-}
-
-.session-exercises {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-top: 6px;
-  line-height: 1.5;
-}
-
-.session-count {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  margin-top: 8px;
-}
-
-.session-details {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.session-exercise {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 13px;
-}
-
-.session-exercise-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.session-exercise-name {
+.hist-session-type {
+  font-size: var(--t-lead);
   font-weight: 600;
-  color: var(--color-text);
+  letter-spacing: -0.012em;
+  color: var(--text);
 }
 
-.session-exercise-sets {
-  color: var(--color-text-secondary);
+.hist-session-preview {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hist-session-count {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.hist-session-edit {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+}
+
+.hist-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  margin: 0;
+  padding: var(--s-4);
+  border-top: 1px solid var(--line);
+  animation: hist-detail-in var(--dur) var(--ease-out);
+}
+
+@keyframes hist-detail-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.hist-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-1) var(--s-4);
+  font-size: var(--t-sm);
+}
+
+.hist-detail-name {
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.hist-detail-sets {
+  margin: 0;
+  color: var(--text);
+  font-weight: 550;
   text-align: right;
-  font-size: 12px;
 }
 
-.session-exercise-note {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  font-style: italic;
+.hist-detail-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: 68ch;
 }
 
-.empty {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--color-text-muted);
-  font-size: 15px;
-}
-
-.load-more-btn {
-  width: 100%;
-  margin-top: 12px;
-  background: transparent;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 14px;
-  padding: 14px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.load-more-btn:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.load-more-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
+.hist-more {
+  align-self: center;
+  min-width: 180px;
 }

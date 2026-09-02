@@ -1,87 +1,141 @@
-<div class="page">
-  @if (targetUserId()) {
-    <div class="header">
-      <a routerLink="/amigos" class="back" aria-label="Volver">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="lw-page lw-page-wide prog">
+  <header class="lw-head">
+    @if (targetUserId()) {
+      <a routerLink="/amigos" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Amigos">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
       </a>
-      <h1 class="title">Progreso de {{ targetUserName() }}</h1>
-    </div>
-  } @else {
-    <h1 class="title">Progreso</h1>
-  }
+      <h1 class="lw-title">Progreso de {{ targetUserName() }}</h1>
+    } @else {
+      <h1 class="lw-title">Progreso</h1>
+    }
+  </header>
 
   @if (loading() && !data()) {
-    <app-exercise-loader />
+    <app-exercise-loader text="Cargando tu progreso…" />
   } @else if (!routines().length) {
-    <div class="empty">
-      {{ targetUserId() ? 'Esta persona todavía no tiene rutinas.' : 'Crea una rutina para empezar a ver tu Progreso aquí.' }}
+    <div class="lw-empty">
+      <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19V5M4 19h16" />
+        <path d="M8 15l3.5-4 3 2.5L21 7" />
+      </svg>
+      @if (targetUserId()) {
+        <p class="lw-empty-title">Esta persona todavía no tiene rutinas</p>
+        <p class="lw-empty-text">El progreso se agrupa por rutina, así que aquí no hay nada que mostrar aún.</p>
+      } @else {
+        <p class="lw-empty-title">Aún no hay nada que medir</p>
+        <p class="lw-empty-text">
+          El progreso se agrupa por rutina. Crea una, regístrala unas cuantas veces y aquí verás cómo evoluciona cada
+          ejercicio.
+        </p>
+        <a routerLink="/rutinas/nueva" class="lw-btn-secondary">Crear una rutina</a>
+      }
     </div>
   } @else {
-    <app-routine-select
-      [routines]="routines()"
-      [selectedId]="selectedRoutineId()"
-      (changed)="onRoutineChanged($event)"
-    />
+    <div class="lw-field prog-picker">
+      <span class="lw-label">Rutina</span>
+      <app-routine-select
+        [routines]="routines()"
+        [selectedId]="selectedRoutineId()"
+        (changed)="onRoutineChanged($event)"
+      />
+    </div>
 
     @if (loading()) {
-      <app-exercise-loader />
+      <div class="prog-grid" aria-busy="true">
+        <div class="lw-skel prog-skel"></div>
+        <div class="lw-skel prog-skel"></div>
+      </div>
     } @else {
-      @for (item of data()?.items ?? []; track item.exercise.id) {
-        <div class="exercise-block">
-          <div class="exercise-block-header">
-            <div class="exercise-block-title" [style.color]="categoryColor[item.exercise.category]">
-              {{ item.exercise.name }}
-            </div>
-            <div class="time-toggle" role="group" [attr.aria-label]="'Rango para ' + item.exercise.name">
-              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '3M'" (click)="selectTimeRange(item.exercise.id, '3M')">3M</button>
-              <button type="button" class="time-btn" [class.active]="getTimeRange(item.exercise.id) === '1A'" (click)="selectTimeRange(item.exercise.id, '1A')">1A</button>
-            </div>
-          </div>
-
-          <div class="stats">
-            <div class="stat-card">
-              <div class="stat-label">Récord</div>
-              <div class="stat-value">{{ itemPr(item) }}</div>
-              @if (itemPrReps(item)) {
-                <div class="stat-sub">{{ itemPrReps(item) }}</div>
-              }
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Actual</div>
-              <div class="stat-value">{{ itemActual(item) }}</div>
-              @if (itemActualReps(item)) {
-                <div class="stat-sub">{{ itemActualReps(item) }}</div>
-              }
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Progreso (mes)</div>
-              <div
-                class="stat-value"
-                [class.positive]="itemCambioPositive(item)"
-                [class.negative]="!itemCambioPositive(item)"
-              >
-                {{ itemCambio(item) }}
+      <div class="prog-grid">
+        @for (item of data()?.items ?? []; track item.exercise.id) {
+          <section class="lw-card prog-item">
+            <header class="prog-item-head">
+              <div class="prog-item-title">
+                <h2 class="prog-name" [style.color]="categoryColor[item.exercise.category]">
+                  {{ item.exercise.name }}
+                </h2>
+                <p class="prog-metric">{{ itemChartTitle(item) }}</p>
               </div>
-            </div>
-          </div>
 
-          <div class="chart-card">
-            <div class="chart-title">{{ itemChartTitle(item) }}</div>
-            <div class="chart-wrap">
+              <div class="prog-range" role="group" [attr.aria-label]="'Rango de tiempo para ' + item.exercise.name">
+                <button
+                  type="button"
+                  class="prog-range-btn"
+                  [class.is-active]="getTimeRange(item.exercise.id) === '3M'"
+                  [attr.aria-pressed]="getTimeRange(item.exercise.id) === '3M'"
+                  (click)="selectTimeRange(item.exercise.id, '3M')"
+                >
+                  3M
+                </button>
+                <button
+                  type="button"
+                  class="prog-range-btn"
+                  [class.is-active]="getTimeRange(item.exercise.id) === '1A'"
+                  [attr.aria-pressed]="getTimeRange(item.exercise.id) === '1A'"
+                  (click)="selectTimeRange(item.exercise.id, '1A')"
+                >
+                  1A
+                </button>
+              </div>
+            </header>
+
+            <!-- Fila de datos, no tres tarjetas gemelas: son tres lecturas de la
+                 misma serie y se leen mejor en línea, junto a la gráfica. -->
+            <dl class="prog-stats">
+              <div class="prog-stat">
+                <dt class="prog-stat-label">Récord</dt>
+                <dd class="prog-stat-value lw-num">
+                  {{ itemPr(item) }}
+                  @if (itemPrReps(item)) {
+                    <span class="prog-stat-sub">{{ itemPrReps(item) }}</span>
+                  }
+                </dd>
+              </div>
+              <div class="prog-stat">
+                <dt class="prog-stat-label">Actual</dt>
+                <dd class="prog-stat-value lw-num">
+                  {{ itemActual(item) }}
+                  @if (itemActualReps(item)) {
+                    <span class="prog-stat-sub">{{ itemActualReps(item) }}</span>
+                  }
+                </dd>
+              </div>
+              <div class="prog-stat">
+                <dt class="prog-stat-label">Último mes</dt>
+                <dd
+                  class="prog-stat-value lw-num"
+                  [class.is-up]="itemCambioPositive(item)"
+                  [class.is-down]="!itemCambioPositive(item)"
+                >
+                  {{ itemCambio(item) }}
+                </dd>
+              </div>
+            </dl>
+
+            <div class="prog-chart">
               @switch (getTimeRange(item.exercise.id)) {
                 @case ('3M') {
-                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" height="220" />
                 }
                 @case ('1A') {
-                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" [height]="'200'" />
+                  <p-chart type="line" [data]="itemChartData(item)" [options]="itemChartOptions(item)" height="220" />
                 }
               }
             </div>
+          </section>
+        } @empty {
+          <div class="lw-empty prog-empty">
+            <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 19V5M4 19h16" />
+              <path d="M8 15l3.5-4 3 2.5L21 7" />
+            </svg>
+            <p class="lw-empty-title">Esta rutina no tiene entrenos registrados</p>
+            <p class="lw-empty-text">
+              Regístrala en un entreno y a partir del segundo aquí verás la evolución de cada ejercicio.
+            </p>
           </div>
-        </div>
-      } @empty {
-        <div class="empty">Esta rutina todavía no tiene entrenos registrados.</div>
-      }
+        }
+      </div>
     }
   }
 </div>

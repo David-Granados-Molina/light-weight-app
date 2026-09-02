@@ -1,183 +1,199 @@
-.page {
-  animation: fadeUp 0.4s ease both;
+/* Calendario. En móvil la rejilla y el detalle se apilan; en escritorio van
+   lado a lado, para poder saltar de día en día sin perder de vista el mes. */
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-5);
 }
 
-.header {
+@media (min-width: 1024px) {
+  .cal-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--s-8);
+    align-items: start;
+  }
+}
+
+/* --- Mes --------------------------------------------------------------------- */
+
+.cal-month {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 
-.back {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
-
-.month-nav {
+.cal-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 22px 0 14px;
+  gap: var(--s-3);
 }
 
-.nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  cursor: pointer;
+.cal-month-label {
+  font-size: var(--t-title);
+  font-weight: 650;
+  letter-spacing: -0.016em;
 }
 
-.month-label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 17px;
-}
-
-.weekday-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.weekday {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-muted);
+.cal-month-label::first-letter {
   text-transform: uppercase;
 }
 
-.month-grid {
+.cal-weekdays,
+.cal-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: var(--s-1);
 }
 
-.day-cell {
-  aspect-ratio: 1;
+.cal-weekdays span {
+  text-align: center;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.cal-day {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: default;
-  padding: 0;
+  gap: 3px;
+  aspect-ratio: 1;
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
-.day-cell.out {
-  color: var(--color-text-muted);
-  opacity: 0.35;
+.cal-day.is-out {
+  color: var(--text-muted);
+  opacity: 0.4;
 }
 
-.day-cell.today {
-  border-color: var(--color-accent);
+/* Un día con entreno se marca con superficie propia, no solo con el punto: es
+   lo que permite leer la constancia del mes de un vistazo. */
+.cal-day.has-data {
+  background: var(--surface-raised);
+  color: var(--text);
 }
 
-.day-cell.has-data {
-  cursor: pointer;
+.cal-day.has-data:hover {
+  background: var(--surface-hover);
 }
 
-.day-cell.selected {
-  background: var(--color-surface-alt);
-  border-color: var(--color-text);
+.cal-day.is-today {
+  border-color: var(--line-strong);
+  color: var(--text);
 }
 
-.day-dots {
+.cal-day.is-selected {
+  background: var(--accent-solid);
+  border-color: transparent;
+  color: var(--accent-ink);
+}
+
+.cal-day-dots {
   display: flex;
   gap: 3px;
+  height: 6px;
 }
 
-.dot {
+.cal-day-dots .lw-dot {
   width: 5px;
   height: 5px;
-  border-radius: 50%;
-  display: inline-block;
 }
 
-.day-summary {
-  margin-top: 18px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.summary-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 10px;
-}
-
-.summary-session {
-  border-left: 3px solid;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: var(--color-bg);
-  margin-bottom: 8px;
-}
-
-.summary-session:last-child {
-  margin-bottom: 0;
-}
-
-.summary-type {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.summary-exercise {
+.cal-legend {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  font-size: 13px;
-  padding: 3px 0;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  font-size: var(--t-xs);
+  color: var(--text-secondary);
 }
 
-.summary-exercise-name {
+.cal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* --- Detalle del día ---------------------------------------------------------- */
+
+.cal-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .cal-detail {
+    position: sticky;
+    top: var(--s-8);
+  }
+}
+
+.cal-detail-title {
+  font-size: var(--t-title);
+  font-weight: 650;
+  letter-spacing: -0.016em;
+}
+
+.cal-detail-title::first-letter {
+  text-transform: uppercase;
+}
+
+.cal-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.cal-session-type {
+  font-size: var(--t-lead);
   font-weight: 600;
+  letter-spacing: -0.012em;
 }
 
-.summary-exercise-sets {
-  color: var(--color-text-secondary);
+.cal-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+}
+
+.cal-session-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  font-size: var(--t-sm);
+}
+
+.cal-session-name {
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.cal-session-sets {
+  margin: 0;
+  color: var(--text);
+  font-weight: 550;
   text-align: right;
-  font-size: 12px;
 }
 
-.hint {
-  margin-top: 18px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--color-text-muted);
+.cal-hint {
+  padding: var(--s-8) var(--s-4);
 }

@@ -5,7 +5,6 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
-import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
 import { sessionTypeLabel } from '../../core/models/labels';
 import { dayLetter, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
@@ -51,7 +50,7 @@ const TIP_TICK_MS = 100;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CategoryTag, ExerciseLoader, AppAvatar],
+  imports: [RouterLink, CategoryTag, AppAvatar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',

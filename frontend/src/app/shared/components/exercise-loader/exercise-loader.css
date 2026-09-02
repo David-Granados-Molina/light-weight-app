@@ -1,3 +1,8 @@
+/* Componente de firma del producto: una figura de palotes que hace banca, curl,
+   sentadilla, dominada, flexión o fondos mientras se espera. Se reserva para
+   bloqueos reales de pantalla (login, guardado); las listas cargan con
+   esqueletos, que no hacen esperar a nadie mirando un dibujo. */
+
 :host {
   display: block;
 }
@@ -7,8 +12,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 36px 0;
+  gap: var(--s-4);
+  padding: var(--s-10) 0;
 }
 
 .figure {
@@ -19,7 +24,7 @@
 
 .loader.compact {
   padding: 0;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .loader.compact .figure {
@@ -29,39 +34,41 @@
 
 .part {
   fill: none;
-  stroke: var(--color-text-secondary);
+  stroke: var(--text-secondary);
   stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .head {
-  fill: var(--color-text-secondary);
+  fill: var(--text-secondary);
   stroke: none;
 }
 
+/* El suelo, la barra y los discos van un plano por detrás del cuerpo. */
 .floor {
-  stroke: var(--color-border-strong);
+  stroke: var(--scroll-thumb);
 }
 
 .plate-bar {
-  stroke: var(--color-border-strong);
+  stroke: var(--scroll-thumb);
   stroke-width: 5;
 }
 
 .plate {
-  fill: var(--color-border-strong);
+  fill: var(--scroll-thumb);
   stroke: none;
 }
 
 .loader-text {
-  font-size: 13px;
+  font-size: var(--t-sm);
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
+  letter-spacing: -0.004em;
 }
 
-/* cada ejercicio se dibuja en dos posturas (inicio/fin del movimiento) que
-   se funden entre sí en bucle, dando la sensación de repetición del gesto */
+/* Cada ejercicio se dibuja en dos posturas (inicio y fin del movimiento) que se
+   funden entre sí en bucle, dando la sensación de repetir el gesto. */
 .pose-a,
 .pose-b {
   animation: pose-fade 1.6s ease-in-out infinite;
@@ -78,5 +85,12 @@
   }
   50% {
     opacity: 0;
+  }
+}
+
+/* Sin movimiento: se muestra una sola postura fija en vez de la alternancia. */
+@media (prefers-reduced-motion: reduce) {
+  .pose-b {
+    display: none;
   }
 }

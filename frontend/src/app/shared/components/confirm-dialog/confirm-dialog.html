@@ -1,12 +1,27 @@
-<div class="overlay" (click)="cancelled.emit()">
-  <div class="dialog" (click)="$event.stopPropagation()">
-    <div class="dialog-title">{{ title() }}</div>
+<dialog #dialog class="dialog" (cancel)="onCancelEvent($event)" (click)="onBackdropClick($event)">
+  <div class="dialog-body">
+    <h2 class="dialog-title">{{ title() }}</h2>
     @if (message()) {
-      <div class="dialog-message">{{ message() }}</div>
+      <p class="dialog-message">{{ message() }}</p>
     }
     <div class="dialog-actions">
-      <button type="button" class="cancel-btn" (click)="cancelled.emit()">{{ cancelText() }}</button>
-      <button type="button" class="confirm-btn" (click)="confirmed.emit()">{{ confirmText() }}</button>
+      <button
+        type="button"
+        class="lw-btn-secondary"
+        [attr.autofocus]="danger() ? '' : null"
+        (click)="cancelled.emit()"
+      >
+        {{ cancelText() }}
+      </button>
+      <button
+        type="button"
+        [class.lw-btn-danger]="danger()"
+        [class.lw-btn-primary]="!danger()"
+        [attr.autofocus]="danger() ? null : ''"
+        (click)="confirmed.emit()"
+      >
+        {{ confirmText() }}
+      </button>
     </div>
   </div>
-</div>
+</dialog>

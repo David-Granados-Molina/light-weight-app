@@ -1,324 +1,398 @@
 @if (showReminder()) {
-  <div class="reminder-toast">
-    <span class="reminder-text">Entreno sin guardar — pulsa "Guardar entreno" al final de la página</span>
-    <button type="button" class="reminder-close" (click)="closeReminder()" aria-label="Cerrar aviso">✕</button>
+  <div class="reg-reminder" role="status">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v4.5l3 2" />
+    </svg>
+    <span>Este entreno todavía no está guardado. Pulsa «Guardar entreno» al terminar.</span>
+    <button type="button" class="lw-icon-btn reg-reminder-close" (click)="closeReminder()" aria-label="Cerrar aviso">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
   </div>
 }
 
-<div class="page">
-  <h1 class="title">{{ editingSessionId() ? 'Editar entreno' : 'Registrar entreno' }}</h1>
+<div class="lw-page lw-page-wide reg">
+  <header class="lw-head">
+    <h1 class="lw-title">{{ editingSessionId() ? 'Editar entreno' : 'Registrar entreno' }}</h1>
+  </header>
 
-  <div class="date-row">
-    <div class="date-info">
-      <span class="date-label" [class.today]="selectedDate() === todayIso">{{ selectedDateLabel() }}</span>
-      @if (selectedDate() !== todayIso) {
-        <button type="button" class="today-link" (click)="goToToday()">Volver a hoy</button>
-      }
-    </div>
-    <div class="calendar-pop-wrap">
-      <button type="button" class="date-pick-btn" (click)="openCalendar()" aria-label="Elegir día">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-      </button>
-      @if (showCalendar()) {
-        <div class="calendar-backdrop" (click)="closeCalendar()"></div>
-        <div class="calendar-pop">
-          <div class="month-nav">
-            <button type="button" class="nav-btn" (click)="calendarPrevMonth()" aria-label="Mes anterior">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  <div class="reg-grid">
+    <!-- Panel de preparación: qué día, qué rutina, qué ejercicios. En escritorio
+         se queda fijo mientras se rellena la lista de la derecha. -->
+    <aside class="reg-panel">
+      <div class="lw-card reg-date">
+        <div class="reg-date-main">
+          <span class="lw-label">Fecha</span>
+          <span class="reg-date-value" [class.is-today]="selectedDate() === todayIso">{{ selectedDateLabel() }}</span>
+        </div>
+
+        <div class="reg-date-actions">
+          @if (selectedDate() !== todayIso) {
+            <button type="button" class="lw-btn-ghost reg-today" (click)="goToToday()">Volver a hoy</button>
+          }
+          <div class="reg-cal-anchor">
+            <button
+              type="button"
+              class="lw-icon-btn lw-icon-btn-bordered"
+              [attr.aria-expanded]="showCalendar()"
+              (click)="openCalendar()"
+              aria-label="Elegir otro día"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M3 10h18M8 3v4M16 3v4" />
+              </svg>
             </button>
-            <span class="month-label">{{ calendarMonthLabel() }}</span>
-            <button type="button" class="nav-btn" (click)="calendarNextMonth()" aria-label="Mes siguiente">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
 
-          <div class="weekday-row">
-            @for (h of weekdayHeaders; track h) {
-              <span class="weekday">{{ h }}</span>
-            }
-          </div>
+            @if (showCalendar()) {
+              <div class="reg-cal-backdrop" (click)="closeCalendar()"></div>
+              <div class="reg-cal">
+                <div class="reg-cal-nav">
+                  <button type="button" class="lw-icon-btn" (click)="calendarPrevMonth()" aria-label="Mes anterior">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+                  </button>
+                  <span class="reg-cal-month">{{ calendarMonthLabel() }}</span>
+                  <button type="button" class="lw-icon-btn" (click)="calendarNextMonth()" aria-label="Mes siguiente">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+                  </button>
+                </div>
 
-          <div class="month-grid">
-            @for (week of calendarWeeks(); track $index) {
-              @for (cell of week; track cell.iso) {
-                <button
-                  type="button"
-                  class="day-cell"
-                  [class.out]="!cell.inMonth"
-                  [class.today]="cell.isToday"
-                  [class.selected]="selectedDate() === cell.iso"
-                  [class.has-data]="cell.categories.length > 0"
-                  [disabled]="cell.disabled"
-                  (click)="pickCalendarDay(cell)"
-                >
-                  <span class="day-number">{{ cell.day }}</span>
-                  @if (cell.categories.length > 0) {
-                    <span class="day-dots">
-                      @for (cat of cell.categories; track cat) {
-                        <span class="dot" [style.background]="categoryColor[cat]"></span>
-                      }
-                    </span>
+                <div class="reg-cal-weekdays" aria-hidden="true">
+                  @for (h of weekdayHeaders; track h) {
+                    <span>{{ h }}</span>
                   }
-                </button>
-              }
+                </div>
+
+                <div class="reg-cal-grid">
+                  @for (week of calendarWeeks(); track $index) {
+                    @for (cell of week; track cell.iso) {
+                      <button
+                        type="button"
+                        class="reg-cal-day"
+                        [class.is-out]="!cell.inMonth"
+                        [class.is-today]="cell.isToday"
+                        [class.is-selected]="selectedDate() === cell.iso"
+                        [disabled]="cell.disabled"
+                        (click)="pickCalendarDay(cell)"
+                      >
+                        <span class="lw-num">{{ cell.day }}</span>
+                        @if (cell.categories.length > 0) {
+                          <span class="reg-cal-dots">
+                            @for (cat of cell.categories; track cat) {
+                              <span class="lw-dot" [style.background]="categoryColor[cat]"></span>
+                            }
+                          </span>
+                        }
+                      </button>
+                    }
+                  }
+                </div>
+              </div>
             }
           </div>
         </div>
+      </div>
+
+      @if (editingSessionId() && !loadingDay()) {
+        <p class="reg-editing" role="status">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          Estás editando el entreno del {{ selectedDateLabel() }}
+        </p>
       }
-    </div>
-  </div>
 
-  @if (editingSessionId() && !loadingDay()) {
-    <div class="edit-banner">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-      </svg>
-      Editando el entreno del {{ selectedDateLabel() }}
-    </div>
-  }
-
-  @if (loadingDay()) {
-    <app-exercise-loader text="Cargando entreno…" compact />
-  }
-
-  @if (!loadingRoutines() && routines().length > 0) {
-    <div class="section-label">Rutina</div>
-    <app-routine-select
-      [routines]="routines()"
-      [selectedId]="selectedRoutineId()"
-      [allowEmpty]="true"
-      (changed)="onRoutineChanged($event)"
-    />
-  }
-
-  <app-exercise-picker
-    class="search-wrap"
-    [catalog]="catalog()"
-    [excludeIds]="addedIds()"
-    [placeholder]="searchPlaceholder()"
-    (picked)="addExercise($event)"
-  />
-
-  <div class="added-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-    @for (item of added(); track item.exercise.id; let exIndex = $index) {
-      <div class="exercise-card" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
-        @if (item.note) {
-          <button type="button" class="note-bookmark has-note" (click)="openNoteView(exIndex)" aria-label="Ver nota">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          </button>
-        }
-        <div class="exercise-head">
-          <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
-          </div>
-          <div class="exercise-head-info">
-            <div class="exercise-name">
-              {{ item.exercise.name }}
-              @if (exerciseInfo(item)) {
-                <span class="exercise-info">({{ exerciseInfo(item) }})</span>
-              }
-            </div>
-            <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
-              {{ typeLabel[item.exercise.type] }}
-            </div>
-          </div>
-          <button type="button" class="remove-btn" (click)="removeExercise(exIndex)" aria-label="Eliminar ejercicio">
-            ✕
-          </button>
+      @if (!loadingRoutines() && routines().length > 0) {
+        <div class="lw-field">
+          <span class="lw-label">Rutina</span>
+          <app-routine-select
+            [routines]="routines()"
+            [selectedId]="selectedRoutineId()"
+            [allowEmpty]="true"
+            (changed)="onRoutineChanged($event)"
+          />
         </div>
+      }
 
-        @if (canToggleEmom(item)) {
-          <button
-            type="button"
-            class="emom-toggle"
-            [class.active]="item.inputTypeOverride === 'emom'"
-            (click)="toggleEmom(exIndex)"
-          >
-            {{ item.inputTypeOverride === 'emom' ? 'MODO EMOM' : 'MODO EMOM' }}
-          </button>
-        }
+      <div class="lw-field">
+        <span class="lw-label">Añadir ejercicio</span>
+        <app-exercise-picker
+          [catalog]="catalog()"
+          [excludeIds]="addedIds()"
+          [placeholder]="searchPlaceholder()"
+          (picked)="addExercise($event)"
+        />
+      </div>
+    </aside>
 
-        @if (lastSummary(item); as last) {
-          <div class="last-session">
-            <span class="last-label">Última vez ({{ last.when }}):</span> {{ last.sets }}
-          </div>
-        }
+    <!-- Lista de trabajo: el entreno real. -->
+    <div class="reg-main">
+      @if (loadingDay()) {
+        <div class="lw-card reg-loading">
+          <app-exercise-loader text="Cargando el entreno de ese día…" compact />
+        </div>
+      }
 
-        <div class="sets">
-          @for (set of item.sets; track $index; let setIndex = $index) {
-            <div class="set-row">
-              <span class="set-label">{{ setIndex + 1 }}</span>
+      <div class="reg-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+        @for (item of added(); track item.exercise.id; let exIndex = $index) {
+          <article class="lw-card lw-spine reg-ex" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
+            <div class="reg-ex-head">
+              <button type="button" class="reg-drag" cdkDragHandle aria-label="Arrastrar para reordenar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
+                  <circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" />
+                  <circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" />
+                </svg>
+              </button>
 
-              <div class="wheels">
-                @switch (effectiveInputType(item)) {
-                  @case ('tiempo') {
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="300"
-                      [step]="0.5"
-                      [decimals]="1"
-                      unit="kg"
-                      [value]="set.weight ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'weight', $event)"
-                    />
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="600"
-                      [step]="5"
-                      unit="seg"
-                      [value]="set.time ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
-                    />
+              <div class="reg-ex-title">
+                <h2 class="reg-ex-name">
+                  {{ item.exercise.name }}
+                  @if (exerciseInfo(item)) {
+                    <span class="reg-ex-info">{{ exerciseInfo(item) }}</span>
                   }
-                  @case ('min') {
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="5"
-                      [step]="1"
-                      unit="h"
-                      [value]="cardioHours(exIndex, setIndex)"
-                      (valueChange)="setCardioHours(exIndex, setIndex, $event)"
-                    />
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="55"
-                      [step]="5"
-                      unit="min"
-                      [value]="cardioMins(exIndex, setIndex)"
-                      (valueChange)="setCardioMins(exIndex, setIndex, $event)"
-                    />
-                  }
-                  @case ('emom') {
-                    <app-number-wheel
-                      [min]="1"
-                      [max]="60"
-                      [step]="1"
-                      unit="min"
-                      [value]="set.time ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
-                    />
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="100"
-                      [step]="1"
-                      unit="reps/min"
-                      [value]="set.reps ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
-                    />
-                  }
-                  @default {
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="300"
-                      [step]="0.5"
-                      [decimals]="1"
-                      unit="kg"
-                      [value]="set.weight ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'weight', $event)"
-                    />
-                    <app-number-wheel
-                      [min]="0"
-                      [max]="100"
-                      [step]="1"
-                      unit="reps"
-                      [value]="set.reps ?? null"
-                      (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
-                    />
-                  }
-                }
+                </h2>
+                <span class="reg-ex-type" [style.color]="categoryColor[item.exercise.category]">
+                  {{ typeLabel[item.exercise.type] }}
+                </span>
               </div>
 
-              @if (item.sets.length > 1) {
-                <button type="button" class="remove-set-btn" (click)="removeSet(exIndex, setIndex)" aria-label="Eliminar serie">
-                  ✕
+              @if (item.note) {
+                <button type="button" class="lw-icon-btn reg-note" (click)="openNoteView(exIndex)" aria-label="Ver la nota de este ejercicio">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
                 </button>
               }
+
+              <button type="button" class="lw-icon-btn reg-remove" (click)="removeExercise(exIndex)" [attr.aria-label]="'Quitar ' + item.exercise.name">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
             </div>
-          }
-        </div>
 
-        <button type="button" class="add-set-btn" (click)="addSet(exIndex)">+ Añadir serie</button>
-      </div>
-    } @empty {
-      <div class="empty">Busca un ejercicio o elige una rutina para empezar</div>
-    }
-  </div>
+            @if (canToggleEmom(item)) {
+              <button
+                type="button"
+                class="lw-chip reg-emom"
+                [class.is-active]="item.inputTypeOverride === 'emom'"
+                [attr.aria-pressed]="item.inputTypeOverride === 'emom'"
+                (click)="toggleEmom(exIndex)"
+              >
+                Modo EMOM
+              </button>
+            }
 
-  @if (added().length > 0) {
-    @if (editingSessionId()) {
-      <div class="edit-actions">
-        <button type="button" class="cancel-edit-btn" [disabled]="saving()" (click)="cancelEdit()">Cancelar edición</button>
-        <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">Editar entreno</button>
-      </div>
-    } @else {
-      <button type="button" class="save-btn" [disabled]="saving()" (click)="save()">
-        Guardar entreno
-      </button>
-    }
-    @if (saveError()) {
-      <div class="save-error">No se ha podido guardar el entreno. Comprueba tu conexión e inténtalo de nuevo.</div>
-    }
-  }
+            @if (lastSummary(item); as last) {
+              <p class="reg-last lw-num">
+                <span class="reg-last-label">Última vez ({{ last.when }})</span>
+                {{ last.sets }}
+              </p>
+            }
 
-  @if (saving()) {
-    <div class="saving-overlay">
-      <div class="saving-sheet">
-        <app-exercise-loader text="" compact />
-        <div class="saving-title">Guardando entreno…</div>
-        <div class="saving-text">
-          No salgas de aquí hasta que se confirme que el entreno se ha guardado. Puede tardar unos segundos.
-        </div>
-      </div>
-    </div>
-  }
+            <div class="reg-sets">
+              @for (set of item.sets; track $index; let setIndex = $index) {
+                <div class="reg-set">
+                  <span class="reg-set-n lw-num">{{ setIndex + 1 }}</span>
 
-  @if (saved()) {
-    <div class="saved-overlay">
-      <div class="saved-sheet">
-        <div class="saved-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0B0B0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-        </div>
-        <div class="saved-title">¡Entreno guardado!</div>
-        <div class="saved-summary">{{ savedSummary() }}</div>
+                  <div class="reg-wheels">
+                    @switch (effectiveInputType(item)) {
+                      @case ('tiempo') {
+                        <app-number-wheel
+                          [min]="0" [max]="300" [step]="0.5" [decimals]="1" unit="kg"
+                          [value]="set.weight ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'weight', $event)"
+                        />
+                        <app-number-wheel
+                          [min]="0" [max]="600" [step]="5" unit="seg"
+                          [value]="set.time ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
+                        />
+                      }
+                      @case ('min') {
+                        <app-number-wheel
+                          [min]="0" [max]="5" [step]="1" unit="h"
+                          [value]="cardioHours(exIndex, setIndex)"
+                          (valueChange)="setCardioHours(exIndex, setIndex, $event)"
+                        />
+                        <app-number-wheel
+                          [min]="0" [max]="55" [step]="5" unit="min"
+                          [value]="cardioMins(exIndex, setIndex)"
+                          (valueChange)="setCardioMins(exIndex, setIndex, $event)"
+                        />
+                      }
+                      @case ('emom') {
+                        <app-number-wheel
+                          [min]="1" [max]="60" [step]="1" unit="min"
+                          [value]="set.time ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'time', $event)"
+                        />
+                        <app-number-wheel
+                          [min]="0" [max]="100" [step]="1" unit="reps/min"
+                          [value]="set.reps ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
+                        />
+                      }
+                      @default {
+                        <app-number-wheel
+                          [min]="0" [max]="300" [step]="0.5" [decimals]="1" unit="kg"
+                          [value]="set.weight ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'weight', $event)"
+                        />
+                        <app-number-wheel
+                          [min]="0" [max]="100" [step]="1" unit="reps"
+                          [value]="set.reps ?? null"
+                          (valueChange)="setValue(exIndex, setIndex, 'reps', $event)"
+                        />
+                      }
+                    }
+                  </div>
 
-        @if (comparisonMessage()) {
-          <div class="saved-comparison">{{ comparisonMessage() }}</div>
+                  @if (item.sets.length > 1) {
+                    <button
+                      type="button"
+                      class="lw-icon-btn reg-set-remove"
+                      (click)="removeSet(exIndex, setIndex)"
+                      [attr.aria-label]="'Quitar la serie ' + (setIndex + 1)"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" />
+                      </svg>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <button type="button" class="reg-add-set" (click)="addSet(exIndex)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Añadir serie
+            </button>
+          </article>
+        } @empty {
+          <div class="lw-empty">
+            <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6.5 9v6M17.5 9v6M3 10.5v3M21 10.5v3M6.5 12h11" />
+            </svg>
+            <p class="lw-empty-title">Aún no hay nada en este entreno</p>
+            <p class="lw-empty-text">
+              Carga una rutina para partir de tus objetivos, o busca ejercicios sueltos en el catálogo.
+            </p>
+          </div>
         }
+      </div>
 
-        <div class="share-row">
-          @if (canShareNative) {
-            <button type="button" class="share-btn" (click)="shareNative()" aria-label="Compartir">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-              Compartir
+      @if (added().length > 0) {
+        <div class="reg-commit">
+          <p class="reg-commit-count lw-num">
+            {{ added().length }} {{ added().length === 1 ? 'ejercicio' : 'ejercicios' }}
+            <span aria-hidden="true">·</span>
+            {{ totalSeries() }} {{ totalSeries() === 1 ? 'serie' : 'series' }}
+          </p>
+
+          @if (editingSessionId()) {
+            <div class="reg-commit-actions">
+              <button type="button" class="lw-btn-secondary" [disabled]="saving()" (click)="cancelEdit()">
+                Cancelar edición
+              </button>
+              <button type="button" class="lw-btn-primary" [disabled]="saving()" (click)="save()">
+                Guardar cambios
+              </button>
+            </div>
+          } @else {
+            <button type="button" class="lw-btn-primary reg-save" [disabled]="saving()" (click)="save()">
+              Guardar entreno
             </button>
           }
-          <button type="button" class="share-btn whatsapp" (click)="shareWhatsapp()" aria-label="Compartir en WhatsApp">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.3-.6-2.2-1.1-3.1-2.6-.2-.3 0-.5.1-.6.2-.2.4-.5.6-.7.1-.2.1-.4 0-.6-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4-.2 0-.4 0-.6.1-.2.1-.9.4-.9 1.6 0 1.2.9 2.4 1 2.6.1.2 1.7 2.7 4.2 3.7 2 .8 2.4.6 2.8.6.4 0 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.5-.2zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z"/></svg>
-            WhatsApp
-          </button>
-          <button type="button" class="share-btn" (click)="copyShareText()" aria-label="Copiar resumen">
-            @if (shareCopied()) {
-              ✓ Copiado
-            } @else {
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copiar
-            }
-          </button>
         </div>
 
-        <button type="button" class="saved-primary" (click)="goHistorial()">Ver en historial</button>
-        <button type="button" class="saved-secondary" (click)="closeSaved()">Seguir aquí</button>
+        @if (saveError()) {
+          <div class="lw-error" role="alert">
+            No se ha podido guardar el entreno. Comprueba tu conexión e inténtalo de nuevo; lo que has escrito sigue aquí.
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (saving()) {
+  <div class="lw-overlay">
+    <div class="lw-sheet reg-sheet">
+      <app-exercise-loader text="" compact />
+      <h2 class="reg-sheet-title">Guardando entreno…</h2>
+      <p class="reg-sheet-text">No cierres esta pantalla hasta que se confirme. Puede tardar unos segundos.</p>
+    </div>
+  </div>
+}
+
+@if (saved()) {
+  <div class="lw-overlay">
+    <div class="lw-sheet reg-sheet">
+      <span class="reg-saved-mark" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </span>
+      <h2 class="reg-sheet-title">Entreno guardado</h2>
+      <p class="reg-sheet-summary lw-num">{{ savedSummary() }}</p>
+
+      @if (comparisonMessage()) {
+        <p class="reg-sheet-compare">{{ comparisonMessage() }}</p>
+      }
+
+      <div class="reg-share">
+        @if (canShareNative) {
+          <button type="button" class="lw-btn-secondary reg-share-btn" (click)="shareNative()">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+              <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+            </svg>
+            Compartir
+          </button>
+        }
+        <button type="button" class="lw-btn-secondary reg-share-btn" (click)="shareWhatsapp()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.3-.6-2.2-1.1-3.1-2.6-.2-.3 0-.5.1-.6.2-.2.4-.5.6-.7.1-.2.1-.4 0-.6-.1-.2-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4-.2 0-.4 0-.6.1-.2.1-.9.4-.9 1.6 0 1.2.9 2.4 1 2.6.1.2 1.7 2.7 4.2 3.7 2 .8 2.4.6 2.8.6.4 0 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.5-.2zM12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2z" />
+          </svg>
+          WhatsApp
+        </button>
+        <button type="button" class="lw-btn-secondary reg-share-btn" (click)="copyShareText()">
+          @if (shareCopied()) {
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+            Copiado
+          } @else {
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            Copiar
+          }
+        </button>
+      </div>
+
+      <div class="reg-saved-actions">
+        <button type="button" class="lw-btn-primary" (click)="goHistorial()">Ver en historial</button>
+        <button type="button" class="lw-btn-ghost" (click)="closeSaved()">Seguir aquí</button>
       </div>
     </div>
-  }
-</div>
+  </div>
+}
 
 @if (pendingRoutine()) {
   <app-confirm-dialog
     title="Cargar rutina"
-    message="Se sustituirán los ejercicios añadidos por los de esta rutina. ¿Continuar?"
-    confirmText="Cargar"
+    message="Se sustituirán los ejercicios que ya has añadido por los de esta rutina."
+    confirmText="Cargar rutina"
+    [danger]="false"
     (confirmed)="confirmLoadRoutine()"
     (cancelled)="cancelLoadRoutine()"
   />
@@ -326,9 +400,9 @@
 
 @if (pendingDate()) {
   <app-confirm-dialog
-    title="Cambiar fecha"
-    message="Se perderán los ejercicios añadidos. ¿Continuar?"
-    confirmText="Cambiar"
+    title="Cambiar de día"
+    message="Se perderán los ejercicios que has añadido y todavía no has guardado."
+    confirmText="Cambiar de día"
     (confirmed)="confirmDateChange()"
     (cancelled)="cancelDateChange()"
   />
@@ -336,9 +410,10 @@
 
 @if (showDateConfirm()) {
   <app-confirm-dialog
-    title="Fecha distinta a hoy"
-    [message]="'Vas a guardar este entreno con fecha ' + selectedDateLabel() + ', que no es hoy. ¿Confirmas?'"
+    title="Este entreno no es de hoy"
+    [message]="'Se guardará con fecha ' + selectedDateLabel() + '. ¿Es correcto?'"
     confirmText="Guardar"
+    [danger]="false"
     (confirmed)="confirmSaveDate()"
     (cancelled)="cancelSaveDate()"
   />
@@ -357,7 +432,6 @@
   [contentStyle]="{ overflowY: 'auto' }"
 >
   @if (noteViewIndex() !== null) {
-    <p class="note-view-text">{{ added()[noteViewIndex()!].note }}</p>
+    <p class="reg-note-text">{{ added()[noteViewIndex()!].note }}</p>
   }
 </p-dialog>
-

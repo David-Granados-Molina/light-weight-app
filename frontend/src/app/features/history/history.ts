@@ -9,7 +9,6 @@ import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
 import { effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
-import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 type HistFilter = 'todos' | Category;
 type DateMode = 'todos' | 'dia' | 'mes' | 'anio';
@@ -44,7 +43,7 @@ function subtractDays(iso: string, days: number): string {
 
 @Component({
   selector: 'app-history',
-  imports: [ExerciseLoader, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './history.html',
   styleUrl: './history.css',

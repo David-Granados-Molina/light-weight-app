@@ -1,146 +1,209 @@
-<div class="page">
-  <div class="header">
-    <a routerLink="/rutinas" class="back" aria-label="Volver">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="lw-page lw-page-wide rf">
+  <header class="lw-head">
+    <a routerLink="/rutinas" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Rutinas">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
     </a>
-    <h1 class="title">{{ isEdit() ? 'Editar rutina' : 'Nueva rutina' }}</h1>
-  </div>
+    <h1 class="lw-title">{{ isEdit() ? 'Editar rutina' : 'Nueva rutina' }}</h1>
+  </header>
 
   @if (loading()) {
-    <app-exercise-loader />
+    <div class="lw-skel-list" aria-busy="true">
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+    </div>
   } @else {
-    <label class="field-label">Nombre</label>
-    <input class="text-input" type="text" placeholder="Ej. Empuje" [value]="name()" (input)="onNameInput($event)" />
-
-    <label class="field-label">Ejercicios</label>
-    <app-exercise-picker
-      class="search-wrap"
-      [catalog]="catalog()"
-      [excludeIds]="exerciseIds()"
-      (picked)="addExercise($event)"
-    />
-    @if (!creatingExercise()) {
-      <button type="button" class="create-option" (click)="startCreateExercise()">+ Crear ejercicio nuevo</button>
-    }
-
-    @if (creatingExercise()) {
-      <div class="create-card">
-        <div class="field-label">Nombre</div>
-        <input
-          class="text-input"
-          type="text"
-          placeholder="Ej. Press declinado"
-          [value]="newExerciseName()"
-          (input)="onNewExerciseNameInput($event)"
-        />
-        <div class="field-label">Categoría</div>
-        <div class="mini-chips">
-          <button type="button" class="mini-chip" [class.active]="newExerciseCategory() === 'gym'" (click)="selectNewExerciseCategory('gym')">Gym</button>
-          <button type="button" class="mini-chip" [class.active]="newExerciseCategory() === 'calistenia'" (click)="selectNewExerciseCategory('calistenia')">Calistenia</button>
+    <div class="rf-grid">
+      <aside class="rf-panel">
+        <div class="lw-field">
+          <label class="lw-label" for="rf-name">Nombre de la rutina</label>
+          <input
+            id="rf-name"
+            class="lw-input"
+            type="text"
+            placeholder="Ej. Empuje"
+            [value]="name()"
+            (input)="onNameInput($event)"
+          />
         </div>
-        <div class="field-label">Tipo de movimiento</div>
-        <div class="mini-chips">
-          @for (type of exerciseTypes; track type) {
-            <button
-              type="button"
-              class="mini-chip"
-              [class.active]="newExerciseType() === type"
-              (click)="selectNewExerciseType(type)"
-            >
-              {{ typeLabel[type] }}
+
+        <div class="lw-field">
+          <span class="lw-label">Añadir ejercicio</span>
+          <app-exercise-picker [catalog]="catalog()" [excludeIds]="exerciseIds()" (picked)="addExercise($event)" />
+
+          @if (!creatingExercise()) {
+            <button type="button" class="rf-create-open" (click)="startCreateExercise()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Crear un ejercicio que no está en el catálogo
             </button>
           }
         </div>
-        <div class="field-label">Se mide en</div>
-        <div class="mini-chips">
-          @for (inputType of inputTypes; track inputType) {
-            <button
-              type="button"
-              class="mini-chip"
-              [class.active]="newExerciseInputType() === inputType"
-              (click)="selectNewExerciseInputType(inputType)"
-            >
-              {{ inputTypeLabel[inputType] }}
-            </button>
-          }
-        </div>
-        <div class="create-actions">
-          <button type="button" class="ghost-btn" (click)="cancelCreateExercise()">Cancelar</button>
-          <button
-            type="button"
-            class="primary-btn"
-            [disabled]="newExerciseName().trim().length < 2"
-            (click)="confirmCreateExercise()"
-          >
-            Crear y añadir
-          </button>
-        </div>
-      </div>
-    }
 
-    <div class="exercise-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-      @for (item of exercises(); track item.exerciseId; let i = $index) {
-        <div class="exercise-row" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
-          <button
-            type="button"
-            class="note-bookmark"
-            [class.has-note]="item.note"
-            (click)="openNoteDialog(i)"
-            [attr.aria-label]="item.note ? 'Ver o editar nota' : 'Añadir nota'"
-          >
-            @if (item.note) {
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            } @else {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            }
-          </button>
-          <div class="drag-handle" cdkDragHandle aria-label="Arrastrar para reordenar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
-          </div>
-          <div class="exercise-main">
-            <div class="exercise-top">
-              <div class="exercise-info">
-                <div class="exercise-name">{{ item.exercise.name }}</div>
-                <div class="exercise-type" [style.color]="categoryColor[item.exercise.category]">
-                  {{ typeLabel[item.exercise.type] }}
-                </div>
-              </div>
-              <button type="button" class="remove-btn" (click)="askRemoveExercise(i)" aria-label="Quitar ejercicio">✕</button>
+        @if (creatingExercise()) {
+          <div class="lw-card rf-create">
+            <div class="lw-field">
+              <label class="lw-label" for="rf-new-name">Nombre</label>
+              <input
+                id="rf-new-name"
+                class="lw-input"
+                type="text"
+                placeholder="Ej. Press declinado"
+                [value]="newExerciseName()"
+                (input)="onNewExerciseNameInput($event)"
+              />
             </div>
 
-            @if (item.exercise.inputType === 'min') {
-              <!-- Cardio: series + duración en una fila -->
-              <div class="targets targets-single">
-                <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
-                <app-number-wheel [min]="0" [max]="5" [step]="1" unit="h" compact [value]="cardioTargetHours(i)" (valueChange)="setCardioHours(i, $event)" />
-                <app-number-wheel [min]="0" [max]="55" [step]="5" unit="min" compact [value]="cardioTargetMins(i)" (valueChange)="setCardioMins(i, $event)" />
+            <div class="lw-field">
+              <span class="lw-label">Categoría</span>
+              <div class="lw-chips">
+                <button type="button" class="lw-chip is-gym" [class.is-active]="newExerciseCategory() === 'gym'" [attr.aria-pressed]="newExerciseCategory() === 'gym'" (click)="selectNewExerciseCategory('gym')">Gym</button>
+                <button type="button" class="lw-chip is-cali" [class.is-active]="newExerciseCategory() === 'calistenia'" [attr.aria-pressed]="newExerciseCategory() === 'calistenia'" (click)="selectNewExerciseCategory('calistenia')">Calistenia</button>
               </div>
-            } @else if (isTimeExercise(item.exercise)) {
-              <!-- Tiempo/EMOM: una fila -->
-              <div class="targets targets-single">
-                <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
-                <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'min ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMin" (valueChange)="setTarget(i, 'targetRepsMin', $event)" />
-                <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'max ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMax" (valueChange)="setTarget(i, 'targetRepsMax', $event)" />
-              </div>
-            } @else {
-              <!-- Peso/Reps: fila superior (series · kg · RIR) + fila inferior (min · max) -->
-              <div class="targets targets-top">
-                <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
-                @if (showWeight(item.exercise)) {
-                  <app-number-wheel [min]="0" [max]="300" [step]="0.5" [decimals]="1" unit="kg" compact [value]="item.targetWeight" (valueChange)="setTargetWeight(i, $event)" />
+            </div>
+
+            <div class="lw-field">
+              <span class="lw-label">Tipo de movimiento</span>
+              <div class="lw-chips">
+                @for (type of exerciseTypes; track type) {
+                  <button
+                    type="button"
+                    class="lw-chip"
+                    [class.is-active]="newExerciseType() === type"
+                    [attr.aria-pressed]="newExerciseType() === type"
+                    (click)="selectNewExerciseType(type)"
+                  >
+                    {{ typeLabel[type] }}
+                  </button>
                 }
-                <app-number-wheel [min]="0" [max]="10" [step]="1" unit="RIR" compact [value]="item.targetRIR" (valueChange)="setTargetRIR(i, $event)" />
               </div>
-              <div class="targets targets-bottom">
-                <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'min ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMin" (valueChange)="setTarget(i, 'targetRepsMin', $event)" />
-                <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'max ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMax" (valueChange)="setTarget(i, 'targetRepsMax', $event)" />
+            </div>
+
+            <div class="lw-field">
+              <span class="lw-label">Se mide en</span>
+              <div class="lw-chips">
+                @for (inputType of inputTypes; track inputType) {
+                  <button
+                    type="button"
+                    class="lw-chip"
+                    [class.is-active]="newExerciseInputType() === inputType"
+                    [attr.aria-pressed]="newExerciseInputType() === inputType"
+                    (click)="selectNewExerciseInputType(inputType)"
+                  >
+                    {{ inputTypeLabel[inputType] }}
+                  </button>
+                }
               </div>
-            }
+            </div>
+
+            <div class="rf-create-actions">
+              <button type="button" class="lw-btn-secondary" (click)="cancelCreateExercise()">Cancelar</button>
+              <button
+                type="button"
+                class="lw-btn-primary"
+                [disabled]="newExerciseName().trim().length < 2"
+                (click)="confirmCreateExercise()"
+              >
+                Crear y añadir
+              </button>
+            </div>
           </div>
+        }
+      </aside>
+
+      <div class="rf-main">
+        <div class="rf-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+          @for (item of exercises(); track item.exerciseId; let i = $index) {
+            <article class="lw-card lw-spine rf-row" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
+              <div class="rf-row-head">
+                <button type="button" class="rf-drag" cdkDragHandle aria-label="Arrastrar para reordenar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" />
+                    <circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" />
+                    <circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" />
+                  </svg>
+                </button>
+
+                <div class="rf-row-title">
+                  <h2 class="rf-row-name">{{ item.exercise.name }}</h2>
+                  <span class="rf-row-type" [style.color]="categoryColor[item.exercise.category]">
+                    {{ typeLabel[item.exercise.type] }}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  class="lw-icon-btn rf-note"
+                  [class.has-note]="item.note"
+                  (click)="openNoteDialog(i)"
+                  [attr.aria-label]="item.note ? 'Ver o editar la nota de ' + item.exercise.name : 'Añadir una nota a ' + item.exercise.name"
+                >
+                  @if (item.note) {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+                  }
+                </button>
+
+                <button type="button" class="lw-icon-btn rf-remove" (click)="askRemoveExercise(i)" [attr.aria-label]="'Quitar ' + item.exercise.name">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+
+              @if (item.exercise.inputType === 'min') {
+                <div class="rf-targets rf-targets-3">
+                  <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
+                  <app-number-wheel [min]="0" [max]="5" [step]="1" unit="h" compact [value]="cardioTargetHours(i)" (valueChange)="setCardioHours(i, $event)" />
+                  <app-number-wheel [min]="0" [max]="55" [step]="5" unit="min" compact [value]="cardioTargetMins(i)" (valueChange)="setCardioMins(i, $event)" />
+                </div>
+              } @else if (isTimeExercise(item.exercise)) {
+                <div class="rf-targets rf-targets-3">
+                  <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
+                  <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'min ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMin" (valueChange)="setTarget(i, 'targetRepsMin', $event)" />
+                  <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'max ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMax" (valueChange)="setTarget(i, 'targetRepsMax', $event)" />
+                </div>
+              } @else {
+                <div class="rf-targets rf-targets-flow">
+                  <app-number-wheel [min]="1" [max]="20" [step]="1" unit="series" compact [value]="item.targetSets" (valueChange)="setTarget(i, 'targetSets', $event)" />
+                  @if (showWeight(item.exercise)) {
+                    <app-number-wheel [min]="0" [max]="300" [step]="0.5" [decimals]="1" unit="kg" compact [value]="item.targetWeight" (valueChange)="setTargetWeight(i, $event)" />
+                  }
+                  <app-number-wheel [min]="0" [max]="10" [step]="1" unit="RIR" compact [value]="item.targetRIR" (valueChange)="setTargetRIR(i, $event)" />
+                  <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'min ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMin" (valueChange)="setTarget(i, 'targetRepsMin', $event)" />
+                  <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'max ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMax" (valueChange)="setTarget(i, 'targetRepsMax', $event)" />
+                </div>
+              }
+            </article>
+          } @empty {
+            <div class="lw-empty">
+              <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <p class="lw-empty-title">La rutina está vacía</p>
+              <p class="lw-empty-text">
+                Busca ejercicios en el catálogo y fija sus objetivos: series, rango de repeticiones y peso. Al registrar
+                partirás de aquí.
+              </p>
+            </div>
+          }
         </div>
-      } @empty {
-        <div class="empty">Añade ejercicios a la rutina</div>
-      }
+
+        @if (error()) {
+          <div class="lw-error" role="alert">{{ error() }}</div>
+        }
+
+        <div class="rf-commit">
+          <button type="button" class="lw-btn-primary rf-save" [disabled]="!canSave()" (click)="save()">
+            {{ saving() ? 'Guardando…' : 'Guardar rutina' }}
+          </button>
+          @if (isEdit()) {
+            <button type="button" class="lw-btn-danger" (click)="askDeleteRoutine()">Eliminar rutina</button>
+          }
+        </div>
+      </div>
     </div>
 
     <p-dialog
@@ -157,36 +220,26 @@
     >
       @if (noteDialogIndex() !== null) {
         <textarea
-          class="note-dialog-textarea"
+          class="lw-textarea"
           rows="6"
-          placeholder="Nota (ej: foco en excéntrica, agarre neutro…)"
+          aria-label="Nota del ejercicio"
+          placeholder="Ej. foco en la excéntrica, agarre neutro…"
           [value]="exercises()[noteDialogIndex()!].note"
           (input)="setNote(noteDialogIndex()!, $event)"
         ></textarea>
       }
-      <div class="note-dialog-actions">
-        <button type="button" class="primary-btn" (click)="closeNoteDialog()">Listo</button>
+      <div class="rf-note-actions">
+        <button type="button" class="lw-btn-primary" (click)="closeNoteDialog()">Listo</button>
       </div>
     </p-dialog>
-
-    @if (error()) {
-      <div class="error">{{ error() }}</div>
-    }
-
-    <button type="button" class="save-btn" [disabled]="!canSave()" (click)="save()">
-      {{ saving() ? 'Guardando…' : 'Guardar rutina' }}
-    </button>
-
-    @if (isEdit()) {
-      <button type="button" class="delete-btn" (click)="askDeleteRoutine()">Eliminar rutina</button>
-    }
   }
 </div>
 
 @if (removeIndex() !== null) {
   <app-confirm-dialog
     title="Quitar ejercicio"
-    message="¿Seguro que quieres quitar este ejercicio de la rutina?"
+    message="Se quita solo de esta rutina; el ejercicio sigue en el catálogo."
+    confirmText="Quitar"
     (confirmed)="confirmRemoveExercise()"
     (cancelled)="cancelRemoveExercise()"
   />
@@ -195,20 +248,18 @@
 @if (confirmDeleteRoutine()) {
   <app-confirm-dialog
     title="Eliminar rutina"
-    message="Esta acción no se puede deshacer. ¿Seguro que quieres eliminar la rutina?"
+    message="Esta acción no se puede deshacer. Los entrenos que ya registraste con ella se conservan."
     (confirmed)="confirmDeleteRoutineAction()"
     (cancelled)="cancelDeleteRoutine()"
   />
 }
 
 @if (saving()) {
-  <div class="saving-overlay">
-    <div class="saving-sheet">
+  <div class="lw-overlay">
+    <div class="lw-sheet rf-sheet">
       <app-exercise-loader text="" compact />
-      <div class="saving-title">Guardando rutina…</div>
-      <div class="saving-text">
-        No salgas de aquí hasta que se confirme que la rutina se ha guardado. Puede tardar unos segundos.
-      </div>
+      <h2 class="rf-sheet-title">Guardando rutina…</h2>
+      <p class="rf-sheet-text">No cierres esta pantalla hasta que se confirme. Puede tardar unos segundos.</p>
     </div>
   </div>
 }

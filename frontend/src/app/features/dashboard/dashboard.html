@@ -1,119 +1,168 @@
-<div class="page">
-  <div class="brand">
-    <img src="icons/light-weight-icon.svg" width="28" height="28" alt="" class="brand-icon" />
-    <div class="brand-text">
-      <span class="brand-name">Light Weight</span>
-      <span class="brand-subtitle">Tu registro personal de ejercicio</span>
+<div class="lw-page dash">
+  <header class="dash-head">
+    <div class="dash-greeting">
+      <p class="dash-today">{{ todayLabel }}</p>
+      <h1 class="lw-title">Hola, {{ userName() }}</h1>
     </div>
-  </div>
-
-  <div class="header">
-    <div>
-      <div class="today">{{ todayLabel }}</div>
-      <div class="greeting">Hola, {{ userName() }}</div>
-    </div>
-    <a routerLink="/perfil" class="avatar" aria-label="Perfil">
+    <a routerLink="/perfil" class="dash-avatar" aria-label="Ir a tu perfil">
       <app-avatar [avatarId]="avatarId()" [fallback]="userName().charAt(0)" />
     </a>
-  </div>
+  </header>
 
   @if (loading()) {
-    <app-exercise-loader />
+    <div class="dash-grid" aria-busy="true">
+      <div class="dash-col">
+        <div class="lw-skel dash-skel-week"></div>
+        <div class="lw-skel dash-skel-cta"></div>
+      </div>
+      <div class="dash-col lw-skel-list">
+        <div class="lw-skel lw-skel-card"></div>
+        <div class="lw-skel lw-skel-card"></div>
+        <div class="lw-skel lw-skel-card"></div>
+      </div>
+    </div>
   } @else if (error()) {
-    <div class="empty">No se ha podido conectar con el servidor.</div>
+    <div class="lw-empty" role="alert">
+      <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 9v4M12 17h.01" />
+        <path d="M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+      </svg>
+      <p class="lw-empty-title">No hemos podido conectar con el servidor</p>
+      <p class="lw-empty-text">Comprueba tu conexión y vuelve a cargar la página. Tus entrenos siguen guardados.</p>
+    </div>
   } @else {
-    <div class="section-label">Esta semana</div>
-    <div class="week-stats">
-      <div class="stat stat-accent">
-        <div class="stat-value">{{ weekEntrenos() }}</div>
-        <div class="stat-label">Entrenos</div>
-      </div>
-      <div class="stat stat-tip">
-        @for (tip of [currentTip()]; track tipIndex()) {
-          <div class="tip-text">{{ tip }}</div>
-        }
-        <div class="tip-progress">
-          <div class="tip-progress-bar" [style.transform]="'scaleX(' + tipProgress() + ')'"></div>
-        </div>
-      </div>
-    </div>
+    <div class="dash-grid">
+      <div class="dash-col">
+        <section class="lw-section">
+          <div class="lw-section-head">
+            <h2 class="lw-label">Esta semana</h2>
+            <a routerLink="/calendario" class="dash-link">Calendario</a>
+          </div>
 
-    <div class="card checks-card">
-      <div class="checks-header">
-        <span class="muted-label">Días entrenados</span>
-        <a routerLink="/calendario" class="calendar-link" aria-label="Calendario de entrenos">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          <div class="lw-card dash-week">
+            <p class="dash-week-count lw-num">
+              <strong>{{ weekEntrenos() }}</strong>
+              {{ weekEntrenos() === 1 ? 'entreno' : 'entrenos' }}
+            </p>
+
+            <ul class="dash-days">
+              @for (day of weekChecks(); track day.date) {
+                <li class="dash-day" [class.is-today]="day.isToday">
+                  <span class="dash-day-marks">
+                    @if (day.categories.length) {
+                      @for (cat of day.categories; track cat) {
+                        <svg
+                          class="dash-check"
+                          [style.color]="cat === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'"
+                          width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                        >
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                      }
+                    } @else {
+                      <span class="dash-day-empty" aria-hidden="true"></span>
+                    }
+                  </span>
+                  <span class="dash-day-letter">{{ day.letter }}</span>
+                  <span class="lw-sr-only">
+                    {{ day.categories.length ? 'entrenado: ' + day.categories.join(', ') : 'sin entreno' }}
+                  </span>
+                </li>
+              }
+            </ul>
+
+            <p class="dash-legend">
+              <span class="dash-legend-item"><span class="lw-dot" style="background: var(--color-gym)"></span>Gym</span>
+              <span class="dash-legend-item"><span class="lw-dot" style="background: var(--color-cali)"></span>Calistenia</span>
+            </p>
+          </div>
+        </section>
+
+        <a routerLink="/registrar" class="dash-cta">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          {{ hasDraftInProgress() ? 'Continuar el entreno de hoy' : 'Registrar entreno de hoy' }}
         </a>
-      </div>
-      <div class="checks">
-        @for (day of weekChecks(); track day.date) {
-          <div class="check-col">
-            <div class="check-icons">
-              @if (day.categories.length) {
-                @for (cat of day.categories; track cat) {
-                  <svg class="check-icon" [style.color]="cat === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                }
-              } @else {
-                <svg class="check-icon empty" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
-              }
-            </div>
-            <span class="check-label" [class.today]="day.isToday">{{ day.letter }}</span>
-          </div>
-        }
-      </div>
-      <div class="legend">
-        <span class="legend-item"><span class="dot" style="background: var(--color-gym)"></span>Gym</span>
-        <span class="legend-item"><span class="dot" style="background: var(--color-cali)"></span>Cali</span>
-      </div>
-    </div>
 
-    <a routerLink="/registrar" class="cta">
-      + Registrar entreno de hoy
-      @if (hasDraftInProgress()) {
-        <span class="draft-dot" aria-label="Entreno en proceso sin guardar"></span>
-      }
-    </a>
-
-    <div class="recent-header">
-      <span class="muted-label">Últimos entrenos</span>
-      <a routerLink="/historial" class="see-all">Ver todos</a>
-    </div>
-
-    <div class="recent-list">
-      @for (s of recent(); track s.id) {
-        <div
-          class="session-card"
-          [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'"
-          (click)="toggleExpand(s.id)"
-        >
-          <div class="session-top">
-            <app-category-tag [category]="s.category" />
-            <div class="session-top-right">
-              <span class="muted">{{ relativeDayLabel(s.date) }}</span>
-              <button type="button" class="session-edit-btn" aria-label="Editar entreno" (click)="editSession(s.date, $event)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="session-type">{{ s.typeLabel }}</div>
-          <div class="session-count">{{ s.exerciseCount }} ejercicios</div>
-          @if (expandedId() === s.id) {
-            <div class="session-details">
-              @for (e of s.exercises; track e.id) {
-                <div class="session-exercise">
-                  <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                  <span class="session-exercise-sets">{{ formatSets(e.sets, effectiveInputType(e)) }}</span>
-                </div>
-              }
-            </div>
+        <aside class="lw-card dash-tip">
+          @for (tip of [currentTip()]; track tipIndex()) {
+            <p class="dash-tip-text">{{ tip }}</p>
           }
-        </div>
-      } @empty {
-        <div class="empty">Todavía no has registrado ningún entreno.</div>
-      }
+          <span class="dash-tip-track" aria-hidden="true">
+            <span class="dash-tip-fill" [style.transform]="'scaleX(' + tipProgress() + ')'"></span>
+          </span>
+        </aside>
+      </div>
+
+      <div class="dash-col">
+        <section class="lw-section">
+          <div class="lw-section-head">
+            <h2 class="lw-label">Últimos entrenos</h2>
+            <a routerLink="/historial" class="dash-link">Ver todos</a>
+          </div>
+
+          <div class="dash-sessions">
+            @for (s of recent(); track s.id) {
+              <article
+                class="lw-card lw-spine dash-session"
+                [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'"
+              >
+                <button
+                  type="button"
+                  class="dash-session-toggle"
+                  [attr.aria-expanded]="expandedId() === s.id"
+                  (click)="toggleExpand(s.id)"
+                >
+                  <span class="dash-session-top">
+                    <app-category-tag [category]="s.category" />
+                    <span class="dash-session-date lw-num">{{ relativeDayLabel(s.date) }}</span>
+                  </span>
+                  <span class="dash-session-type">{{ s.typeLabel }}</span>
+                  <span class="dash-session-count lw-num">
+                    {{ s.exerciseCount }} {{ s.exerciseCount === 1 ? 'ejercicio' : 'ejercicios' }}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="lw-icon-btn dash-session-edit"
+                  [attr.aria-label]="'Editar el entreno del ' + relativeDayLabel(s.date)"
+                  (click)="editSession(s.date, $event)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </button>
+
+                @if (expandedId() === s.id) {
+                  <dl class="dash-session-detail">
+                    @for (e of s.exercises; track e.id) {
+                      <div class="dash-session-row">
+                        <dt class="dash-session-ex">{{ e.exercise.name }}</dt>
+                        <dd class="dash-session-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                      </div>
+                    }
+                  </dl>
+                }
+              </article>
+            } @empty {
+              <div class="lw-empty">
+                <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
+                </svg>
+                <p class="lw-empty-title">Todavía no has registrado ningún entreno</p>
+                <p class="lw-empty-text">
+                  Registra el primero y aquí verás lo que hiciste cada día, con sus series y sus pesos.
+                </p>
+                <a routerLink="/registrar" class="lw-btn-secondary">Registrar entreno</a>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
     </div>
   }
 </div>

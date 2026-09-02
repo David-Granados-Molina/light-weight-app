@@ -1,152 +1,173 @@
-.page {
-  animation: fadeUp 0.4s ease both;
+/* Progreso. Un bloque por ejercicio: cabecera, tres lecturas en línea y la
+   gráfica. En pantalla ancha caben dos bloques por fila, que es donde de verdad
+   se compara un ejercicio con otro. */
+
+.prog-picker {
+  max-width: 360px;
 }
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.back {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-app-routine-select {
-  display: block;
-  margin-top: 18px;
-}
-
-.exercise-block-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.time-toggle {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.time-btn {
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid var(--color-border-strong);
-  background: transparent;
-  color: var(--color-text-muted);
-  border-radius: 7px;
-  padding: 5px 11px;
-  cursor: pointer;
-}
-
-.time-btn.active {
-  background: var(--color-surface);
-  border-color: var(--color-text-secondary);
-  color: var(--color-text);
-}
-
-.exercise-block {
-  margin-top: 22px;
-}
-
-.exercise-block:first-of-type {
-  margin-top: 18px;
-}
-
-.exercise-block-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.stats {
+.prog-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-top: 14px;
+  grid-template-columns: 1fr;
+  gap: var(--s-4);
 }
 
-.stat-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 14px;
+@media (min-width: 1280px) {
+  .prog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.stat-label {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.prog-skel {
+  height: 340px;
+  border-radius: var(--r-md);
 }
 
-.stat-value {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 22px;
-  margin-top: 6px;
-  color: var(--color-text);
+.prog-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
 }
 
-.stat-value.positive {
-  color: var(--color-accent);
+.prog-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
 }
 
-.stat-value.negative {
-  color: var(--color-text-secondary);
+.prog-item-title {
+  min-width: 0;
 }
 
-.stat-sub {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-muted);
+.prog-name {
+  font-size: var(--t-title);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.016em;
+}
+
+.prog-metric {
+  font-size: var(--t-sm);
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
-.chart-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 10px;
+/* --- Rango de tiempo --------------------------------------------------------- */
+
+.prog-range {
+  display: flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
 }
 
-.chart-title {
-  font-size: 12px;
-  color: var(--color-text-secondary);
+.prog-range-btn {
+  min-width: 40px;
+  min-height: 30px;
+  padding: 0 var(--s-2);
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-xs);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.prog-range-btn:hover:not(.is-active) {
+  color: var(--text);
+}
+
+.prog-range-btn.is-active {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+
+/* --- Lecturas ------------------------------------------------------------------
+   Tres columnas separadas por filete, no tres tarjetas: son la misma serie leída
+   de tres maneras y anidar cajas dentro de la tarjeta solo añade ruido. */
+
+.prog-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.prog-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: 0 var(--s-3);
+  min-width: 0;
+}
+
+.prog-stat + .prog-stat {
+  border-left: 1px solid var(--line);
+}
+
+.prog-stat:first-child {
+  padding-left: 0;
+}
+
+.prog-stat:last-child {
+  padding-right: 0;
+}
+
+.prog-stat-label {
+  font-size: var(--t-xs);
   font-weight: 600;
-  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.chart-wrap {
-  height: 200px;
-  position: relative;
+.prog-stat-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--t-lead);
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  color: var(--text);
 }
 
-.empty {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--color-text-muted);
-  font-size: 15px;
+.prog-stat-sub {
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.prog-stat-value.is-up {
+  color: var(--color-positive);
+}
+
+.prog-stat-value.is-down {
+  color: var(--color-negative);
+}
+
+/* --- Gráfica --------------------------------------------------------------------- */
+
+.prog-chart {
+  min-width: 0;
+  height: 220px;
+}
+
+.prog-chart canvas {
+  max-width: 100%;
+}
+
+.prog-empty {
+  grid-column: 1 / -1;
 }

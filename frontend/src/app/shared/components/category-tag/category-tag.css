@@ -1,11 +1,14 @@
+:host {
+  display: inline-flex;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
+  gap: var(--s-2);
+  font-size: var(--t-label);
   font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -13,6 +16,6 @@
 .dot {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--r-full);
   flex-shrink: 0;
 }

@@ -1,99 +1,858 @@
 @import 'primeicons/primeicons.css';
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&display=swap');
+
+/* ============================================================================
+   LIGHT WEIGHT — SISTEMA DE DISEÑO
+   Panel de instrumento oscuro. El color es dato: el acento marca estado y la
+   categoría (gym / calistenia) marca a qué disciplina pertenece algo.
+   Contrato completo en DESIGN.md.
+   ========================================================================== */
 
 :root {
-  /* Paleta */
-  --color-bg: #0b0b0b;
-  --color-surface: #141414;
-  --color-surface-alt: #1a1a1a;
-  --color-border: #232323;
-  --color-border-strong: #2a2a2a;
-  --color-text: #ffffff;
-  --color-text-secondary: #9e9e9e;
-  --color-text-muted: #6b6b6b;
+  color-scheme: dark;
 
-  /* Acentos */
+  /* --- Planos -------------------------------------------------------------
+     Cinco, no dos. `chrome` es más frío y oscuro que `surface`: es lo que hace
+     que el rail y la consola de sesión se lean como cromo de aplicación y no
+     como una tarjeta de contenido más. */
+  --ground: #0a0b0d;
+  --chrome: #0d0f13;
+  --surface: #101319;
+  --surface-raised: #161a22;
+  --surface-hover: #1d222c;
+  --scroll-thumb: #2a303c;
+  --scroll-thumb-hover: #39414f;
+
+  --line: rgb(255 255 255 / 7%);
+  --line-strong: rgb(255 255 255 / 13%);
+
+  --text: #f1f3f7;
+  --text-secondary: #98a0ae;
+  --text-muted: #666e7c;
+
+  /* --- Acento del usuario -------------------------------------------------
+     `--color-accent` lo escribe app.ts en <html> desde el themeColor del
+     usuario. Cuatro de los ocho temas son colores oscuros (#9d1d1d, #005492,
+     #69418b, #32673d) y sobre el fondo negro dan 2,4:1–3,5:1. Nunca se usa en
+     crudo: todo consume los derivados de abajo, que conservan el tono y
+     normalizan la luminosidad. Aquí van las reservas estáticas; el bloque
+     @supports de más abajo las sustituye por la derivación real. */
   --color-accent: #ffbf00;
-  --color-accent-contrast: #0b0b0b;
-  --color-gym: #00e5ff;
-  --color-cali: #ff6b00;
+  --accent-solid: var(--color-accent);
+  --accent-text: var(--color-accent);
+  --accent-ink: #0a0b0d;
+  --accent-soft: rgb(255 255 255 / 10%);
+  --accent-line: rgb(255 255 255 / 24%);
 
-  /* Tipografía */
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  /* --- Categoría: dato, no decoración ------------------------------------ */
+  --color-gym: #22d3ee;
+  --color-cali: #fb923c;
+
+  /* --- Semánticos --------------------------------------------------------- */
+  --color-positive: #4ade80;
+  --color-negative: #f87171;
+
+  /* --- Tipografía ---------------------------------------------------------
+     Una sola familia. Escala fija en rem (no fluida): el usuario mira a DPI
+     constante y un clamp() dentro de un panel estrecho empeora el resultado. */
+  --font: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --t-display: 1.75rem;
+  --t-title: 1.25rem;
+  --t-lead: 1.0625rem;
+  --t-body: 0.9375rem;
+  --t-sm: 0.8125rem;
+  --t-label: 0.75rem;
+  --t-xs: 0.6875rem;
+
+  /* --- Espaciado (escala de 4) ------------------------------------------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* --- Formas ------------------------------------------------------------- */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-full: 999px;
+
+  /* --- Profundidad -------------------------------------------------------
+     Toda sombra lleva desplazamiento y desenfoque. Un halo de color a
+     desplazamiento cero es decoración, no profundidad. */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 50%), 0 2px 6px -2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 2px 4px rgb(0 0 0 / 40%), 0 10px 24px -10px rgb(0 0 0 / 70%);
+  --shadow-3: 0 4px 8px rgb(0 0 0 / 50%), 0 24px 56px -16px rgb(0 0 0 / 80%);
+
+  /* --- Movimiento --------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur: 170ms;
+  --dur-slow: 260ms;
+
+  /* --- Métricas de layout -------------------------------------------------- */
+  --rail-w: 224px;
+  --console-w: 336px;
+  --content-max: 880px;
+  --content-wide: 1040px;
+  --gutter: 16px;
+  --tabbar-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
 }
 
-* {
+/* Derivación real del acento. Preserva el tono elegido por el usuario y le
+   impone un suelo de luminosidad, de modo que los ocho temas producen texto y
+   rellenos legibles en vez de solo el ámbar por defecto. */
+@supports (color: oklch(from white l c h)) {
+  :root {
+    --accent-solid: oklch(from var(--color-accent) max(l, 0.68) c h);
+    --accent-text: oklch(from var(--color-accent) max(l, 0.78) min(c, 0.15) h);
+    --accent-ink: oklch(from var(--color-accent) 0.15 min(c, 0.05) h);
+    --accent-soft: oklch(from var(--color-accent) 0.26 min(c, 0.07) h);
+    --accent-line: oklch(from var(--color-accent) 0.42 min(c, 0.12) h);
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --t-display: 2rem;
+    --gutter: 32px;
+  }
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
-  height: 100%;
+  min-height: 100%;
+  background: var(--ground);
+  color: var(--text);
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  font-weight: 450;
+  line-height: 1.5;
+  letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
 }
 
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }
 
 button {
-  font-family: inherit;
+  cursor: pointer;
 }
 
+svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ============================================================================
+   SUPERFICIES DEL NAVEGADOR
+   Las partes que no dibujamos también llevan el diseño.
+   ========================================================================== */
+
+::selection {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* Barras de scroll finas y tematizadas. En escritorio son información de
+   posición: ocultarlas del todo, como hacía la versión anterior, quita al
+   usuario la única señal de cuánto historial le queda por delante. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+  background-clip: content-box;
+}
+
+/* Scroll horizontal de tiras de chips: sin barra visible, con desvanecido en
+   el borde para que se lea como "hay más a la derecha". */
 .app-scroll {
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .app-scroll::-webkit-scrollbar {
   display: none;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+/* ============================================================================
+   PRIMITIVAS DE PÁGINA
+   ========================================================================== */
+
+.lw-page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.lw-page-wide {
+  max-width: var(--content-wide);
+}
+
+/* Cabecera de pantalla. Más aire por encima que por debajo. */
+.lw-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 40px;
+}
+
+.lw-title {
+  font-size: var(--t-display);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+}
+
+.lw-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--t-body);
+  max-width: 60ch;
+}
+
+.lw-label {
+  display: block;
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.lw-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.lw-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.lw-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Mayúscula solo en la primera letra. `text-transform: capitalize` la pone en
+   todas las palabras y convierte "septiembre de 2026" en "Septiembre De 2026". */
+.lw-cap {
+  display: inline-block;
+}
+
+.lw-cap::first-letter {
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   TARJETAS
+   Nunca una tarjeta dentro de otra: los grupos internos se separan con una
+   regla de 1 px.
+   ========================================================================== */
+
+.lw-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+}
+
+.lw-card-interactive {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  color: inherit;
+  transition:
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.lw-card-interactive:hover {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.lw-card-interactive:active {
+  transform: translateY(0);
+}
+
+/* Filete de categoría de exactamente 1 px. La categoría se lee sobre todo por
+   su punto y su etiqueta; el filete solo ayuda a barrer la lista. */
+.lw-spine {
+  border-left-width: 1px;
+  border-left-style: solid;
+}
+
+.lw-rule {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .lw-card,
+  .lw-card-interactive {
+    padding: var(--s-5);
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
+/* ============================================================================
+   BOTONES
+   ========================================================================== */
+
+.lw-btn-primary,
+.lw-btn-secondary,
+.lw-btn-ghost,
+.lw-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border-radius: var(--r-sm);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: -0.006em;
+  border: 1px solid transparent;
+  transition:
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.lw-btn-primary {
+  min-height: 48px;
+  padding: 0 var(--s-5);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+
+.lw-btn-primary:hover:not(:disabled) {
+  background: var(--accent-text);
+}
+
+.lw-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.lw-btn-secondary {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+  color: var(--text);
+}
+
+.lw-btn-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.lw-btn-ghost {
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.lw-btn-ghost:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.lw-btn-danger {
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  background: transparent;
+  border-color: rgb(248 113 113 / 30%);
+  color: var(--color-negative);
+}
+
+.lw-btn-danger:hover:not(:disabled) {
+  background: rgb(248 113 113 / 10%);
+  border-color: rgb(248 113 113 / 50%);
+}
+
+.lw-btn-primary:disabled,
+.lw-btn-secondary:disabled,
+.lw-btn-ghost:disabled,
+.lw-btn-danger:disabled {
+  background: var(--surface-raised);
+  border-color: var(--line);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.lw-btn-block {
+  width: 100%;
+}
+
+/* Botón de icono. El área táctil real llega a 44 px por pseudo-elemento sin
+   engordar la caja visible. */
+.lw-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.lw-icon-btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
+
+.lw-icon-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.lw-icon-btn:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.lw-icon-btn-bordered {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+}
+
+/* ============================================================================
+   CHIPS
+   ========================================================================== */
+
+.lw-chips {
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.lw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 34px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-full);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  white-space: nowrap;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.lw-chip:hover:not(.is-active) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.lw-chip.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-text);
+}
+
+/* En los chips de categoría el color es dato, así que el estado activo usa el
+   color de la categoría y no el acento del usuario. */
+.lw-chip.is-active.is-gym {
+  background: rgb(34 211 238 / 14%);
+  border-color: rgb(34 211 238 / 38%);
+  color: var(--color-gym);
+}
+
+.lw-chip.is-active.is-cali {
+  background: rgb(251 146 60 / 14%);
+  border-color: rgb(251 146 60 / 38%);
+  color: var(--color-cali);
+}
+
+.lw-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-full);
+  flex-shrink: 0;
+}
+
+/* ============================================================================
+   CAMPOS
+   ========================================================================== */
+
+.lw-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.lw-input,
+.lw-select,
+.lw-textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 var(--s-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: var(--t-body);
+  caret-color: var(--accent-text);
+  transition:
+    border-color var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
+}
+
+.lw-textarea {
+  padding: var(--s-3) var(--s-4);
+  min-height: 120px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.lw-input::placeholder,
+.lw-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.lw-input:focus,
+.lw-select:focus,
+.lw-textarea:focus {
+  outline: none;
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.lw-input:disabled,
+.lw-select:disabled {
+  color: var(--text-muted);
+  background: var(--surface);
+  cursor: not-allowed;
+}
+
+/* El control nativo de fecha y el de select llegan en blanco si no se estilan
+   explícitamente. */
+.lw-select {
+  appearance: none;
+  padding-right: var(--s-8);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2398a0ae' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-3) center;
+  background-size: 18px 18px;
+  font-weight: 550;
+}
+
+.lw-input[type='date'] {
+  color-scheme: dark;
+  font-variant-numeric: tabular-nums;
+}
+
+.lw-input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(65%) sepia(8%) saturate(400%) hue-rotate(185deg);
+  cursor: pointer;
+}
+
+/* ============================================================================
+   ESTADOS
+   ========================================================================== */
+
+.lw-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-10) var(--s-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.lw-empty-icon {
+  color: var(--text-muted);
+}
+
+.lw-empty-title {
+  color: var(--text);
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.lw-empty-text {
+  font-size: var(--t-sm);
+  max-width: 42ch;
+}
+
+.lw-error {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid rgb(248 113 113 / 28%);
+  border-radius: var(--r-sm);
+  background: rgb(248 113 113 / 8%);
+  color: var(--color-negative);
+  font-size: var(--t-sm);
+}
+
+.lw-success {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid rgb(74 222 128 / 28%);
+  border-radius: var(--r-sm);
+  background: rgb(74 222 128 / 8%);
+  color: var(--color-positive);
+  font-size: var(--t-sm);
+}
+
+/* Esqueletos para listas y tarjetas. El exercise-loader queda reservado a los
+   bloqueos de pantalla completa, donde el usuario espera de verdad. */
+.lw-skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-raised);
+  border-radius: var(--r-xs);
+}
+
+.lw-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 5%), transparent);
+  animation: lw-sweep 1.2s infinite;
+}
+
+.lw-skel-card {
+  height: 96px;
+  border-radius: var(--r-md);
+}
+
+.lw-skel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+@keyframes lw-sweep {
   to {
-    opacity: 1;
-    transform: none;
+    transform: translateX(100%);
   }
 }
 
-@keyframes popIn {
+/* ============================================================================
+   OVERLAYS
+   ========================================================================== */
+
+.lw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-5);
+  background: rgb(4 5 7 / 72%);
+  backdrop-filter: blur(6px);
+  animation: lw-fade var(--dur) var(--ease-out);
+}
+
+.lw-sheet {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  padding: var(--s-6);
+  animation: lw-rise var(--dur-slow) var(--ease-out);
+}
+
+@keyframes lw-fade {
   from {
     opacity: 0;
-    transform: scale(0.9);
   }
-  to {
-    opacity: 1;
-    transform: none;
+}
+
+@keyframes lw-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.lw-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ============================================================================
+   PRIMENG — p-dialog (notas de ejercicio)
+   El diálogo se monta en <body>, fuera de todo componente, así que sus estilos
+   tienen que ser globales. Los del buscador de ejercicios viven en
+   exercise-picker.css, que ya es global por ViewEncapsulation.None y viaja en
+   el chunk perezoso de las dos pantallas que lo usan.
+   ========================================================================== */
+
+.p-dialog {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-3);
+  color: var(--text);
+}
+
+.p-dialog .p-dialog-header {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  padding: var(--s-5) var(--s-5) var(--s-4);
+  color: var(--text);
+  font-size: var(--t-title);
+  font-weight: 650;
+  letter-spacing: -0.016em;
+}
+
+.p-dialog .p-dialog-content {
+  background: transparent;
+  padding: var(--s-5);
+  color: var(--text);
+}
+
+.p-dialog .p-dialog-header-actions .p-button,
+.p-dialog .p-dialog-close-button {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--r-xs);
+}
+
+.p-dialog .p-dialog-close-button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.p-dialog-mask {
+  background: rgb(4 5 7 / 72%);
+  backdrop-filter: blur(6px);
+}
+
+/* ============================================================================
+   MOVIMIENTO REDUCIDO
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

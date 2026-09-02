@@ -1,131 +1,175 @@
-<div class="page">
-  @if (targetUserId()) {
-    <div class="header">
-      <a routerLink="/amigos" class="back" aria-label="Volver">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="lw-page lw-page-wide hist">
+  <header class="lw-head">
+    @if (targetUserId()) {
+      <a routerLink="/amigos" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Amigos">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
       </a>
-      <h1 class="title">Historial de {{ targetUserName() }}</h1>
-    </div>
-  } @else {
-    <h1 class="title">Historial</h1>
-  }
-
-  <div class="chips">
-    @for (chip of filterChips; track chip.key) {
-      <button
-        type="button"
-        class="chip"
-        [class.active]="filter() === chip.key"
-        [class.gym]="chip.key === 'gym'"
-        [class.calistenia]="chip.key === 'calistenia'"
-        (click)="selectFilter(chip.key)"
-      >
-        {{ chip.label }}
-      </button>
+      <h1 class="lw-title">Historial de {{ targetUserName() }}</h1>
+    } @else {
+      <h1 class="lw-title">Historial</h1>
     }
-  </div>
+  </header>
 
-  <div class="chips date-mode-chips app-scroll">
-    @for (chip of dateModeChips; track chip.key) {
-      <button
-        type="button"
-        class="chip"
-        [class.active]="dateMode() === chip.key"
-        (click)="selectDateMode(chip.key)"
-      >
-        {{ chip.label }}
-      </button>
-    }
-  </div>
+  <div class="hist-grid">
+    <aside class="hist-filters" aria-label="Filtros del historial">
+      <div class="lw-field">
+        <span class="lw-label">Categoría</span>
+        <div class="lw-chips">
+          @for (chip of filterChips; track chip.key) {
+            <button
+              type="button"
+              class="lw-chip"
+              [class.is-active]="filter() === chip.key"
+              [class.is-gym]="chip.key === 'gym'"
+              [class.is-cali]="chip.key === 'calistenia'"
+              [attr.aria-pressed]="filter() === chip.key"
+              (click)="selectFilter(chip.key)"
+            >
+              {{ chip.label }}
+            </button>
+          }
+        </div>
+      </div>
 
-  @if (dateMode() === 'dia') {
-    <input
-      class="search-input date-input"
-      type="date"
-      [max]="todayIso"
-      [value]="selectedDay()"
-      (change)="onDayInput($event)"
-    />
-  } @else if (dateMode() === 'mes') {
-    <div class="date-selects">
-      <select class="date-select" [value]="selectedMonth()" (change)="onMonthInput($event)">
-        @for (m of months; track m.value) {
-          <option [value]="m.value">{{ m.label }}</option>
+      <div class="lw-field">
+        <span class="lw-label">Periodo</span>
+        <div class="lw-chips hist-period app-scroll">
+          @for (chip of dateModeChips; track chip.key) {
+            <button
+              type="button"
+              class="lw-chip"
+              [class.is-active]="dateMode() === chip.key"
+              [attr.aria-pressed]="dateMode() === chip.key"
+              (click)="selectDateMode(chip.key)"
+            >
+              {{ chip.label }}
+            </button>
+          }
+        </div>
+
+        @if (dateMode() === 'dia') {
+          <input
+            class="lw-input"
+            type="date"
+            aria-label="Día"
+            [max]="todayIso"
+            [value]="selectedDay()"
+            (change)="onDayInput($event)"
+          />
+        } @else if (dateMode() === 'mes') {
+          <div class="hist-selects">
+            <select class="lw-select" aria-label="Mes" [value]="selectedMonth()" (change)="onMonthInput($event)">
+              @for (m of months; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+            <select class="lw-select" aria-label="Año" [value]="selectedYear()" (change)="onYearInput($event)">
+              @for (y of years(); track y) {
+                <option [value]="y">{{ y }}</option>
+              }
+            </select>
+          </div>
+        } @else if (dateMode() === 'anio') {
+          <select class="lw-select" aria-label="Año" [value]="selectedYear()" (change)="onYearInput($event)">
+            @for (y of years(); track y) {
+              <option [value]="y">{{ y }}</option>
+            }
+          </select>
         }
-      </select>
-      <select class="date-select" [value]="selectedYear()" (change)="onYearInput($event)">
-        @for (y of years(); track y) {
-          <option [value]="y">{{ y }}</option>
-        }
-      </select>
-    </div>
-  } @else if (dateMode() === 'anio') {
-    <select class="date-select date-select-full" [value]="selectedYear()" (change)="onYearInput($event)">
-      @for (y of years(); track y) {
-        <option [value]="y">{{ y }}</option>
-      }
-    </select>
-  }
+      </div>
 
-  <input
-    class="search-input"
-    type="text"
-    placeholder="Buscar por ejercicio…"
-    [value]="search()"
-    (input)="onSearchInput($event)"
-  />
+      <div class="lw-field">
+        <label class="lw-label" for="hist-search">Buscar</label>
+        <input
+          id="hist-search"
+          class="lw-input"
+          type="search"
+          placeholder="Nombre del ejercicio…"
+          [value]="search()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+    </aside>
 
-  @if (loading()) {
-    <app-exercise-loader />
-  } @else {
-    <div class="session-list">
-      @for (s of rows(); track s.id) {
-        <div class="session-card" [style.border-left-color]="categoryColor[s.category]" (click)="toggleExpand(s.id)">
-          <div class="session-top">
-            <span class="session-cat" [style.color]="categoryColor[s.category]">
-              <span class="dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
-            </span>
-            <div class="session-top-right">
-              <span class="session-date">{{ s.dateLabel }}</span>
+    <div class="hist-results">
+      @if (loading()) {
+        <div class="lw-skel-list" aria-busy="true">
+          <div class="lw-skel lw-skel-card"></div>
+          <div class="lw-skel lw-skel-card"></div>
+          <div class="lw-skel lw-skel-card"></div>
+          <div class="lw-skel lw-skel-card"></div>
+        </div>
+      } @else {
+        <div class="hist-list">
+          @for (s of rows(); track s.id) {
+            <article class="lw-card lw-spine hist-session" [style.border-left-color]="categoryColor[s.category]">
+              <button
+                type="button"
+                class="hist-session-toggle"
+                [attr.aria-expanded]="expandedId() === s.id"
+                (click)="toggleExpand(s.id)"
+              >
+                <span class="hist-session-top">
+                  <span class="hist-session-cat" [style.color]="categoryColor[s.category]">
+                    <span class="lw-dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
+                  </span>
+                  <span class="hist-session-date lw-num">{{ s.dateLabel }}</span>
+                </span>
+
+                <span class="hist-session-type">{{ s.typeLabel }}</span>
+
+                @if (expandedId() !== s.id) {
+                  <span class="hist-session-preview">{{ s.exercisesText }}</span>
+                  <span class="hist-session-count lw-num">{{ s.count }}</span>
+                }
+              </button>
+
               @if (!targetUserId()) {
-                <button type="button" class="session-edit-btn" aria-label="Editar entreno" (click)="editSession(s.date, $event)">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <button
+                  type="button"
+                  class="lw-icon-btn hist-session-edit"
+                  [attr.aria-label]="'Editar el entreno del ' + s.dateLabel"
+                  (click)="editSession(s.date, $event)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
                 </button>
               }
-            </div>
-          </div>
-          <div class="session-type">{{ s.typeLabel }}</div>
-          @if (expandedId() === s.id) {
-            <div class="session-details">
-              @for (e of s.exercises; track e.id) {
-                <div class="session-exercise">
-                  <div class="session-exercise-row">
-                    <span class="session-exercise-name">{{ e.exercise.name }}</span>
-                    <span class="session-exercise-sets">{{ formatSets(e.sets, effectiveInputType(e)) }}</span>
-                  </div>
-                  @if (e.note) {
-                    <div class="session-exercise-note">{{ e.note }}</div>
+
+              @if (expandedId() === s.id) {
+                <dl class="hist-detail">
+                  @for (e of s.exercises; track e.id) {
+                    <div class="hist-detail-row">
+                      <dt class="hist-detail-name">{{ e.exercise.name }}</dt>
+                      <dd class="hist-detail-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                      @if (e.note) {
+                        <dd class="hist-detail-note">{{ e.note }}</dd>
+                      }
+                    </div>
                   }
-                </div>
+                </dl>
               }
+            </article>
+          } @empty {
+            <div class="lw-empty">
+              <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+              <p class="lw-empty-title">Ningún entreno con estos filtros</p>
+              <p class="lw-empty-text">Prueba con otra categoría, otro periodo, o borra el texto de búsqueda.</p>
             </div>
-          } @else {
-            <div class="session-exercises">{{ s.exercisesText }}</div>
-            <div class="session-count">{{ s.count }}</div>
           }
         </div>
-      } @empty {
-        <div class="empty">Sin resultados</div>
+
+        @if (hasMore()) {
+          <button type="button" class="lw-btn-secondary hist-more" [disabled]="loadingMore()" (click)="loadMore()">
+            {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
+          </button>
+        }
       }
     </div>
-
-    @if (hasMore()) {
-      <button type="button" class="load-more-btn" [disabled]="loadingMore()" (click)="loadMore()">
-        {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
-      </button>
-    }
-  }
+  </div>
 </div>

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable, map } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 import { AdminService } from '../../core/services/admin.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ProgressService } from '../../core/services/progress.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
@@ -12,6 +13,49 @@ import { CATEGORY_COLOR, INPUT_TYPE_UNIT } from '../../core/models/labels';
 import { formatNumber, shortDateLabel } from '../../core/utils/format';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { RoutineSelect } from '../../shared/components/routine-select/routine-select';
+
+
+/**
+ * Valores del sistema de diseño que Chart.js necesita como literales: pinta
+ * sobre canvas y no resuelve variables CSS. Se mantienen sincronizados a mano
+ * con los tokens de `styles.css`.
+ */
+const CHART_FONT = 'Archivo, system-ui, sans-serif';
+const SURFACE = '#101319';
+const SURFACE_RAISED = '#161A22';
+const LINE = 'rgba(255, 255, 255, 0.07)';
+const LINE_STRONG = 'rgba(255, 255, 255, 0.13)';
+const TEXT = '#F1F3F7';
+const TEXT_SECONDARY = '#98A0AE';
+const TEXT_MUTED = '#666E7C';
+const DEFAULT_ACCENT = '#ffbf00';
+const CHART_GRADIENT_HEIGHT = 220;
+const MIN_ACCENT_LIGHTNESS = 0.62;
+
+/**
+ * Sube la luminosidad de un color hasta un mínimo legible sobre fondo oscuro,
+ * conservando su tono y su saturación. Es el equivalente en TypeScript de la
+ * derivación `--accent-solid` que hace CSS con sintaxis de color relativa.
+ */
+function liftLightness(hex: string): [number, number, number] {
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!match) return liftLightness(DEFAULT_ACCENT);
+
+  const int = parseInt(match[1], 16);
+  const r = ((int >> 16) & 255) / 255;
+  const g = ((int >> 8) & 255) / 255;
+  const b = (int & 255) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (l >= MIN_ACCENT_LIGHTNESS) return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+
+  // Interpolación hacia el blanco: mantiene el tono y solo aclara.
+  const t = (MIN_ACCENT_LIGHTNESS - l) / (1 - l);
+  const lift = (c: number) => Math.round((c + (1 - c) * t) * 255);
+  return [lift(r), lift(g), lift(b)];
+}
 
 @Component({
   selector: 'app-progress',
@@ -25,6 +69,16 @@ export class Progress {
   private readonly routineService = inject(RoutineService);
   private readonly adminService = inject(AdminService);
   private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+
+  /**
+   * Chart.js pinta sobre canvas y no entiende variables CSS, así que el color de
+   * la línea se calcula aquí a partir del tema del usuario aplicando la misma
+   * regla que `--accent-solid` en CSS: se conserva el tono y se le impone un
+   * suelo de luminosidad. Sin esto los cuatro temas oscuros (rojo, azul, morado,
+   * verde) dibujaban una línea casi invisible sobre el fondo.
+   */
+  private readonly accentRgb = computed(() => liftLightness(this.auth.currentUser()?.themeColor ?? DEFAULT_ACCENT));
 
   readonly targetUserId = toSignal(this.route.paramMap.pipe(map((p) => p.get('userId'))), {
     initialValue: this.route.snapshot.paramMap.get('userId'),
@@ -126,7 +180,8 @@ export class Progress {
   }
 
   itemChartData(item: RoutineProgressItem) {
-    const color = '#ffbf00';
+    const [r, g, b] = this.accentRgb();
+    const color = `rgb(${r}, ${g}, ${b})`;
     const points = this.getFilteredPoints(item);
     return {
       labels: points.map((p) => shortDateLabel(p.date)),
@@ -136,18 +191,19 @@ export class Progress {
           borderColor: color,
           backgroundColor: (context: { chart: { ctx: CanvasRenderingContext2D } }) => {
             const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, color + '50');
-            gradient.addColorStop(1, color + '00');
+            const gradient = ctx.createLinearGradient(0, 0, 0, CHART_GRADIENT_HEIGHT);
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.28)`);
+            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
             return gradient;
           },
           fill: true,
           tension: 0.35,
-          borderWidth: 2.5,
-          pointRadius: 3,
+          borderWidth: 2,
+          pointRadius: 0,
           pointHoverRadius: 5,
+          pointHitRadius: 14,
           pointBackgroundColor: color,
-          pointBorderColor: '#0B0B0B',
+          pointBorderColor: SURFACE,
           pointBorderWidth: 2,
         },
       ],
@@ -164,15 +220,16 @@ export class Progress {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#000',
-          borderColor: '#2a2a2a',
+          backgroundColor: SURFACE_RAISED,
+          borderColor: LINE_STRONG,
           borderWidth: 1,
-          titleColor: '#9E9E9E',
-          bodyColor: '#fff',
+          titleColor: TEXT_SECONDARY,
+          bodyColor: TEXT,
           padding: 10,
+          cornerRadius: 8,
           displayColors: false,
-          titleFont: { family: 'Space Grotesk' },
-          bodyFont: { family: 'Space Grotesk', weight: '700', size: 14 },
+          titleFont: { family: CHART_FONT, size: 11 },
+          bodyFont: { family: CHART_FONT, weight: '600', size: 14 },
           callbacks: {
             label: (context: { dataIndex: number; parsed: { y: number } }) => {
               const value = `${context.parsed.y} ${unit}`;
@@ -185,12 +242,13 @@ export class Progress {
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: '#6B6B6B', font: { family: 'Space Grotesk', size: 10 } },
+          border: { color: LINE },
+          ticks: { color: TEXT_MUTED, font: { family: CHART_FONT, size: 10 }, maxRotation: 0, autoSkipPadding: 16 },
         },
         y: {
-          grid: { color: 'rgba(255,255,255,0.06)' },
+          grid: { color: LINE },
           border: { display: false },
-          ticks: { color: '#6B6B6B', font: { family: 'Space Grotesk', size: 10 }, maxTicksLimit: 5 },
+          ticks: { color: TEXT_MUTED, font: { family: CHART_FONT, size: 10 }, maxTicksLimit: 5 },
         },
       },
     };

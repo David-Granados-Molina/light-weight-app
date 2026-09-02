@@ -1,0 +1,239 @@
+/* El rail solo existe en escritorio: por debajo de 900 px manda la tab-bar
+   inferior, que es la afordancia correcta para el pulgar. */
+:host {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  :host {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    flex-shrink: 0;
+    width: var(--rail-w);
+    height: 100dvh;
+    padding: var(--s-5) var(--s-3) var(--s-4);
+    background: var(--chrome);
+    border-right: 1px solid var(--line);
+  }
+}
+
+/* --- Marca ---------------------------------------------------------------- */
+
+.rail-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-4);
+  border-radius: var(--r-sm);
+}
+
+.rail-logo {
+  border-radius: var(--r-xs);
+}
+
+.rail-brand-name {
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: -0.014em;
+}
+
+/* --- Acción primaria ------------------------------------------------------
+   Registrar es lo que el producto hace; en el rail es un botón, no una
+   pestaña más de la lista. */
+
+.rail-cta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  margin-bottom: var(--s-5);
+  border-radius: var(--r-sm);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  font-size: var(--t-body);
+  font-weight: 600;
+  transition:
+    background var(--dur) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.rail-cta:hover {
+  background: var(--accent-text);
+}
+
+.rail-cta:active {
+  transform: translateY(1px);
+}
+
+.rail-cta-dot {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-full);
+  background: var(--accent-ink);
+}
+
+/* --- Navegación ------------------------------------------------------------ */
+
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rail-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 42px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  font-size: var(--t-body);
+  font-weight: 550;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.rail-link:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.rail-link.is-active {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* Filete de 2 px pegado al borde interior del enlace activo: da la posición sin
+   competir con el texto. */
+.rail-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: var(--r-full);
+  background: var(--accent-solid);
+}
+
+/* --- Usuario --------------------------------------------------------------- */
+
+.rail-user {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: auto;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  transition:
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.rail-user:hover {
+  background: var(--surface-hover);
+  border-color: var(--line);
+}
+
+.rail-user.is-active {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
+}
+
+.rail-user-avatar {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.rail-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rail-user-name {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-user-role {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* --- Rail estrecho (900–1099 px) -------------------------------------------
+   Solo iconos: por debajo de 1100 px la etiqueta le roba ancho al contenido,
+   que es donde está el trabajo. */
+
+@media (min-width: 900px) and (max-width: 1099px) {
+  :host {
+    width: 68px;
+    padding: var(--s-5) var(--s-2) var(--s-4);
+    align-items: center;
+  }
+
+  .rail-brand {
+    padding: var(--s-2);
+    justify-content: center;
+  }
+
+  /* Ocultas visualmente, no del árbol de accesibilidad: un rail de solo iconos
+     sin nombre accesible deja cinco enlaces sin etiqueta para un lector de
+     pantalla. */
+  .rail-brand-name,
+  .rail-link span,
+  .rail-user-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .rail-cta {
+    width: 44px;
+    padding: 0;
+  }
+
+  .rail-nav {
+    width: 100%;
+    align-items: center;
+  }
+
+  .rail-link {
+    width: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .rail-link.is-active::before {
+    display: none;
+  }
+
+  .rail-user {
+    padding: var(--s-2);
+  }
+}

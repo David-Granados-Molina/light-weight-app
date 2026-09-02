@@ -1,100 +1,131 @@
+/* El control que más se toca dentro del gimnasio. Se lee como un instrumento:
+   dos pasos separados por filete de 1 px y el valor en el centro, en cifras
+   tabulares para que cambiar de 9 a 10 no mueva nada. */
+
 :host {
   display: block;
+  min-width: 0;
 }
 
-.stepper {
-  display: flex;
+.wheel {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: stretch;
-  height: 56px;
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-bg);
+  height: 52px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   overflow: hidden;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
 }
 
-.step-btn {
-  flex: 0 0 40px;
+.wheel:focus-within {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.wheel-step {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
   background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
-.step-btn:first-child {
-  border-right: 1px solid var(--color-border-strong);
+.wheel-step:first-child {
+  border-right: 1px solid var(--line);
 }
 
-.step-btn:last-child {
-  border-left: 1px solid var(--color-border-strong);
+.wheel-step:last-child {
+  border-left: 1px solid var(--line);
 }
 
-.step-btn:active:not(:disabled) {
-  background: var(--color-border);
+.wheel-step:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
-.step-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
+.wheel-step:active:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent-text);
 }
 
-.value-box {
-  flex: 1;
+/* En el límite el botón se atenúa en lugar de desaparecer: quitarlo movería la
+   posición del valor justo cuando el usuario está apuntando. */
+.wheel-step:disabled {
+  color: var(--text-muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wheel-value {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
   min-width: 0;
   padding: 0 2px;
 }
 
-.value-input {
+.wheel-input {
   width: 100%;
-  border: none;
+  min-width: 0;
   background: transparent;
+  border: 0;
   outline: none;
   text-align: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: -0.3px;
-  color: var(--color-text);
-  padding: 0;
-  min-width: 0;
-}
-
-.value-unit {
-  font-size: 10px;
-  color: var(--color-text-secondary);
-  font-family: var(--font-body);
-  font-weight: 400;
-  white-space: nowrap;
-}
-
-.stepper.compact {
-  height: 36px;
-  border-radius: 8px;
-}
-
-.stepper.compact .step-btn {
-  flex-basis: 30px;
-}
-
-.stepper.compact .step-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-.stepper.compact .value-input {
-  font-size: 13px;
+  color: var(--text);
+  font-size: var(--t-lead);
   font-weight: 600;
+  letter-spacing: -0.01em;
+  padding: 0;
 }
 
-.stepper.compact .value-unit {
-  font-size: 9px;
+.wheel-input::placeholder {
+  color: var(--text-muted);
+}
+
+.wheel-unit {
+  font-size: var(--t-xs);
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* --- Compacto: formulario de rutina, donde caben tres por fila ------------- */
+
+.wheel.compact {
+  height: 44px;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+}
+
+.wheel.compact .wheel-input {
+  font-size: var(--t-body);
+}
+
+.wheel.compact .wheel-step svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* El área táctil se mantiene por encima de 44 px aunque la caja visible baje. */
+.wheel.compact .wheel-step {
+  position: relative;
+}
+
+.wheel.compact .wheel-step::before {
+  content: '';
+  position: absolute;
+  inset: -5px 0;
 }

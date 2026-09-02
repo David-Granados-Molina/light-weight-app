@@ -1,68 +1,86 @@
-<div class="page">
-  <div class="header">
-    <a routerLink="/inicio" class="back" aria-label="Volver">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="lw-page lw-page-wide cal">
+  <header class="lw-head">
+    <a routerLink="/inicio" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Inicio">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
     </a>
-    <h1 class="title">Calendario</h1>
-  </div>
+    <h1 class="lw-title">Calendario</h1>
+  </header>
 
-  <div class="month-nav">
-    <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="Mes anterior">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <span class="month-label">{{ monthLabel() }}</span>
-    <button type="button" class="nav-btn" (click)="nextMonth()" aria-label="Mes siguiente">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-  </div>
-
-  <div class="weekday-row">
-    @for (h of weekdayHeaders; track h) {
-      <span class="weekday">{{ h }}</span>
-    }
-  </div>
-
-  <div class="month-grid">
-    @for (week of weeks(); track $index) {
-      @for (cell of week; track cell.iso) {
-        <button
-          type="button"
-          class="day-cell"
-          [class.out]="!cell.inMonth"
-          [class.today]="cell.isToday"
-          [class.selected]="selectedDay() === cell.iso"
-          [class.has-data]="cell.categories.length > 0"
-          (click)="selectDay(cell)"
-        >
-          <span class="day-number">{{ cell.day }}</span>
-          @if (cell.categories.length > 0) {
-            <span class="day-dots">
-              @for (cat of cell.categories; track cat) {
-                <span class="dot" [style.background]="categoryColor[cat]"></span>
-              }
-            </span>
-          }
+  <div class="cal-grid">
+    <section class="lw-card cal-month" aria-label="Mes">
+      <div class="cal-nav">
+        <button type="button" class="lw-icon-btn lw-icon-btn-bordered" (click)="prevMonth()" aria-label="Mes anterior">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-      }
-    }
-  </div>
+        <h2 class="cal-month-label">{{ monthLabel() }}</h2>
+        <button type="button" class="lw-icon-btn lw-icon-btn-bordered" (click)="nextMonth()" aria-label="Mes siguiente">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+        </button>
+      </div>
 
-  @if (selectedDay()) {
-    <div class="day-summary">
-      <div class="summary-title">{{ selectedDayLabel() }}</div>
-      @for (s of selectedSessions(); track s.id) {
-        <div class="summary-session" [style.border-left-color]="categoryColor[s.category]">
-          <div class="summary-type">{{ typeLabel[s.type] }}</div>
-          @for (e of s.exercises; track e.id) {
-            <div class="summary-exercise">
-              <span class="summary-exercise-name">{{ e.exercise.name }}</span>
-              <span class="summary-exercise-sets">{{ formatSets(e.sets, effectiveInputType(e)) }}</span>
-            </div>
+      <div class="cal-weekdays" aria-hidden="true">
+        @for (h of weekdayHeaders; track h) {
+          <span>{{ h }}</span>
+        }
+      </div>
+
+      <div class="cal-days">
+        @for (week of weeks(); track $index) {
+          @for (cell of week; track cell.iso) {
+            <button
+              type="button"
+              class="cal-day"
+              [class.is-out]="!cell.inMonth"
+              [class.is-today]="cell.isToday"
+              [class.is-selected]="selectedDay() === cell.iso"
+              [class.has-data]="cell.categories.length > 0"
+              (click)="selectDay(cell)"
+            >
+              <span class="cal-day-n lw-num">{{ cell.day }}</span>
+              @if (cell.categories.length > 0) {
+                <span class="cal-day-dots">
+                  @for (cat of cell.categories; track cat) {
+                    <span class="lw-dot" [style.background]="categoryColor[cat]"></span>
+                  }
+                </span>
+              }
+            </button>
           }
+        }
+      </div>
+
+      <p class="cal-legend">
+        <span class="cal-legend-item"><span class="lw-dot" style="background: var(--color-gym)"></span>Gym</span>
+        <span class="cal-legend-item"><span class="lw-dot" style="background: var(--color-cali)"></span>Calistenia</span>
+      </p>
+    </section>
+
+    <aside class="cal-detail" aria-label="Resumen del día">
+      @if (selectedDay()) {
+        <h2 class="cal-detail-title">{{ selectedDayLabel() }}</h2>
+        @for (s of selectedSessions(); track s.id) {
+          <article class="lw-card lw-spine cal-session" [style.border-left-color]="categoryColor[s.category]">
+            <h3 class="cal-session-type">{{ typeLabel[s.type] }}</h3>
+            <dl class="cal-session-list">
+              @for (e of s.exercises; track e.id) {
+                <div class="cal-session-row">
+                  <dt class="cal-session-name">{{ e.exercise.name }}</dt>
+                  <dd class="cal-session-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                </div>
+              }
+            </dl>
+          </article>
+        }
+      } @else if (!loading()) {
+        <div class="lw-empty cal-hint">
+          <svg class="lw-empty-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="2" />
+            <path d="M3 10h18M8 3v4M16 3v4" />
+          </svg>
+          <p class="lw-empty-title">Elige un día</p>
+          <p class="lw-empty-text">Los días con punto de color tienen entreno registrado. Toca uno para ver qué hiciste.</p>
         </div>
       }
-    </div>
-  } @else if (!loading()) {
-    <div class="hint">Toca un día con entreno para ver el resumen.</div>
-  }
+    </aside>
+  </div>
 </div>

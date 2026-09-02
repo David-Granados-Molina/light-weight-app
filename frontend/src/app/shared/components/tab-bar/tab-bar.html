@@ -1,36 +1,39 @@
 <nav class="tab-bar" aria-label="Navegación principal">
-  <a routerLink="/inicio" routerLinkActive="active" class="tab-link" #inicio="routerLinkActive">
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+  <a routerLink="/inicio" routerLinkActive="is-active" class="tab-link">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M3 10.5 12 3l9 7.5" />
       <path d="M5 9.5V21h14V9.5" />
     </svg>
     <span>Inicio</span>
   </a>
 
-  <a routerLink="/historial" routerLinkActive="active" class="tab-link">
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+  <a routerLink="/historial" routerLinkActive="is-active" class="tab-link">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M4 6h16M4 12h16M4 18h10" />
     </svg>
     <span>Historial</span>
   </a>
 
-  <a routerLink="/registrar" routerLinkActive="active" class="tab-link add-button" aria-label="Registrar entreno">
-    <i class="pi pi-plus plus"></i>
+  <a routerLink="/registrar" routerLinkActive="is-active" class="tab-add" aria-label="Registrar entreno">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
     @if (hasDraftInProgress()) {
-      <span class="draft-dot" aria-label="Entreno en proceso sin guardar"></span>
+      <span class="tab-add-dot" aria-hidden="true"></span>
+      <span class="lw-sr-only">Tienes un entreno sin guardar</span>
     }
   </a>
 
-  <a routerLink="/progreso" routerLinkActive="active" class="tab-link">
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+  <a routerLink="/progreso" routerLinkActive="is-active" class="tab-link">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M4 19V5M4 19h16" />
       <path d="M8 15l3.5-4 3 2.5L21 7" />
     </svg>
     <span>Progreso</span>
   </a>
 
-  <a routerLink="/rutinas" routerLinkActive="active" class="tab-link">
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+  <a routerLink="/rutinas" routerLinkActive="is-active" class="tab-link">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
     </svg>
     <span>Rutinas</span>

@@ -13,3 +13,4 @@ dist/
 
 # graphify output
 /graphify-out/
+.impeccable/build/

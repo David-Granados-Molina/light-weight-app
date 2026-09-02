@@ -105,7 +105,7 @@ export class Profile implements OnDestroy {
 
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
-    if (target.closest('.dropdown')) return;
+    if (target.closest('.prof-dropdown')) return;
     this.avatarMenuOpen.set(false);
     this.themeMenuOpen.set(false);
   }

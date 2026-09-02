@@ -1,85 +1,112 @@
-.tab-bar {
+/* La tab-bar es la navegación del gimnasio: pulgar, una mano, poca atención.
+   Desaparece en cuanto hay sitio para el rail lateral. */
+
+:host {
   position: fixed;
-  left: 14px;
-  right: 14px;
-  bottom: 16px;
-  max-width: 452px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-around;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 70;
+  display: block;
+}
+
+@media (min-width: 900px) {
+  :host {
+    display: none;
+  }
+}
+
+.tab-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   align-items: center;
-  background: rgba(18, 18, 18, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid #262626;
-  border-radius: 20px;
-  padding: 10px 6px;
-  z-index: 40;
+  height: var(--tabbar-h);
+  padding-bottom: var(--safe-b);
+  box-sizing: content-box;
+  background: color-mix(in srgb, var(--chrome) 88%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-top: 1px solid var(--line-strong);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .tab-bar {
+    background: var(--chrome);
+  }
 }
 
 .tab-link {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  color: var(--color-text-muted);
-  text-decoration: none;
-  padding: 4px 6px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 600;
-  transition: color 0.15s ease;
-}
-
-.tab-link:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.tab-link.active {
-  color: var(--color-text);
-}
-
-.add-button {
-  position: relative;
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  width: 46px;
-  height: 46px;
-  border-radius: 15px;
   justify-content: center;
-  align-items: center;
+  gap: 4px;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  transition: color var(--dur) var(--ease-out);
 }
 
-.draft-dot {
+.tab-link:hover {
+  color: var(--text-secondary);
+}
+
+.tab-link.is-active {
+  color: var(--accent-text);
+}
+
+/* Marca de pestaña activa pegada al borde superior de la barra: da la posición
+   sin robar sitio a la etiqueta. */
+.tab-link.is-active::before {
+  content: '';
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--color-text);
-  border: 2px solid var(--color-bg);
-  animation: draftDotPulse 1.8s ease-in-out infinite;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: var(--accent-solid);
 }
 
-@keyframes draftDotPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
+/* --- Botón central --------------------------------------------------------- */
 
-.add-button.active {
-  color: var(--color-accent-contrast);
-}
-
-.plus {
-  font-size: 20px;
-  line-height: 1;
+.tab-add {
+  position: relative;
+  justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin-top: -22px;
+  border-radius: var(--r-full);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-2);
+  transition:
+    background var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.tab-add:active {
+  transform: scale(0.94);
+}
+
+.tab-add.is-active {
+  background: var(--accent-text);
+}
+
+/* El punto de borrador va en tinta del acento, no en naranja: el naranja es el
+   color de la categoría calistenia y no puede significar dos cosas. */
+.tab-add-dot {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-full);
+  background: var(--accent-ink);
 }

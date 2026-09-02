@@ -5,11 +5,10 @@ import { map } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
 import { Routine, RoutineExercise } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../core/models/labels';
-import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 
 @Component({
   selector: 'app-friend-routines',
-  imports: [RouterLink, ExerciseLoader],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './friend-routines.html',
   styleUrl: './friend-routines.css',

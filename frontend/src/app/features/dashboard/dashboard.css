@@ -1,427 +1,335 @@
-.page {
-  animation: fadeUp 0.4s ease both;
-}
+/* Inicio. En móvil una columna; en escritorio dos: a la izquierda el estado de
+   la semana y la acción, a la derecha el historial reciente, que es lo que se
+   consulta con tiempo. */
 
-.brand {
+.dash-head {
   display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 22px;
-}
-
-.brand-icon {
-  border-radius: 7px;
-  display: block;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.brand-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-}
-
-.brand-subtitle {
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
 }
 
-.today {
-  font-size: 14px;
-  color: var(--color-text-secondary);
+.dash-today {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+  margin-bottom: 2px;
 }
 
-.greeting {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin-top: 2px;
-}
-
-.avatar {
-  width: 70px;
-  height: 70px;
-  border-radius: 12px;
-  background: var(--color-surface-alt);
-  border: 2px solid var(--color-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--color-accent);
-  text-decoration: none;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.avatar app-avatar {
-  font-size: 24px;
-}
-
-.avatar:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.section-label,
-.muted-label {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 1px;
+.dash-today::first-letter {
   text-transform: uppercase;
-  color: var(--color-text-secondary);
 }
 
-.section-label {
-  margin: 12px 0 12px;
+.dash-avatar {
+  display: block;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease-out);
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.dash-avatar:hover {
+  border-color: var(--accent-line);
 }
 
-.section-header .section-label {
-  margin: 26px 0;
+/* En escritorio el rail ya lleva el avatar y el acceso al perfil. */
+@media (min-width: 900px) {
+  .dash-avatar {
+    display: none;
+  }
 }
 
-.calendar-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-}
+/* --- Rejilla ---------------------------------------------------------------- */
 
-.week-stats {
+.dash-grid {
   display: grid;
-  grid-template-columns: 3fr 7fr;
-  gap: 10px;
-  align-items: stretch;
+  grid-template-columns: 1fr;
+  gap: var(--s-6);
 }
 
-.stat {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 18px;
-}
-
-.stat-tip {
+.dash-col {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  min-height: 0;
-  overflow: hidden;
+  gap: var(--s-5);
+  min-width: 0;
 }
 
-.tip-text {
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--color-text-secondary);
-  animation: fadeUp 0.4s ease both;
+@media (min-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--s-8);
+    align-items: start;
+  }
 }
 
-.tip-progress {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-border);
-  overflow: hidden;
+.dash-link {
+  font-size: var(--t-sm);
+  font-weight: 550;
+  color: var(--text-secondary);
+  border-radius: var(--r-xs);
+  transition: color var(--dur) var(--ease-out);
 }
 
-.tip-progress-bar {
-  height: 100%;
-  width: 100%;
-  background: var(--color-accent);
-  border-radius: 2px;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.1s linear;
+.dash-link:hover {
+  color: var(--accent-text);
 }
 
-.stat-accent {
-  background: var(--color-accent);
-  border: none;
+/* --- Semana ---------------------------------------------------------------- */
+
+.dash-week {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  gap: var(--s-5);
 }
 
-.stat-value {
-  font-family: var(--font-display);
+/* El recuento es una frase, no una métrica heroica: el número grande solo, con
+   su etiqueta debajo, no dice nada que esta línea no diga mejor. */
+.dash-week-count {
+  font-size: var(--t-title);
+  font-weight: 550;
+  letter-spacing: -0.016em;
+  color: var(--text-secondary);
+}
+
+.dash-week-count strong {
+  font-size: var(--t-display);
   font-weight: 700;
-  font-size: 40px;
-  line-height: 1;
-  color: var(--color-text);
+  letter-spacing: -0.022em;
+  color: var(--text);
+  margin-right: 2px;
 }
 
-.stat-accent .stat-value {
-  color: var(--color-accent-contrast);
+.dash-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.stat-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-top: 7px;
-}
-
-.stat-accent .stat-label {
-  color: rgba(11, 11, 11, 0.72);
-}
-
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 10px;
-}
-
-.checks-header {
+.dash-day {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 6px;
+  gap: var(--s-2);
+  min-width: 0;
 }
 
-.legend {
+.dash-day-marks {
   display: flex;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--color-text-muted);
-  margin-top: 8px;
+  align-items: center;
   justify-content: center;
+  gap: 2px;
+  min-height: 20px;
 }
 
-.legend-item {
+.dash-day-empty {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--r-full);
+  border: 1.5px solid var(--line-strong);
+}
+
+.dash-day-letter {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.dash-day.is-today .dash-day-letter {
+  color: var(--accent-text);
+}
+
+.dash-legend {
+  display: flex;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  font-size: var(--t-xs);
+  color: var(--text-secondary);
+}
+
+.dash-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--s-2);
 }
 
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
+/* --- Acción primaria ------------------------------------------------------- */
 
-.checks {
+.dash-cta {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.check-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-}
-
-.check-icons {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-height: 20px;
   justify-content: center;
+  gap: var(--s-2);
+  min-height: 52px;
+  border-radius: var(--r-sm);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  font-size: var(--t-body);
+  font-weight: 650;
+  letter-spacing: -0.008em;
+  transition:
+    background var(--dur) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
-.check-icon {
-  color: var(--color-text-muted);
+.dash-cta:hover {
+  background: var(--accent-text);
 }
 
-.check-icon.empty {
-  opacity: 0.35;
+.dash-cta:active {
+  transform: translateY(1px);
 }
 
-.check-label {
-  font-size: 11px;
-  color: var(--color-text-muted);
+/* --- Consejo ---------------------------------------------------------------- */
+
+.dash-tip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 
-.check-label.today {
-  color: var(--color-text);
-  font-weight: 700;
+.dash-tip-text {
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  max-width: 62ch;
+  animation: tip-in var(--dur-slow) var(--ease-out);
 }
 
-.cta {
+@keyframes tip-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.dash-tip-track {
+  display: block;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: var(--line-strong);
+  overflow: hidden;
+}
+
+.dash-tip-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-full);
+  background: var(--accent-solid);
+  transform-origin: left;
+}
+
+/* --- Entrenos recientes ----------------------------------------------------- */
+
+.dash-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.dash-session {
   position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* El botón cubre el resumen entero; el de editar vive fuera de él, porque un
+   botón dentro de otro no es HTML válido ni es navegable con teclado. */
+.dash-session-toggle {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: var(--s-2);
   width: 100%;
-  font-weight: 700;
-  font-size: 17px;
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border: none;
-  border-radius: 16px;
-  padding: 18px;
-  margin-top: 14px;
-  text-decoration: none;
-  cursor: pointer;
+  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  transition: background var(--dur) var(--ease-out);
 }
 
-.cta:focus-visible {
-  outline: 2px solid var(--color-text);
-  outline-offset: 2px;
+.dash-session-toggle:hover {
+  background: var(--surface-raised);
 }
 
-.draft-dot {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: var(--color-text);
-  border: 2px solid var(--color-bg);
-  animation: draftDotPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes draftDotPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-.recent-header {
+.dash-session-top {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin: 28px 0 12px;
+  gap: var(--s-3);
 }
 
-.see-all {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-decoration: none;
+.dash-session-date {
+  font-size: var(--t-sm);
+  color: var(--text-muted);
 }
 
-.recent-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.session-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 15px;
-  border-left: 3px solid;
-  cursor: pointer;
-}
-
-.session-details {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
-}
-
-.session-exercise {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.session-exercise-name {
+.dash-session-type {
+  font-size: var(--t-lead);
   font-weight: 600;
-  color: var(--color-text);
+  letter-spacing: -0.012em;
+  color: var(--text);
 }
 
-.session-exercise-sets {
-  color: var(--color-text-secondary);
-  text-align: right;
-  font-size: 12px;
+.dash-session-count {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
 }
 
-.session-top {
+.dash-session-edit {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+}
+
+.dash-session-detail {
   display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-4);
+  border-top: 1px solid var(--line);
+  animation: detail-in var(--dur) var(--ease-out);
+}
+
+@keyframes detail-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.dash-session-row {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  align-items: center;
+  gap: var(--s-4);
+  font-size: var(--t-sm);
 }
 
-.session-top-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.dash-session-ex {
+  color: var(--text-secondary);
+  min-width: 0;
 }
 
-.session-edit-btn {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  border-radius: 6px;
-  transition: color 0.15s ease;
+.dash-session-sets {
+  margin: 0;
+  color: var(--text);
+  font-weight: 550;
+  text-align: right;
 }
 
-.session-edit-btn:hover {
-  color: var(--color-accent);
+/* --- Esqueletos ------------------------------------------------------------- */
+
+.dash-skel-week {
+  height: 188px;
+  border-radius: var(--r-md);
 }
 
-.muted {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.session-type {
-  font-weight: 700;
-  font-size: 18px;
-  margin-top: 10px;
-}
-
-.session-count {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  margin-top: 6px;
-}
-
-.empty {
-  text-align: center;
-  padding: 0px 20px;
-  color: var(--color-text-muted);
-  font-size: 15px;
+.dash-skel-cta {
+  height: 52px;
+  border-radius: var(--r-sm);
 }

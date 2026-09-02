@@ -1,36 +1,13 @@
 @import '../auth-shared.css';
 
-.page.is-loading {
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
+/* Google renderiza su botón dentro de un iframe recortado; el contenedor solo
+   le da el ancho y lo centra, sin intentar repintarlo. */
+.google-btn-wrap {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 16px;
-  background: rgba(0, 0, 0, 0.4);
+  min-height: 44px;
 }
 
-.secondary-btn {
-  width: 100%;
-  font-weight: 700;
-  font-size: 15px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 16px;
-  cursor: pointer;
+.google-btn-wrap :is(iframe, div) {
+  max-width: 100%;
 }
-
-.secondary-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-

@@ -1,8 +1,21 @@
-<div class="app-shell">
-  <main class="app-content" [class.auth-content]="isAuthRoute()">
+@if (!isAuthRoute()) {
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+}
+
+<div class="app-shell" [class.is-auth]="isAuthRoute()" [class.has-console]="showConsole()">
+  @if (!isAuthRoute()) {
+    <app-side-rail class="app-rail" />
+  }
+
+  <main class="app-main" id="contenido">
     <router-outlet />
   </main>
-  @if (!isAuthRoute()) {
-    <app-tab-bar />
+
+  @if (showConsole()) {
+    <app-session-console />
   }
 </div>
+
+@if (!isAuthRoute()) {
+  <app-tab-bar />
+}

@@ -1,125 +1,119 @@
-.page {
-  animation: fadeUp 0.4s ease both;
-}
+/* Listado de rutinas. Rejilla que se llena sola: una columna en el móvil, tres
+   en una pantalla ancha, sin breakpoints intermedios que mantener. */
 
-.header {
+.rt-head {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
 }
 
-.back {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  text-decoration: none;
+.rt-new {
   flex-shrink: 0;
 }
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 0;
+@media (max-width: 599px) {
+  .rt-new {
+    width: 100%;
+  }
 }
 
-.cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  font-weight: 700;
-  font-size: 17px;
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border: none;
-  border-radius: 16px;
-  padding: 18px;
-  margin-top: 18px;
-  text-decoration: none;
-  cursor: pointer;
+.rt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-3);
 }
 
-.routine-list {
+.rt-skel {
+  height: 148px;
+}
+
+.rt-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
+  gap: var(--s-2);
+  transition:
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
 }
 
-.routine-card {
-  display: block;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 15px;
-  border-left: 3px solid;
-  text-decoration: none;
-  color: var(--color-text);
+.rt-card:hover {
+  background: var(--surface-raised);
+  border-color: var(--line-strong);
 }
 
-.routine-top {
+.rt-card-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
 }
 
-.routine-cat {
+.rt-cat {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
+  gap: var(--s-2);
+  font-size: var(--t-label);
   font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
+.rt-name {
+  font-size: var(--t-title);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.016em;
 }
 
-.remove-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  font-size: 16px;
-  cursor: pointer;
-  padding: 2px;
+/* El enlace se estira sobre toda la tarjeta para que el objetivo táctil sea la
+   tarjeta entera, pero sigue siendo un enlace con su propio texto: la tarjeta
+   no puede ser un <a> porque contiene el botón de eliminar. */
+.rt-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
-.routine-name {
-  font-weight: 700;
-  font-size: 17px;
-  margin-top: 9px;
+.rt-link:focus-visible {
+  outline: none;
 }
 
-.routine-exercises {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-top: 6px;
-  line-height: 1.5;
+.rt-link:focus-visible::after {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
 }
 
-.routine-count {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  margin-top: 8px;
+.rt-delete {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
-.empty {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--color-text-muted);
-  font-size: 15px;
+.rt-delete:hover {
+  color: var(--color-negative);
+}
+
+.rt-exercises {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rt-count {
+  margin-top: auto;
+  padding-top: var(--s-2);
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.rt-empty {
+  grid-column: 1 / -1;
 }

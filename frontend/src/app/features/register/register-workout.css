@@ -1,697 +1,582 @@
-.page {
-  animation: fadeUp 0.4s ease both;
-  padding-bottom: 8px;
-}
+/* Registrar entreno. La pantalla más usada del producto y la que más
+   restricciones tiene: en móvil se rellena de pie, entre serie y serie, con una
+   mano. En escritorio se separa en dos columnas: a la izquierda la preparación
+   (día, rutina, catálogo), que se queda fija, y a la derecha el entreno real. */
 
-.title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: -0.5px;
-  margin: 0;
-}
+/* --- Aviso de entreno sin guardar ------------------------------------------ */
 
-.date-row {
+.reg-reminder {
+  position: fixed;
+  top: var(--s-3);
+  left: var(--gutter);
+  right: var(--gutter);
+  z-index: 80;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--t-sm);
+  box-shadow: var(--shadow-2);
+  animation: reminder-in var(--dur-slow) var(--ease-out);
 }
 
-.date-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.reg-reminder span {
+  flex: 1;
   min-width: 0;
 }
 
-.date-label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 17px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.date-label.today {
-  color: var(--color-text);
-}
-
-.today-link {
+.reg-reminder-close {
+  color: inherit;
   flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--color-accent);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
 }
 
-.date-pick-btn {
+@keyframes reminder-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@media (min-width: 900px) {
+  .reg-reminder {
+    left: auto;
+    right: var(--s-6);
+    max-width: 420px;
+  }
+}
+
+/* --- Rejilla ---------------------------------------------------------------- */
+
+.reg-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-5);
+}
+
+.reg-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.reg-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .reg-grid {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: var(--s-8);
+    align-items: start;
+  }
+
+  .reg-panel {
+    position: sticky;
+    top: var(--s-8);
+  }
+}
+
+/* --- Fecha ------------------------------------------------------------------ */
+
+.reg-date {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  cursor: pointer;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.reg-date-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.reg-date-value {
+  display: inline-block;
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.reg-date-value::first-letter {
+  text-transform: uppercase;
+}
+
+.reg-date-value.is-today {
+  color: var(--accent-text);
+}
+
+.reg-date-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
   flex-shrink: 0;
-  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.date-pick-btn:hover {
-  border-color: var(--color-border-strong);
-  color: var(--color-text);
+.reg-today {
+  font-size: var(--t-sm);
+  white-space: nowrap;
 }
 
-.calendar-pop-wrap {
+/* --- Calendario emergente ---------------------------------------------------- */
+
+.reg-cal-anchor {
   position: relative;
-  flex-shrink: 0;
 }
 
-.calendar-backdrop {
+.reg-cal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 75;
-  background: transparent;
+  z-index: 99;
 }
 
-.calendar-pop {
+.reg-cal {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  z-index: 80;
-  width: 300px;
-  max-width: calc(100vw - 32px);
-  background: #161616;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-  animation: popIn 0.2s ease both;
+  z-index: 100;
+  width: 292px;
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-3);
+  animation: cal-in var(--dur) var(--ease-out);
 }
 
-.calendar-pop .month-nav {
+@keyframes cal-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.reg-cal-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--s-3);
 }
 
-.calendar-pop .nav-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.calendar-pop .month-label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.calendar-pop .weekday-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.calendar-pop .weekday {
-  font-size: 11px;
+.reg-cal-month {
+  display: inline-block;
+  font-size: var(--t-body);
   font-weight: 600;
-  color: var(--color-text-muted);
+}
+
+.reg-cal-month::first-letter {
   text-transform: uppercase;
 }
 
-.calendar-pop .month-grid {
+.reg-cal-weekdays,
+.reg-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 2px;
 }
 
-.calendar-pop .day-cell {
-  aspect-ratio: 1;
+.reg-cal-weekdays {
+  margin-bottom: var(--s-2);
+}
+
+.reg-cal-weekdays span {
+  text-align: center;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.reg-cal-day {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 9px;
-  color: var(--color-text);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
+  gap: 2px;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
-.calendar-pop .day-cell.out {
-  color: var(--color-text-muted);
+.reg-cal-day:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.reg-cal-day.is-out {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.reg-cal-day.is-today {
+  border-color: var(--line-strong);
+}
+
+.reg-cal-day.is-selected {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  border-color: transparent;
+}
+
+.reg-cal-day:disabled {
+  color: var(--text-muted);
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.reg-cal-dots {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+}
+
+.reg-cal-dots .lw-dot {
+  width: 4px;
+  height: 4px;
+}
+
+/* --- Aviso de edición -------------------------------------------------------- */
+
+.reg-editing {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--t-sm);
+  font-weight: 550;
+}
+
+.reg-loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--s-6);
+}
+
+/* --- Ejercicio ---------------------------------------------------------------- */
+
+.reg-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.reg-ex {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.reg-ex.cdk-drag-preview {
+  box-shadow: var(--shadow-3);
+  border-color: var(--line-strong);
+}
+
+.reg-ex.cdk-drag-placeholder {
   opacity: 0.35;
 }
 
-.calendar-pop .day-cell.today {
-  border-color: var(--color-accent);
-}
-
-.calendar-pop .day-cell.selected {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-accent-contrast);
-}
-
-.calendar-pop .day-cell:disabled {
-  opacity: 0.25;
-  cursor: default;
-}
-
-.calendar-pop .day-dots {
+.reg-ex-head {
   display: flex;
-  gap: 3px;
+  align-items: flex-start;
+  gap: var(--s-2);
 }
 
-.calendar-pop .dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.edit-banner {
+.reg-drag {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-accent);
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-accent);
-}
-
-.loading-routines {
-  margin-top: 18px;
-  font-size: 13px;
-  color: var(--color-text-muted);
-}
-
-.section-label {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  margin: 18px 0 6px;
-}
-
-
-.search-wrap {
-  display: block;
-  margin-top: 12px;
-}
-
-.added-list {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.exercise-card {
-  position: relative;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  padding: 16px;
-  border-left: 3px solid;
-}
-
-.exercise-card.cdk-drag-preview {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-  border-radius: 16px;
-  border-left: 3px solid;
-  padding: 16px;
-  background: var(--color-surface);
-}
-
-.exercise-card.cdk-drag-placeholder {
-  opacity: 0.3;
-}
-
-.added-list.cdk-drop-list-dragging .exercise-card:not(.cdk-drag-placeholder) {
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.exercise-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.drag-handle {
-  color: var(--color-text-muted);
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
   cursor: grab;
   touch-action: none;
-  flex-shrink: 0;
-  padding: 2px;
+  transition: color var(--dur) var(--ease-out);
 }
 
-.exercise-head-info {
+.reg-drag:hover {
+  color: var(--text-secondary);
+}
+
+.reg-drag:active {
+  cursor: grabbing;
+}
+
+.reg-ex-title {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.note-bookmark {
-  position: absolute;
-  top: -8px;
-  left: 15px;
-  width: 22px;
-  height: 26px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
-}
-
-.note-bookmark svg {
-  width: 100%;
-  height: 100%;
-}
-
-.note-bookmark.has-note {
-  color: var(--color-accent);
-}
-
-.note-view-text {
-  font-size: 14px;
-  color: var(--color-text);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  margin: 0;
-}
-
-.exercise-name {
-  font-weight: 700;
-  font-size: 17px;
-}
-
-.exercise-info {
-  font-weight: 500;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.exercise-type {
-  font-size: 12px;
+.reg-ex-name {
+  font-size: var(--t-lead);
   font-weight: 600;
-  margin-top: 2px;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
 }
 
-.remove-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
+.reg-ex-info {
+  font-size: var(--t-sm);
+  font-weight: 450;
+  color: var(--text-muted);
+  margin-left: var(--s-1);
 }
 
-.emom-toggle {
-  margin-top: 10px;
-  font-size: 12px;
+.reg-ex-type {
+  font-size: var(--t-label);
   font-weight: 600;
-  border: 1px solid var(--color-border-strong);
-  background: transparent;
-  color: var(--color-text-secondary);
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.reg-note,
+.reg-remove {
+  flex-shrink: 0;
+}
+
+.reg-note {
+  color: var(--accent-text);
+}
+
+.reg-emom {
   align-self: flex-start;
 }
 
-.emom-toggle.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-accent-contrast);
+/* --- Última vez ---------------------------------------------------------------
+   Lo que el usuario compara mentalmente entre serie y serie. Va justo encima de
+   las ruedas, no escondido en un desplegable. */
+
+.reg-last {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-radius: var(--r-xs);
+  background: var(--surface-raised);
+  font-size: var(--t-sm);
+  color: var(--text);
 }
 
-.sets {
+.reg-last-label {
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+/* --- Series -------------------------------------------------------------------- */
+
+.reg-sets {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 14px;
+  gap: var(--s-2);
 }
 
-.last-session {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.last-label {
-  color: var(--color-text-muted);
-  font-weight: 600;
-}
-
-.set-row {
-  display: flex;
+.reg-set {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 32px;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
-.set-label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--color-text-muted);
-  width: 18px;
-  flex-shrink: 0;
+.reg-set-n {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
   text-align: center;
 }
 
-.wheels {
-  flex: 1;
-  display: flex;
-  gap: 8px;
+.reg-wheels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
   min-width: 0;
 }
 
-.wheels app-number-wheel {
-  flex: 1;
-  min-width: 0;
+.reg-set-remove {
+  width: 32px;
+  height: 32px;
 }
 
-.remove-set-btn {
-  background: none;
-  border: none;
-  color: #3a3a3a;
-  font-size: 16px;
-  cursor: pointer;
-  flex-shrink: 0;
-  width: 20px;
-}
-
-.add-set-btn {
-  width: 100%;
-  margin-top: 12px;
-  background: transparent;
-  border: 1px dashed #333;
-  border-radius: 10px;
-  padding: 10px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--color-text-muted);
-  font-size: 15px;
-}
-
-.save-btn {
-  width: 100%;
-  font-weight: 700;
-  font-size: 17px;
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border: none;
-  border-radius: 16px;
-  padding: 18px;
-  margin-top: 12px;
-  cursor: pointer;
-}
-
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.edit-actions .save-btn {
-  flex: 1;
-  margin-top: 0;
-}
-
-.cancel-edit-btn {
-  flex: 1;
-  font-weight: 700;
-  font-size: 17px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 16px;
-  padding: 18px;
-  cursor: pointer;
-}
-
-.save-btn:disabled,
-.cancel-edit-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.save-error {
-  margin-top: 10px;
-  color: var(--color-cali);
-  font-size: 13px;
-  text-align: center;
-}
-
-.reminder-toast {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 70;
-  margin: 0 auto;
-  max-width: 480px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #2a1d0a;
-  border: 1px solid #6b4a12;
-  border-top: none;
-  border-radius: 0 0 14px 14px;
-  padding: 10px 12px 10px 18px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #ffc861;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-  animation: slideDown 0.3s ease both;
-}
-
-.reminder-text {
-  flex: 1;
-  text-align: center;
-}
-
-.reminder-close {
-  flex-shrink: 0;
+.reg-add-set {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: none;
-  border: none;
-  color: #ffc861;
-  font-size: 13px;
-  line-height: 1;
-  cursor: pointer;
+  gap: var(--s-2);
+  min-height: 42px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  transition:
+    background var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
 }
 
-.reminder-close:active {
-  background: rgba(255, 200, 97, 0.15);
+.reg-add-set:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent-line);
+  color: var(--accent-text);
 }
 
-@keyframes slideDown {
+/* --- Guardar --------------------------------------------------------------------
+   En escritorio se queda pegado al pie de la columna: la lista puede ser larga y
+   el botón no debería obligar a bajar hasta el final para verlo. */
+
+.reg-commit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.reg-commit-count {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+}
+
+.reg-commit-actions {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.reg-commit-actions > * {
+  flex: 1;
+}
+
+.reg-save {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .reg-commit {
+    position: sticky;
+    bottom: var(--s-6);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-2);
+  }
+
+  .reg-commit-actions,
+  .reg-save {
+    width: auto;
+    flex: none;
+  }
+}
+
+/* --- Hojas de guardado / guardado correcto -------------------------------------- */
+
+.reg-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+  text-align: center;
+}
+
+.reg-sheet-title {
+  font-size: var(--t-title);
+  font-weight: 650;
+  letter-spacing: -0.016em;
+}
+
+.reg-sheet-text,
+.reg-sheet-compare {
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  max-width: 44ch;
+  line-height: 1.6;
+}
+
+.reg-sheet-summary {
+  color: var(--text);
+  font-size: var(--t-body);
+  font-weight: 550;
+}
+
+.reg-saved-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-full);
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  margin-bottom: var(--s-1);
+  animation: mark-in var(--dur-slow) var(--ease-out);
+}
+
+@keyframes mark-in {
   from {
     opacity: 0;
-    transform: translateY(-100%);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    transform: scale(0.7);
   }
 }
 
-.saving-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 65;
-  background: rgba(11, 11, 11, 0.75);
-  backdrop-filter: blur(6px);
+.reg-share {
   display: flex;
-  align-items: flex-end;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: var(--s-2);
+  width: 100%;
+  margin-top: var(--s-2);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
 }
 
-.saving-sheet {
-  width: 100%;
-  max-width: 480px;
-  background: #161616;
-  border-top: 1px solid var(--color-border-strong);
-  border-radius: 28px 28px 0 0;
-  padding: 32px 22px 40px;
+.reg-share-btn {
+  flex: 1;
+  min-width: 108px;
+  font-size: var(--t-sm);
+}
+
+.reg-saved-actions {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  animation: slideUp 0.35s ease both;
-}
-
-.saving-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  margin-top: 18px;
-  text-align: center;
-}
-
-.saving-text {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-align: center;
-  margin-top: 8px;
-  line-height: 1.5;
-}
-
-.saved-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  background: rgba(11, 11, 11, 0.7);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.saved-sheet {
+  gap: var(--s-2);
   width: 100%;
-  max-width: 480px;
-  background: #161616;
-  border-top: 1px solid var(--color-border-strong);
-  border-radius: 28px 28px 0 0;
-  padding: 32px 22px 40px;
-  animation: slideUp 0.35s ease both;
+  margin-top: var(--s-2);
 }
 
-.saved-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  animation: popIn 0.4s ease both;
-}
-
-.saved-title {
-  text-align: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 22px;
-  margin-top: 18px;
-}
-
-.saved-summary {
-  text-align: center;
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin-top: 6px;
-}
-
-.saved-comparison {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  padding: 12px 16px;
-  margin-top: 16px;
-  line-height: 1.4;
-}
-
-.share-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.share-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 11px 8px;
-  color: var(--color-text);
-  font-weight: 600;
-  font-size: 12.5px;
-  cursor: pointer;
-}
-
-.share-btn.whatsapp {
-  color: #25d366;
-  border-color: rgba(37, 211, 102, 0.35);
-}
-
-.saved-primary {
+.reg-saved-actions > * {
   width: 100%;
-  font-weight: 700;
-  font-size: 16px;
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border: none;
-  border-radius: 14px;
-  padding: 16px;
-  margin-top: 22px;
-  cursor: pointer;
 }
 
-.saved-secondary {
-  width: 100%;
-  font-weight: 600;
-  font-size: 15px;
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: none;
-  padding: 14px;
-  margin-top: 4px;
-  cursor: pointer;
+.reg-note-text {
+  color: var(--text-secondary);
+  font-size: var(--t-body);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  max-width: 62ch;
 }
-

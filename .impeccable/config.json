@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "frontend/src/app/features/profile/profile.html"
+        ],
+        "createdAt": "2026-09-02T10:19:38.546Z",
+        "reason": "Claude: the only <img> here is [src]=\"lightboxSrc()!\", an Angular binding to a blob URL generated at runtime by Profile.buildBlobUrl(), rendered only inside @if (lightboxSrc()). There is no static src for the detector to read."
+      },
+      {
+        "rule": "marquee",
+        "value": "*",
+        "files": [
+          "frontend/src/index.html"
+        ],
+        "createdAt": "2026-09-02T10:37:54.489Z",
+        "reason": "Claude: the flagged loop is .app-boot-fill, the indeterminate progress bar on the boot splash — a loading indicator, not auto-scrolling content. It exists only until Angular takes over, carries no content, and is disabled under prefers-reduced-motion."
+      }
+    ]
+  }
+}

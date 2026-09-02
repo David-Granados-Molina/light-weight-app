@@ -1,45 +1,56 @@
-<div class="page">
-  <div class="header">
-    <a routerLink="/amigos" class="back" aria-label="Volver">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="lw-page lw-page-wide frr">
+  <header class="lw-head">
+    <a routerLink="/amigos" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Amigos">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
     </a>
-    <h1 class="title">Rutinas de {{ targetUserName() }}</h1>
-  </div>
+    <h1 class="lw-title">Rutinas de {{ targetUserName() }}</h1>
+  </header>
 
   @if (loading()) {
-    <app-exercise-loader />
+    <div class="frr-grid" aria-busy="true">
+      <div class="lw-skel frr-skel"></div>
+      <div class="lw-skel frr-skel"></div>
+    </div>
   } @else {
-    <div class="routine-list">
+    <div class="frr-grid">
       @for (r of rows(); track r.id) {
-        <div class="routine-card" [style.border-left-color]="categoryColor[r.category]">
-          <div class="routine-top">
-            <span class="routine-cat" [style.color]="categoryColor[r.category]">
-              <span class="dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
+        <article class="lw-card lw-spine frr-card" [style.border-left-color]="categoryColor[r.category]">
+          <div class="frr-top">
+            <span class="frr-cat" [style.color]="categoryColor[r.category]">
+              <span class="lw-dot" [style.background]="categoryColor[r.category]"></span>{{ categoryLabel[r.category] }}
             </span>
+            <span class="frr-count lw-num">{{ r.count }} {{ r.count === 1 ? 'ejercicio' : 'ejercicios' }}</span>
           </div>
-          <div class="routine-name">{{ r.name }}</div>
+
+          <h2 class="frr-name">{{ r.name }}</h2>
+
           @if (r.count) {
-            <div class="routine-exercise-list">
+            <ul class="frr-list">
               @for (e of r.exercises; track e.id) {
-                <div class="routine-exercise-row">
-                  <div class="routine-exercise-top">
-                    <span class="routine-exercise-name">{{ e.name }}</span>
+                <li class="frr-item">
+                  <div class="frr-item-top">
+                    <span class="frr-item-name">{{ e.name }}</span>
                     @if (e.muscleGroup) {
-                      <span class="routine-exercise-muscle">{{ e.muscleGroup }}</span>
+                      <span class="frr-item-muscle">{{ e.muscleGroup }}</span>
                     }
                   </div>
-                  <div class="routine-exercise-target">{{ e.target }}</div>
+                  <p class="frr-item-target lw-num">{{ e.target }}</p>
                   @if (e.note) {
-                    <div class="routine-exercise-note">{{ e.note }}</div>
+                    <p class="frr-item-note">{{ e.note }}</p>
                   }
-                </div>
+                </li>
               }
-            </div>
+            </ul>
           }
-          <div class="routine-count">{{ r.count }} ejercicios</div>
-        </div>
+        </article>
       } @empty {
-        <div class="empty">Este usuario no tiene rutinas todavía.</div>
+        <div class="lw-empty frr-empty">
+          <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
+          </svg>
+          <p class="lw-empty-title">Este usuario no tiene rutinas</p>
+          <p class="lw-empty-text">Puede que entrene sin plantilla, registrando ejercicios sueltos.</p>
+        </div>
       }
     </div>
   }
