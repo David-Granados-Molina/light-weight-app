@@ -395,18 +395,53 @@
   gap: var(--s-2);
 }
 
+/* En móvil el ordinal y el botón de quitar van en una línea de rótulo encima, y
+   las dos ruedas ocupan el ancho entero. En fila los tres, la caja del valor se
+   quedaba en 24 px y recortaba el peso: "40,0" y "127,5" salían cortados. */
 .reg-set {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) 32px;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'n rm'
+    'wheels wheels';
   align-items: center;
-  gap: var(--s-2);
+  gap: var(--s-1) var(--s-2);
 }
 
 .reg-set-n {
-  font-size: var(--t-sm);
+  grid-area: n;
+}
+
+.reg-wheels {
+  grid-area: wheels;
+}
+
+.reg-set-remove {
+  grid-area: rm;
+}
+
+/* A partir de 600 px la fila entera cabe holgada y vuelve a una sola línea. */
+@media (min-width: 600px) {
+  .reg-set {
+    grid-template-columns: 20px minmax(0, 1fr) 32px;
+    grid-template-areas: 'n wheels rm';
+    gap: var(--s-2);
+  }
+}
+
+.reg-set-n {
+  font-size: var(--t-xs);
   font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
-  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .reg-set-n {
+    font-size: var(--t-sm);
+    letter-spacing: 0;
+    text-align: center;
+  }
 }
 
 .reg-wheels {
