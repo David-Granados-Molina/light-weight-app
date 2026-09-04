@@ -5,7 +5,9 @@
   aspect-ratio: 1;
   border-radius: var(--r-sm);
   overflow: hidden;
-  background: var(--surface-raised);
+  /* Blanco, no un plano de la interfaz: el dibujo lleva trazo negro y en oscuro
+     se perdía contra el fondo (ver --avatar-canvas). */
+  background: var(--avatar-canvas);
   color: var(--accent-text);
 }
 

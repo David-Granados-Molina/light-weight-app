@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { asyncHandler } from '../lib/async-handler';
 import { addDays, startOfDay } from '../lib/dateUtils';
 import { prisma } from '../lib/prisma';
 
@@ -38,7 +39,7 @@ export const sessionInclude = {
 const include = sessionInclude;
 
 // GET /api/sessions?category=gym|calistenia&q=texto&exerciseId=...&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=20
-sessionsRouter.get('/', async (req, res) => {
+sessionsRouter.get('/', asyncHandler(async (req, res) => {
   const userId = req.userId!;
   const { category, q, exerciseId, from, to, limit } = req.query;
 
@@ -69,10 +70,10 @@ sessionsRouter.get('/', async (req, res) => {
   });
 
   res.json(sessions);
-});
+}));
 
 // GET /api/sessions/last?exerciseIds=id1,id2,... -> última sesión registrada para cada ejercicio
-sessionsRouter.get('/last', async (req, res) => {
+sessionsRouter.get('/last', asyncHandler(async (req, res) => {
   const userId = req.userId!;
   const ids = String(req.query.exerciseIds ?? '')
     .split(',')
@@ -96,10 +97,10 @@ sessionsRouter.get('/last', async (req, res) => {
   }
 
   res.json(result);
-});
+}));
 
 // GET /api/sessions/by-date/:date -> entreno existente ese día (para editarlo), o 404 si no hay
-sessionsRouter.get('/by-date/:date', async (req, res) => {
+sessionsRouter.get('/by-date/:date', asyncHandler(async (req, res) => {
   const userId = req.userId!;
   const day = new Date(req.params.date);
   if (Number.isNaN(day.getTime())) return res.status(400).json({ error: 'Fecha no válida' });
@@ -112,15 +113,15 @@ sessionsRouter.get('/by-date/:date', async (req, res) => {
 
   if (!session) return res.status(404).json({ error: 'No hay entreno ese día' });
   res.json(session);
-});
+}));
 
-sessionsRouter.get('/:id', async (req, res) => {
+sessionsRouter.get('/:id', asyncHandler(async (req, res) => {
   const session = await prisma.workoutSession.findUnique({ where: { id: req.params.id }, include });
   if (!session) return res.status(404).json({ error: 'Entreno no encontrado' });
   res.json(session);
-});
+}));
 
-sessionsRouter.post('/', async (req, res) => {
+sessionsRouter.post('/', asyncHandler(async (req, res) => {
   const parsed = sessionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -152,9 +153,9 @@ sessionsRouter.post('/', async (req, res) => {
   });
 
   res.status(201).json(session);
-});
+}));
 
-sessionsRouter.put('/:id', async (req, res) => {
+sessionsRouter.put('/:id', asyncHandler(async (req, res) => {
   const parsed = sessionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -194,13 +195,13 @@ sessionsRouter.put('/:id', async (req, res) => {
   } catch {
     res.status(404).json({ error: 'Entreno no encontrado' });
   }
-});
+}));
 
-sessionsRouter.delete('/:id', async (req, res) => {
+sessionsRouter.delete('/:id', asyncHandler(async (req, res) => {
   try {
     await prisma.workoutSession.delete({ where: { id: req.params.id } });
     res.status(204).send();
   } catch {
     res.status(404).json({ error: 'Entreno no encontrado' });
   }
-});
+}));

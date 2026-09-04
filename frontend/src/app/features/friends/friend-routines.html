@@ -4,7 +4,21 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
     </a>
     <h1 class="lw-title">Rutinas de {{ targetUserName() }}</h1>
+    <a
+      class="lw-btn-primary frr-new"
+      [routerLink]="['/amigos', targetUserId(), 'rutinas', 'nueva']"
+      [queryParams]="nameQuery()"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Nueva rutina
+    </a>
   </header>
+
+  @if (error()) {
+    <div class="lw-error" role="alert">{{ error() }}</div>
+  }
 
   @if (loading()) {
     <div class="frr-grid" aria-busy="true">
@@ -22,7 +36,32 @@
             <span class="frr-count lw-num">{{ r.count }} {{ r.count === 1 ? 'ejercicio' : 'ejercicios' }}</span>
           </div>
 
-          <h2 class="frr-name">{{ r.name }}</h2>
+          <div class="frr-title-row">
+            <h2 class="frr-name">{{ r.name }}</h2>
+            <div class="frr-actions">
+              <a
+                class="lw-icon-btn"
+                [routerLink]="['/amigos', targetUserId(), 'rutinas', r.id]"
+                [queryParams]="nameQuery()"
+                [attr.aria-label]="'Editar la rutina ' + r.name"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </a>
+              <button
+                type="button"
+                class="lw-icon-btn frr-delete"
+                (click)="askDelete(r.id, r.name)"
+                [attr.aria-label]="'Eliminar la rutina ' + r.name"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
           @if (r.count) {
             <ul class="frr-list">
@@ -30,13 +69,31 @@
                 <li class="frr-item">
                   <div class="frr-item-top">
                     <span class="frr-item-name">{{ e.name }}</span>
-                    @if (e.muscleGroup) {
+                    @if (e.primaryMuscles?.length) {
+                      <span class="frr-item-muscle">{{ e.primaryMuscles!.join(' · ') }}</span>
+                    } @else if (e.muscleGroup) {
                       <span class="frr-item-muscle">{{ e.muscleGroup }}</span>
                     }
                   </div>
-                  <p class="frr-item-target lw-num">{{ e.target }}</p>
+                  <p class="frr-item-target lw-num">
+                    {{ e.target }}
+                    @if (restLabel(e.restSeconds); as rest) {
+                      <span class="frr-item-rest">· descanso {{ rest }}</span>
+                    }
+                  </p>
+                  @if (e.description) {
+                    <p class="frr-item-description">{{ e.description }}</p>
+                  }
                   @if (e.note) {
                     <p class="frr-item-note">{{ e.note }}</p>
+                  }
+                  @if (e.videoUrl) {
+                    <a class="frr-item-video" [href]="e.videoUrl" target="_blank" rel="noopener noreferrer">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="4" width="20" height="16" rx="3" /><path d="M10 9l5 3-5 3z" />
+                      </svg>
+                      Ver vídeo
+                    </a>
                   }
                 </li>
               }
@@ -49,9 +106,21 @@
             <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
           </svg>
           <p class="lw-empty-title">Este usuario no tiene rutinas</p>
-          <p class="lw-empty-text">Puede que entrene sin plantilla, registrando ejercicios sueltos.</p>
+          <p class="lw-empty-text">
+            Puede que entrene sin plantilla, registrando ejercicios sueltos. También puedes montarle una tú.
+          </p>
         </div>
       }
     </div>
   }
 </div>
+
+@if (deleteTarget(); as target) {
+  <app-confirm-dialog
+    title="Eliminar rutina"
+    [message]="'Se eliminará «' + target.name + '» de las rutinas de ' + targetUserName() + '. Esto no se puede deshacer.'"
+    confirmText="Eliminar rutina"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

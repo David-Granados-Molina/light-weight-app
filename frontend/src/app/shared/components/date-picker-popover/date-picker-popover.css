@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+/* Capta el clic fuera. Fija, no absoluta, para que no la recorte ningún
+   ancestro con overflow. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 100;
+  width: 292px;
+  padding: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-3);
+  animation: popover-in var(--dur) var(--ease-out);
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--s-3);
+}
+
+.month {
+  display: inline-block;
+  font-size: var(--t-body);
+  font-weight: 600;
+}
+
+.month::first-letter {
+  text-transform: uppercase;
+}
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.weekdays {
+  margin-bottom: var(--s-2);
+}
+
+.weekdays span {
+  text-align: center;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.day:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.day.is-out {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.day.is-today {
+  border-color: var(--line-strong);
+}
+
+.day.is-selected {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+  border-color: transparent;
+}
+
+.day:disabled {
+  color: var(--text-muted);
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.dots {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+}
+
+.dots .lw-dot {
+  width: 4px;
+  height: 4px;
+}

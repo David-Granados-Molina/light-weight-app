@@ -4,7 +4,7 @@ import { SessionService } from '../../core/services/session.service';
 import { WorkoutSession } from '../../core/models/session.model';
 import { Category } from '../../core/models/exercise.model';
 import { CATEGORY_COLOR, TYPE_LABEL } from '../../core/models/labels';
-import { effectiveInputType, formatSets } from '../../core/utils/format';
+import { DAY_LETTERS, effectiveInputType, formatSets } from '../../core/utils/format';
 
 interface DayCell {
   iso: string;
@@ -13,8 +13,6 @@ interface DayCell {
   isToday: boolean;
   categories: Category[];
 }
-
-const WEEKDAY_HEADERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 function isoDate(date: Date): string {
   const y = date.getFullYear();
@@ -39,7 +37,7 @@ export class Calendar {
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
-  readonly weekdayHeaders = WEEKDAY_HEADERS;
+  readonly weekdayHeaders = DAY_LETTERS;
   readonly formatSets = formatSets;
   readonly effectiveInputType = effectiveInputType;
 

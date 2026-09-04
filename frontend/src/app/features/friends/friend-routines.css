@@ -86,6 +86,34 @@
   color: var(--text-secondary);
 }
 
+.frr-item-rest {
+  color: var(--text-muted);
+}
+
+.frr-item-description {
+  margin-top: var(--s-1);
+  color: var(--text-secondary);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: 62ch;
+  white-space: pre-wrap;
+}
+
+.frr-item-video {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--accent-text);
+  border-radius: var(--r-xs);
+}
+
+.frr-item-video:hover {
+  text-decoration: underline;
+}
+
 .frr-item-note {
   margin-top: var(--s-1);
   padding-left: var(--s-3);
@@ -98,4 +126,32 @@
 
 .frr-empty {
   grid-column: 1 / -1;
+}
+
+/* --- Gestión de las rutinas ajenas -------------------------------------------
+   El admin no solo mira: monta, edita y borra desde aquí. */
+
+.frr-new {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+}
+
+.frr-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.frr-actions {
+  display: flex;
+  gap: var(--s-1);
+  flex-shrink: 0;
+}
+
+.frr-delete:hover {
+  color: var(--color-negative);
 }

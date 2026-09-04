@@ -51,7 +51,11 @@ export function formatSets(sets: SetLike[], inputType?: InputType): string {
   return sets.map((s) => formatSet(s, inputType)).join(' · ');
 }
 
-const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+/**
+ * Iniciales de los días, con la semana empezando en lunes. Las usan tanto
+ * `dayLetter()` como las cuadrículas de calendario.
+ */
+export const DAY_LETTERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 /** Lunes=0 ... Domingo=6 -> letra del día */
 export function dayLetter(mondayIndex: number): string {

@@ -10,7 +10,9 @@
 }
 
 .dialog::backdrop {
-  background: rgb(4 5 7 / 72%);
+  /* ::backdrop hereda del <dialog> que lo origina; el valor de reserva cubre
+     los navegadores donde no lo haga. */
+  background: var(--scrim, rgb(4 5 7 / 72%));
   backdrop-filter: blur(6px);
   animation: dialog-backdrop-in var(--dur) var(--ease-out);
 }

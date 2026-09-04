@@ -4,63 +4,97 @@
     <span class="auth-brand-name">Light Weight</span>
   </div>
 
-  <h1 class="auth-title">Iniciar sesión</h1>
-  <p class="auth-subtitle">Accede para registrar tus entrenos.</p>
+  @if (step() === 'email') {
+    <h1 class="auth-title">Iniciar sesión</h1>
+    <p class="auth-subtitle">Escribe tu email y te enviamos un código de acceso.</p>
 
-  <div class="auth-form">
-    <div class="lw-field">
-      <label class="lw-label" for="login-email">Email</label>
-      <input
-        id="login-email"
-        class="lw-input"
-        type="email"
-        placeholder="tucorreo@ejemplo.com"
-        autocomplete="email"
-        [value]="email()"
-        [disabled]="loading()"
-        (input)="onEmailInput($event)"
-      />
-    </div>
+    <div class="auth-form">
+      <div class="lw-field">
+        <label class="lw-label" for="login-email">Email</label>
+        <input
+          id="login-email"
+          class="lw-input"
+          type="email"
+          placeholder="tucorreo@ejemplo.com"
+          autocomplete="email"
+          [value]="email()"
+          [disabled]="loading()"
+          (input)="onEmailInput($event)"
+          (keydown.enter)="requestCode()"
+        />
+      </div>
 
-    <div class="lw-field">
-      <label class="lw-label" for="login-password">Contraseña</label>
-      <input
-        id="login-password"
-        class="lw-input"
-        type="password"
-        placeholder="Tu contraseña"
-        autocomplete="current-password"
-        [value]="password()"
-        [disabled]="loading()"
-        (input)="onPasswordInput($event)"
-        (keydown.enter)="submit()"
-      />
-    </div>
+      @if (error()) {
+        <div class="lw-error" role="alert">{{ error() }}</div>
+      }
 
-    <a routerLink="/recuperar" class="auth-inline-link">¿Has olvidado tu contraseña?</a>
+      <button type="button" class="lw-btn-primary lw-btn-block" [disabled]="!canRequest()" (click)="requestCode()">
+        {{ loading() ? 'Enviando…' : 'Enviar código' }}
+      </button>
 
-    @if (error()) {
-      <div class="lw-error" role="alert">{{ error() }}</div>
-    }
-
-    <button type="button" class="lw-btn-primary lw-btn-block" [disabled]="!canSubmit()" (click)="submit()">
-      {{ loading() ? 'Entrando…' : 'Iniciar sesión' }}
-    </button>
-
-    @if (googleAvailable) {
       <div class="auth-divider">o</div>
-      <div class="google-btn-wrap" #googleBtn></div>
+
+      <button type="button" class="lw-btn-secondary lw-btn-block" [disabled]="loading()" (click)="loginAsTestUser()">
+        Acceder como test
+      </button>
+    </div>
+  } @else {
+    <h1 class="auth-title">Tu código de acceso</h1>
+    @if (delivered()) {
+      <p class="auth-subtitle">
+        Hemos enviado un código de 8 dígitos a <strong class="auth-email">{{ email() }}</strong>. Caduca en 10 minutos.
+      </p>
+    } @else {
+      <!-- Sin correo configurado el código está en el log del servidor, no en un
+           buzón: se dice así en vez de mandar a nadie a mirar su email. -->
+      <p class="auth-subtitle">
+        Tu código de 8 dígitos ya está generado, pero el envío de correos todavía no está activo. Pídeselo al
+        administrador. Caduca en 10 minutos.
+      </p>
     }
 
-    <div class="auth-divider">o</div>
-    <button type="button" class="lw-btn-secondary lw-btn-block" [disabled]="loading()" (click)="loginAsTestUser()">
-      Entrar con la cuenta de prueba
-    </button>
-  </div>
+    <div class="auth-form">
+      <div class="lw-field">
+        <label class="lw-label" for="login-code">Código</label>
+        <!-- inputmode numérico para que en el móvil salga el teclado de dígitos, y
+             one-time-code para que iOS y Android lo ofrezcan desde la notificación. -->
+        <input
+          #codeInput
+          id="login-code"
+          class="lw-input auth-code-input lw-num"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="8"
+          placeholder="00000000"
+          [value]="code()"
+          [disabled]="loading()"
+          (input)="onCodeInput($event)"
+          (keydown.enter)="verifyCode()"
+        />
+      </div>
+
+      @if (notice(); as message) {
+        <p class="auth-notice" [class.is-warning]="!delivered()">{{ message }}</p>
+      }
+
+      @if (error()) {
+        <div class="lw-error" role="alert">{{ error() }}</div>
+      }
+
+      <button type="button" class="lw-btn-primary lw-btn-block" [disabled]="!canVerify()" (click)="verifyCode()">
+        {{ loading() ? 'Entrando…' : 'Entrar' }}
+      </button>
+
+      <button type="button" class="auth-inline-link auth-back" [disabled]="loading()" (click)="backToEmail()">
+        Usar otro email o pedir un código nuevo
+      </button>
+    </div>
+  }
 </div>
 
 @if (loading()) {
   <div class="auth-blocking">
-    <app-exercise-loader text="Iniciando sesión…" />
+    <app-exercise-loader [text]="step() === 'email' ? 'Enviando el código…' : 'Iniciando sesión…'" />
   </div>
 }

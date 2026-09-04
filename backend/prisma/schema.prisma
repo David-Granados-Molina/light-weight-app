@@ -40,6 +40,27 @@ model User {
   routines     Routine[]
   sessions     WorkoutSession[]
   resetTokens  PasswordResetToken[]
+  loginCodes   LoginCode[]
+  diet         Diet?
+}
+
+/// Código de un solo uso que se envía por email para entrar. Sustituye a la
+/// contraseña: no hay registro público, las cuentas se dan de alta a mano en la
+/// base de datos, y quien demuestra tener acceso al buzón entra.
+model LoginCode {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Hash bcrypt, no el código: un volcado de la tabla no debe dar acceso a nadie.
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  /// Intentos fallidos contra este código. Al llegar al máximo se quema, para
+  /// que ocho dígitos no se puedan sacar a fuerza bruta dentro de su ventana.
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model PasswordResetToken {
@@ -52,13 +73,160 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 }
 
+/// Las tres comidas del día. El orden del enum es el orden en que se muestran.
+enum MealSlot {
+  desayuno
+  comida
+  cena
+}
+
+/// VESTIGIAL. Los suplementos se movieron a `DietSlotInfo` cuando quedó claro que
+/// se toman con la comida entera y no con una opción concreta, así que hoy todos
+/// los `DietItem` son `alimento`. Se conserva para no hacer una migración
+/// destructiva sobre producción; pendiente de limpiar junto a `passwordHash`.
+enum DietItemKind {
+  alimento
+  suplemento
+}
+
+/// Secciones de la lista de la compra, en el orden en que se recorre un súper.
+enum ShoppingCategory {
+  frutas
+  verduras
+  carnes
+  pescados
+  huevos_lacteos
+  cereales
+  frutos_secos
+  grasas
+  despensa
+  suplementos
+}
+
+/// La dieta de un usuario: sus objetivos del día, sus comidas y su lista de la
+/// compra. Una por usuario, de ahí el `@unique` en userId.
+model Diet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Objetivos diarios. Opcionales por separado: se puede fijar solo las kcal.
+  kcal      Int?
+  protein   Int?
+  fat       Int?
+  carbs     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  /// Texto de cabecera de la lista de la compra ("úsala como guía flexible…").
+  shoppingNotes String?
+
+  meals         DietMeal[]
+  slots         DietSlotInfo[]
+  shoppingItems ShoppingItem[]
+  planEntries   DietPlanEntry[]
+}
+
+/// Lo que es de la comida entera y no de una opción suya: la indicación de
+/// cabecera ("Comida previa al entreno: poca verdura y grasa") y los suplementos,
+/// que se toman con el desayuno, la comida o la cena, se elija la opción que se
+/// elija.
+model DietSlotInfo {
+  id     String   @id @default(uuid())
+  dietId String
+  diet   Diet     @relation(fields: [dietId], references: [id], onDelete: Cascade)
+  slot   MealSlot
+  notes  String?
+
+  supplements DietSupplement[]
+
+  @@unique([dietId, slot])
+}
+
+model DietSupplement {
+  id         String       @id @default(uuid())
+  slotInfoId String
+  slotInfo   DietSlotInfo @relation(fields: [slotInfoId], references: [id], onDelete: Cascade)
+  name       String
+  /// Texto libre: "1 cápsula", "5 g, todos los días incluidos los de descanso".
+  quantity   String?
+  order      Int
+
+  @@index([slotInfoId, order])
+}
+
+/// Qué opción toca cada día. Una fila por celda planificada; las celdas sin
+/// planificar sencillamente no existen.
+///
+/// Apunta a la opción por `mealId` y no por número, para que al borrar una opción
+/// la casilla se vacíe sola en vez de quedarse señalando a otra cosa.
+model DietPlanEntry {
+  id     String   @id @default(uuid())
+  dietId String
+  diet   Diet     @relation(fields: [dietId], references: [id], onDelete: Cascade)
+  /// 0 = lunes … 6 = domingo.
+  day    Int
+  slot   MealSlot
+  mealId String
+  meal   DietMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([dietId, day, slot])
+  @@index([mealId])
+}
+
+/// Una opción concreta de una comida: "Desayuno · Opción 2".
+model DietMeal {
+  id     String   @id @default(uuid())
+  dietId String
+  diet   Diet     @relation(fields: [dietId], references: [id], onDelete: Cascade)
+  slot   MealSlot
+  name   String
+  notes  String?
+  order  Int
+
+  items       DietItem[]
+  planEntries DietPlanEntry[]
+
+  @@index([dietId, slot, order])
+}
+
+model DietItem {
+  id       String       @id @default(uuid())
+  mealId   String
+  meal     DietMeal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  kind     DietItemKind
+  name     String
+  /// Texto libre ("150 g", "2 unidades", "un puñado"): pedir un número y una
+  /// unidad cerrada obligaría a inventar un catálogo de unidades para nada.
+  quantity String?
+  order    Int
+
+  @@index([mealId, order])
+}
+
+model ShoppingItem {
+  id       String           @id @default(uuid())
+  dietId   String
+  diet     Diet             @relation(fields: [dietId], references: [id], onDelete: Cascade)
+  category ShoppingCategory
+  name     String
+  quantity String?
+  checked  Boolean          @default(false)
+  order    Int
+
+  @@index([dietId, category, order])
+}
+
 model Exercise {
   id               String            @id @default(uuid())
   name             String            @unique
   category         Category
   type             ExerciseType
   inputType        InputType
+  /// Etiqueta corta heredada ("Pecho/Tríceps"). Se conserva porque el catálogo y
+  /// las capturas antiguas la usan; los músculos reales viven en los dos arrays.
   muscleGroup      String?
+  primaryMuscles   String[]          @default([])
+  secondaryMuscles String[]          @default([])
   createdAt        DateTime          @default(now())
   routineExercises RoutineExercise[]
   sessionExercises SessionExercise[]
@@ -71,6 +239,10 @@ model Routine {
   name      String
   category  Category
   notes     String?
+  /// Calentamiento de la rutina entera, no de un ejercicio: qué hacer antes de
+  /// empezar, y/o un vídeo que lo enseñe. Los dos son opcionales por separado.
+  warmupDescription String?
+  warmupVideoUrl    String?
   createdAt DateTime          @default(now())
   exercises RoutineExercise[]
   sessions  WorkoutSession[]
@@ -88,6 +260,14 @@ model RoutineExercise {
   targetWeight  Float?
   targetRIR     Int?
   note          String?
+  /// Consejos para hacer este ejercicio, escritos al montar la rutina. Viven en
+  /// la rutina y no en el catálogo: quien la prepara adapta la explicación a
+  /// quien la va a seguir.
+  description   String?
+  /// Enlace a un vídeo (YouTube) que muestra la ejecución.
+  videoUrl      String?
+  /// Descanso recomendado entre series, en segundos.
+  restSeconds   Int?
   order         Int      @default(0)
 }
 

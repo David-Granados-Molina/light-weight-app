@@ -1,0 +1,44 @@
+<div class="backdrop" (click)="closed.emit()"></div>
+
+<div class="popover" role="dialog" aria-label="Elegir día">
+  <div class="nav">
+    <button type="button" class="lw-icon-btn" (click)="prevMonth()" aria-label="Mes anterior">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+    </button>
+    <span class="month">{{ monthLabel() }}</span>
+    <button type="button" class="lw-icon-btn" (click)="nextMonth()" aria-label="Mes siguiente">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+    </button>
+  </div>
+
+  <div class="weekdays" aria-hidden="true">
+    @for (h of weekdayHeaders; track h) {
+      <span>{{ h }}</span>
+    }
+  </div>
+
+  <div class="grid">
+    @for (week of weeks(); track $index) {
+      @for (cell of week; track cell.iso) {
+        <button
+          type="button"
+          class="day"
+          [class.is-out]="!cell.inMonth"
+          [class.is-today]="cell.isToday"
+          [class.is-selected]="selected() === cell.iso"
+          [disabled]="cell.disabled"
+          (click)="pick(cell)"
+        >
+          <span class="lw-num">{{ cell.day }}</span>
+          @if (cell.categories.length > 0) {
+            <span class="dots">
+              @for (cat of cell.categories; track cat) {
+                <span class="lw-dot" [style.background]="categoryColor[cat]"></span>
+              }
+            </span>
+          }
+        </button>
+      }
+    }
+  </div>
+</div>

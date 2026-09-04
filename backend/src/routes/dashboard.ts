@@ -1,11 +1,12 @@
 import { Router } from 'express';
+import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
 import { addDays, isSameDay, startOfWeek } from '../lib/dateUtils';
 
 export const dashboardRouter = Router();
 
 // GET /api/dashboard
-dashboardRouter.get('/', async (req, res) => {
+dashboardRouter.get('/', asyncHandler(async (req, res) => {
   const userId = req.userId!;
   const today = new Date();
   const weekStart = startOfWeek(today);
@@ -58,4 +59,4 @@ dashboardRouter.get('/', async (req, res) => {
     weekBars,
     recent,
   });
-});
+}));

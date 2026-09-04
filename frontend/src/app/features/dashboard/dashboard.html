@@ -143,6 +143,9 @@
                       <div class="dash-session-row">
                         <dt class="dash-session-ex">{{ e.exercise.name }}</dt>
                         <dd class="dash-session-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                        @if (e.note) {
+                          <dd class="dash-session-note">{{ e.note }}</dd>
+                        }
                       </div>
                     }
                   </dl>

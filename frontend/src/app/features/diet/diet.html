@@ -1,0 +1,356 @@
+<div class="lw-page lw-page-wide diet">
+  <header class="lw-head">
+    <a routerLink="/perfil" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver al perfil">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+    </a>
+    <h1 class="lw-title">Dieta</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="lw-skel-list" aria-busy="true">
+      <div class="lw-skel lw-skel-card"></div>
+      <div class="lw-skel lw-skel-card"></div>
+    </div>
+  } @else {
+    <!-- Objetivos del día: cuatro cifras, arriba del todo, porque son la vara de
+         medir de todo lo que viene debajo. -->
+    <section class="lw-section diet-targets" aria-label="Objetivos nutricionales">
+      <h2 class="lw-label">Objetivos del día</h2>
+
+      <div class="diet-target-grid">
+        <div class="lw-field">
+          <label class="lw-label" for="diet-kcal">kcal / día</label>
+          <input id="diet-kcal" class="lw-input lw-num" type="text" inputmode="numeric" placeholder="2400"
+            [value]="kcal()" (input)="onTargetInput('kcal', $event)" />
+        </div>
+        <div class="lw-field">
+          <label class="lw-label" for="diet-protein">Proteínas (g)</label>
+          <input id="diet-protein" class="lw-input lw-num" type="text" inputmode="numeric" placeholder="160"
+            [value]="protein()" (input)="onTargetInput('protein', $event)" />
+        </div>
+        <div class="lw-field">
+          <label class="lw-label" for="diet-carbs">Carbohidratos (g)</label>
+          <input id="diet-carbs" class="lw-input lw-num" type="text" inputmode="numeric" placeholder="260"
+            [value]="carbs()" (input)="onTargetInput('carbs', $event)" />
+        </div>
+        <div class="lw-field">
+          <label class="lw-label" for="diet-fat">Grasas (g)</label>
+          <input id="diet-fat" class="lw-input lw-num" type="text" inputmode="numeric" placeholder="70"
+            [value]="fat()" (input)="onTargetInput('fat', $event)" />
+        </div>
+      </div>
+    </section>
+
+    <!-- La semana. Va antes que las opciones porque es la vista que se consulta a
+         diario; las opciones se tocan de vez en cuando. Cada casilla dice QUÉ se
+         come, no un número que haya que ir a buscar a otro sitio. -->
+    <section class="lw-section diet-week" aria-label="Planificación de la semana">
+      <div class="diet-slot-head">
+        <h2 class="lw-label">La semana</h2>
+        @if (hasPlan()) {
+          <button type="button" class="diet-week-clear" (click)="clearPlan()">Vaciar semana</button>
+        }
+      </div>
+
+      <div class="diet-week-scroll">
+        <table class="diet-week-table">
+          <thead>
+            <tr>
+              <th scope="col"><span class="lw-sr-only">Día</span></th>
+              @for (slot of mealSlots; track slot) {
+                <!-- La clase va dentro y no en el <th>: `.lw-label` es `display: block`
+                     y sacaba las cabeceras del layout de tabla, apilándolas. -->
+                <th scope="col"><span class="lw-label">{{ mealSlotLabel[slot] }}</span></th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (day of planGrid(); track day.index) {
+              <tr>
+                <th scope="row" class="diet-week-day">
+                  <abbr [title]="day.label">{{ day.short }}</abbr>
+                </th>
+                @for (cell of day.cells; track cell.slot) {
+                  <td class="diet-week-cell" [class.is-set]="cell.meal">
+                    <button
+                      type="button"
+                      class="diet-week-btn"
+                      (click)="openPlanPick(day.index, day.label, cell.slot)"
+                      [attr.aria-label]="cell.slotLabel + ' del ' + day.label + (cell.meal ? ': ' + cell.meal.name : ': sin planificar')"
+                    >
+                      @if (cell.meal) {
+                        <span class="diet-week-name">{{ cell.meal.name }}</span>
+                        @if (cell.summary) {
+                          <span class="diet-week-summary">{{ cell.summary }}</span>
+                        }
+                      } @else {
+                        <span class="diet-week-empty" aria-hidden="true">+</span>
+                      }
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Las tres comidas. Cada una admite varias opciones para poder rotar sin
+         tener que reescribir el día entero. -->
+    @for (slot of mealsBySlot(); track slot.slot) {
+      <section class="lw-section diet-meal-slot" [attr.aria-label]="slot.label">
+        <div class="diet-slot-head">
+          <h2 class="lw-label">{{ slot.label }}</h2>
+          <span class="diet-slot-count lw-num">
+            {{ slot.options.length }} {{ slot.options.length === 1 ? 'opción' : 'opciones' }}
+          </span>
+        </div>
+
+        <!-- Indicación de toda la comida, no de una opción suya. -->
+        <div class="lw-field">
+          <label class="lw-label" [attr.for]="'diet-slot-notes-' + slot.slot">Indicación</label>
+          <textarea
+            [id]="'diet-slot-notes-' + slot.slot"
+            class="lw-textarea"
+            rows="2"
+            placeholder="Ej. elige una opción cada día; las tres cubren la proteína."
+            [value]="slot.info.notes"
+            (input)="setSlotNotes(slot.slot, $event)"
+          ></textarea>
+        </div>
+
+        @for (meal of slot.options; track meal.key) {
+          <article class="lw-card diet-option">
+            <div class="diet-option-head">
+              <input
+                class="lw-input diet-option-name"
+                type="text"
+                placeholder="Nombre de la opción"
+                [attr.aria-label]="'Nombre de la opción de ' + slot.label"
+                [value]="meal.name"
+                (input)="setMealName(meal.key, $event)"
+              />
+              <button
+                type="button"
+                class="lw-icon-btn diet-option-remove"
+                (click)="askRemoveMeal(meal)"
+                [attr.aria-label]="'Eliminar la opción ' + meal.name"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="diet-items">
+              <span class="lw-label">Alimentos</span>
+              @for (item of meal.items; track item.key) {
+                <div class="diet-item-row">
+                  <input class="lw-input" type="text" placeholder="Alimento" aria-label="Alimento"
+                    [value]="item.name" (input)="setItemField(meal.key, item.key, 'name', $event)" />
+                  <input class="lw-input diet-item-qty" type="text" placeholder="Cantidad" aria-label="Cantidad"
+                    [value]="item.quantity" (input)="setItemField(meal.key, item.key, 'quantity', $event)" />
+                  <button type="button" class="lw-icon-btn diet-item-remove" (click)="removeItem(meal.key, item.key)" aria-label="Quitar alimento">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                      <path d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                  </button>
+                </div>
+              }
+              <button type="button" class="diet-add-row" (click)="addItem(meal.key)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Añadir alimento
+              </button>
+            </div>
+
+            <div class="lw-field">
+              <label class="lw-label" [attr.for]="'diet-notes-' + meal.key">Notas</label>
+              <textarea
+                [id]="'diet-notes-' + meal.key"
+                class="lw-textarea"
+                rows="2"
+                placeholder="Ej. dejar la avena en remojo la noche anterior."
+                [value]="meal.notes"
+                (input)="setMealNotes(meal.key, $event)"
+              ></textarea>
+            </div>
+          </article>
+        } @empty {
+          <p class="diet-slot-empty">Todavía no hay ninguna opción para {{ slot.lowerLabel }}.</p>
+        }
+
+        <button type="button" class="diet-add-option" (click)="addMeal(slot.slot)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Añadir opción de {{ slot.lowerLabel }}
+        </button>
+
+        <!-- Los suplementos se toman con la comida, se elija la opción que se elija. -->
+        <div class="diet-supplements">
+          <span class="lw-label">Suplementos con {{ slot.slot === 'cena' ? 'la cena' : slot.slot === 'comida' ? 'la comida' : 'el desayuno' }}</span>
+          @for (item of slot.info.supplements; track item.key) {
+            <div class="diet-item-row">
+              <input class="lw-input" type="text" placeholder="Suplemento" aria-label="Suplemento"
+                [value]="item.name" (input)="setSupplementField(slot.slot, item.key, 'name', $event)" />
+              <input class="lw-input diet-item-qty" type="text" placeholder="Dosis" aria-label="Dosis"
+                [value]="item.quantity" (input)="setSupplementField(slot.slot, item.key, 'quantity', $event)" />
+              <button type="button" class="lw-icon-btn diet-item-remove" (click)="removeSupplement(slot.slot, item.key)" aria-label="Quitar suplemento">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </div>
+          }
+          <button type="button" class="diet-add-row" (click)="addSupplement(slot.slot)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Añadir suplemento
+          </button>
+        </div>
+      </section>
+    }
+
+    <!-- Lista de la compra, por secciones de súper. -->
+    <section class="lw-section diet-shopping" aria-label="Lista de la compra">
+      <div class="diet-slot-head">
+        <h2 class="lw-label">Lista de la compra</h2>
+        <span class="diet-slot-count lw-num">
+          {{ pendingCount() }} {{ pendingCount() === 1 ? 'pendiente' : 'pendientes' }}
+        </span>
+      </div>
+
+      <div class="lw-field">
+        <label class="lw-label" for="diet-shopping-notes">Cómo usarla</label>
+        <textarea
+          id="diet-shopping-notes"
+          class="lw-textarea"
+          rows="2"
+          placeholder="Ej. alimentos base de todas las opciones, sin repetidos; guía flexible, sin pesos."
+          [value]="shoppingNotes()"
+          (input)="onShoppingNotes($event)"
+        ></textarea>
+      </div>
+
+      <div class="diet-shopping-add">
+        <input class="lw-input" type="text" placeholder="Qué comprar" aria-label="Qué comprar"
+          [value]="newShoppingName()" (input)="onNewShoppingName($event)" (keydown.enter)="addShoppingItem()" />
+        <input class="lw-input diet-item-qty" type="text" placeholder="Cantidad" aria-label="Cantidad"
+          [value]="newShoppingQuantity()" (input)="onNewShoppingQuantity($event)" (keydown.enter)="addShoppingItem()" />
+        <select class="lw-input diet-shopping-cat" aria-label="Categoría" (change)="onNewShoppingCategory($event)">
+          @for (category of shoppingCategories; track category) {
+            <option [value]="category" [selected]="newShoppingCategory() === category">
+              {{ shoppingCategoryLabel[category] }}
+            </option>
+          }
+        </select>
+        <button type="button" class="lw-btn-primary diet-shopping-btn" [disabled]="!canAddShopping()" (click)="addShoppingItem()">
+          Añadir
+        </button>
+      </div>
+
+      @for (section of shoppingBySection(); track section.category) {
+        <div class="diet-shopping-section">
+          <h3 class="lw-label diet-shopping-cat-title">{{ section.label }}</h3>
+          <ul class="diet-shopping-list">
+            @for (item of section.items; track item.key) {
+              <li class="diet-shopping-item" [class.is-checked]="item.checked">
+                <label class="diet-shopping-check">
+                  <input type="checkbox" [checked]="item.checked" (change)="toggleShoppingItem(item.key)" />
+                  <span class="diet-shopping-name">{{ item.name }}</span>
+                  @if (item.quantity) {
+                    <span class="diet-shopping-qty lw-num">{{ item.quantity }}</span>
+                  }
+                </label>
+                <button type="button" class="lw-icon-btn diet-item-remove" (click)="removeShoppingItem(item.key)"
+                  [attr.aria-label]="'Quitar ' + item.name + ' de la lista'">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+      } @empty {
+        <p class="diet-slot-empty">La lista está vacía. Añade lo que te falte para las comidas de arriba.</p>
+      }
+
+      @if (checkedCount() > 0) {
+        <button type="button" class="diet-clear-checked" (click)="clearCheckedShopping()">
+          Quitar lo ya comprado ({{ checkedCount() }})
+        </button>
+      }
+    </section>
+
+    @if (error()) {
+      <div class="lw-error" role="alert">{{ error() }}</div>
+    }
+    @if (saved()) {
+      <div class="lw-success" role="status">Dieta guardada.</div>
+    }
+
+    <div class="diet-commit">
+      <button type="button" class="lw-btn-primary" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Guardando…' : 'Guardar dieta' }}
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Elegir la opción de una casilla. Se listan con sus alimentos delante, que es
+     lo que faltaba en la tabla de números: se elige por lo que se come. -->
+@if (planPick(); as pick) {
+  <div class="lw-overlay diet-pick-overlay" role="dialog" aria-modal="true"
+    [attr.aria-label]="pick.slotLabel + ' del ' + pick.dayLabel" (click)="closePlanPick()">
+    <div class="diet-pick" (click)="$event.stopPropagation()">
+      <header class="diet-pick-head">
+        <h2 class="diet-pick-title">{{ pick.slotLabel }} · {{ pick.dayLabel }}</h2>
+        <button type="button" class="lw-icon-btn" (click)="closePlanPick()" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="diet-pick-list">
+        @for (option of pickOptions(); track option.key) {
+          <button type="button" class="diet-pick-option" [class.is-selected]="option.selected"
+            [attr.aria-pressed]="option.selected" (click)="choosePlanOption(option.key)">
+            <span class="diet-pick-name">{{ option.name }}</span>
+            <span class="diet-pick-foods">
+              @for (item of option.items; track item.key) {
+                <span class="diet-pick-food">
+                  {{ item.name }}
+                  @if (item.quantity) {
+                    <span class="diet-pick-qty lw-num">{{ item.quantity }}</span>
+                  }
+                </span>
+              }
+            </span>
+          </button>
+        } @empty {
+          <p class="diet-slot-empty">No hay opciones de {{ pick.slotLabel }} todavía.</p>
+        }
+
+        <button type="button" class="diet-pick-clear" (click)="choosePlanOption(null)">
+          Dejar sin planificar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (mealToRemove(); as target) {
+  <app-confirm-dialog
+    title="Eliminar opción"
+    [message]="'Se eliminará «' + target.name + '» con sus alimentos y notas, y se vaciarán los días de la semana que la tuvieran puesta.'"
+    confirmText="Eliminar"
+    (confirmed)="confirmRemoveMeal()"
+    (cancelled)="cancelRemoveMeal()"
+  />
+}

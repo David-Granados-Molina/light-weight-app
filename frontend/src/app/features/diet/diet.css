@@ -1,0 +1,501 @@
+/* Pantalla de dieta: objetivos, las tres comidas con sus opciones, y la lista de
+   la compra. Es una pantalla de edición larga, así que todo va en secciones de
+   una sola columna separadas por regla, sin tarjetas dentro de tarjetas. */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.diet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+/* --- Objetivos ------------------------------------------------------------- */
+
+.diet-target-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--s-4);
+}
+
+/* --- La semana --------------------------------------------------------------
+   La rejilla de siete días por tres comidas. La celda dice el nombre de la
+   opción y qué lleva: la tabla de números obligaba a ir a buscar cada opción
+   a otro sitio, que es justo lo que sobraba. */
+
+.diet-week-scroll {
+  overflow-x: auto;
+  margin: 0 calc(var(--s-4) * -1);
+  padding: 0 var(--s-4);
+}
+
+.diet-week-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  /* Fijo: las tres comidas miden lo mismo pase lo que pase con el texto de
+     dentro. Con layout automático una casilla con nombres largos ensanchaba su
+     columna y la rejilla dejaba de leerse como rejilla. */
+  table-layout: fixed;
+}
+
+.diet-week-table th,
+.diet-week-table td {
+  padding: 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.diet-week-table thead th {
+  padding: 0 var(--s-2) var(--s-2);
+  color: var(--text-muted);
+}
+
+.diet-week-table thead th:first-child,
+.diet-week-day {
+  width: 38px;
+}
+
+.diet-week-day {
+  padding-top: var(--s-3);
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 650;
+}
+
+.diet-week-day abbr {
+  text-decoration: none;
+  border: 0;
+}
+
+.diet-week-cell {
+  padding: 2px;
+}
+
+.diet-week-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 52px;
+  padding: var(--s-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  text-align: left;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out);
+}
+
+.diet-week-btn:hover {
+  border-color: var(--accent-line);
+  background: var(--surface-raised);
+}
+
+/* Con opción puesta deja de ser un hueco: línea continua y texto pleno. */
+.diet-week-cell.is-set .diet-week-btn {
+  border-style: solid;
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.diet-week-name {
+  color: var(--text);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Los alimentos de un vistazo, a dos líneas como mucho: es una pista, no la ficha. */
+.diet-week-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+}
+
+.diet-week-empty {
+  color: var(--text-muted);
+  font-size: var(--t-lead);
+  line-height: 1;
+}
+
+.diet-week-clear {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  border-radius: var(--r-xs);
+  transition: color var(--dur) var(--ease-out);
+}
+
+.diet-week-clear:hover {
+  color: var(--color-negative);
+}
+
+/* --- Elegir la opción de una casilla --------------------------------------- */
+
+.diet-pick {
+  width: min(560px, 92vw);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-3);
+  animation: lw-rise var(--dur-slow) var(--ease-out);
+}
+
+.diet-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.diet-pick-title {
+  font-size: var(--t-lead);
+  font-weight: 650;
+  letter-spacing: -0.012em;
+}
+
+.diet-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  overflow-y: auto;
+}
+
+.diet-pick-option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  text-align: left;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out);
+}
+
+.diet-pick-option:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+
+.diet-pick-option.is-selected {
+  border-color: var(--accent-text);
+  background: var(--accent-soft);
+}
+
+.diet-pick-name {
+  color: var(--text);
+  font-size: var(--t-body);
+  font-weight: 650;
+}
+
+.diet-pick-foods {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.diet-pick-food {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+
+.diet-pick-qty {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.diet-pick-clear {
+  align-self: center;
+  margin-top: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  transition: color var(--dur) var(--ease-out);
+}
+
+.diet-pick-clear:hover {
+  color: var(--accent-text);
+}
+
+/* --- Comidas --------------------------------------------------------------- */
+
+.diet-slot-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.diet-slot-count {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+}
+
+.diet-meal-slot,
+.diet-shopping {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.diet-option {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.diet-option-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* El nombre de la opción es el título de la tarjeta: se edita en el sitio, con
+   tamaño de título y sin caja hasta que se enfoca. */
+.diet-option-name {
+  flex: 1;
+  min-width: 0;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.diet-option-name:hover:not(:focus) {
+  border-color: var(--line);
+}
+
+.diet-option-remove:hover {
+  color: var(--color-negative);
+}
+
+.diet-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.diet-item-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.diet-item-row .lw-input {
+  min-width: 0;
+}
+
+/* La cantidad se lleva un ancho fijo y el nombre el resto. 120 px se quedaban
+   cortos con las cantidades reales («160 g (4 rebanadas)»), así que crece hasta
+   200 y puede encogerse si no cabe. */
+.diet-item-qty {
+  flex: 0 1 200px;
+  min-width: 96px;
+}
+
+.diet-item-remove {
+  flex-shrink: 0;
+}
+
+.diet-item-remove:hover {
+  color: var(--color-negative);
+}
+
+.diet-add-row,
+.diet-add-option {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  align-self: flex-start;
+  padding: var(--s-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  border-radius: var(--r-xs);
+  transition: color var(--dur) var(--ease-out);
+}
+
+.diet-add-row:hover,
+.diet-add-option:hover {
+  color: var(--accent-text);
+}
+
+.diet-add-option {
+  align-self: stretch;
+  justify-content: center;
+  padding: var(--s-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  transition:
+    color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.diet-add-option:hover {
+  border-color: var(--accent-line);
+}
+
+/* Los suplementos son de la comida entera, así que se separan de las opciones
+   con una regla y no con otra tarjeta. */
+.diet-supplements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+
+.diet-slot-empty {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
+
+/* --- Lista de la compra ---------------------------------------------------- */
+
+.diet-shopping-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.diet-shopping-add .lw-input {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.diet-shopping-cat {
+  flex: 1 1 180px;
+}
+
+.diet-shopping-btn {
+  flex: 0 0 auto;
+}
+
+.diet-shopping-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+
+.diet-shopping-cat-title {
+  color: var(--accent-text);
+}
+
+.diet-shopping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diet-shopping-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) 0;
+}
+
+.diet-shopping-check {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-body);
+}
+
+.diet-shopping-check input {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent-solid);
+}
+
+.diet-shopping-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.diet-shopping-qty {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
+
+/* Lo comprado no se esconde —hace falta para saber qué se lleva—, pero deja de
+   pedir atención. */
+.diet-shopping-item.is-checked .diet-shopping-name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.diet-clear-checked {
+  align-self: flex-start;
+  padding: var(--s-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  border-radius: var(--r-xs);
+  transition: color var(--dur) var(--ease-out);
+}
+
+.diet-clear-checked:hover {
+  color: var(--color-negative);
+}
+
+/* --- Guardado -------------------------------------------------------------- */
+
+.diet-commit {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: var(--s-4);
+}
+
+@media (max-width: 599px) {
+  .diet-commit .lw-btn-primary {
+    width: 100%;
+  }
+
+  .diet-item-qty {
+    flex: 0 1 120px;
+    min-width: 84px;
+  }
+}

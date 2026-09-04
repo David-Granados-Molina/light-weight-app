@@ -8,6 +8,7 @@
   optionGroupLabel="label"
   optionGroupChildren="items"
   [filter]="true"
+  [filterMatchMode]="filterMatchMode"
   filterPlaceHolder="Buscar ejercicio…"
   [placeholder]="placeholder()"
   display="chip"
@@ -21,5 +22,17 @@
     <span class="picker-dot" [style.background]="dotColor(exercise)"></span>
     {{ exercise.name }}
   </ng-template>
-</p-multiselect>
 
+  @if (allowCreate()) {
+    <!-- Salida para lo que no está en el catálogo, sin salir del buscador: es
+         justo cuando el usuario descubre que le falta el ejercicio. -->
+    <ng-template #footer>
+      <button type="button" class="picker-create" (click)="createRequested.emit()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Añadir ejercicio nuevo
+      </button>
+    </ng-template>
+  }
+</p-multiselect>

@@ -175,11 +175,23 @@
 }
 
 .cal-session-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-4);
+  gap: var(--s-1) var(--s-4);
   font-size: var(--t-sm);
+}
+
+.cal-session-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: 68ch;
+  white-space: pre-wrap;
 }
 
 .cal-session-name {

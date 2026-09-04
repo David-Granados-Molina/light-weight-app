@@ -9,15 +9,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   {
-    path: 'recuperar',
-    canActivate: [guestGuard],
-    loadComponent: () => import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
-  },
-  {
-    path: 'restablecer',
-    loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
-  },
-  {
     path: 'inicio',
     canActivate: [authGuard],
     loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
@@ -41,6 +32,14 @@ export const routes: Routes = [
     path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+  },
+  // La dieta es de quien está dentro; hoy solo el admin llega hasta aquí, porque
+  // el botón vive en su perfil, pero la API es por usuario y no hace falta tocar
+  // nada aquí el día que se abra al resto.
+  {
+    path: 'dieta',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/diet/diet').then((m) => m.DietScreen),
   },
   {
     path: 'calendario',
@@ -81,6 +80,18 @@ export const routes: Routes = [
     path: 'amigos/:userId/rutinas',
     canActivate: [adminGuard],
     loadComponent: () => import('./features/friends/friend-routines').then((m) => m.FriendRoutines),
+  },
+  // El admin monta y edita rutinas ajenas con el mismo formulario que las suyas;
+  // el `userId` de la ruta es lo único que las distingue.
+  {
+    path: 'amigos/:userId/rutinas/nueva',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/routines/routine-form').then((m) => m.RoutineForm),
+  },
+  {
+    path: 'amigos/:userId/rutinas/:id',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/routines/routine-form').then((m) => m.RoutineForm),
   },
   { path: '**', redirectTo: 'inicio' },
 ];

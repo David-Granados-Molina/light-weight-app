@@ -239,13 +239,15 @@
 }
 
 /* El botón cubre el resumen entero; el de editar vive fuera de él, porque un
-   botón dentro de otro no es HTML válido ni es navegable con teclado. */
+   botón dentro de otro no es HTML válido ni es navegable con teclado.
+   El hueco reservado a la derecha es literalmente lo que ocupa el de editar
+   —su margen, sus 36 px y un respiro—: con 40 px la fecha caía debajo de él. */
 .dash-session-toggle {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
   width: 100%;
-  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  padding: var(--s-4) calc(var(--s-4) + 36px + var(--s-3)) var(--s-4) var(--s-4);
   background: transparent;
   border: 0;
   text-align: left;
@@ -256,11 +258,15 @@
   background: var(--surface-raised);
 }
 
+/* La primera línea mide lo mismo que el botón de editar y arranca a su misma
+   altura, así que categoría, fecha y lápiz comparten centro en vez de quedar
+   desfasados por la diferencia entre el alto del texto y los 36 px del botón. */
 .dash-session-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
+  min-height: 36px;
 }
 
 .dash-session-date {
@@ -282,8 +288,8 @@
 
 .dash-session-edit {
   position: absolute;
-  top: var(--s-3);
-  right: var(--s-3);
+  top: var(--s-4);
+  right: var(--s-4);
 }
 
 .dash-session-detail {
@@ -303,11 +309,24 @@
 }
 
 .dash-session-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-4);
+  gap: var(--s-1) var(--s-4);
   font-size: var(--t-sm);
+}
+
+/* La nota del ejercicio de ese entreno, debajo de sus series. */
+.dash-session-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  max-width: 68ch;
+  white-space: pre-wrap;
 }
 
 .dash-session-ex {

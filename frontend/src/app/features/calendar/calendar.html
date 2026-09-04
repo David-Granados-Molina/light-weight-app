@@ -66,6 +66,9 @@
                 <div class="cal-session-row">
                   <dt class="cal-session-name">{{ e.exercise.name }}</dt>
                   <dd class="cal-session-sets lw-num">{{ formatSets(e.sets, effectiveInputType(e)) }}</dd>
+                  @if (e.note) {
+                    <dd class="cal-session-note">{{ e.note }}</dd>
+                  }
                 </div>
               }
             </dl>

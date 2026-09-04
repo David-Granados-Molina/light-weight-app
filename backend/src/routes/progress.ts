@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
 
 export const progressRouter = Router();
@@ -44,7 +45,7 @@ function monthlyChange(points: { date: string; value: number }[]): number {
 }
 
 // GET /api/progress/exercises -> ejercicios con histórico registrado
-progressRouter.get('/exercises', async (req, res) => {
+progressRouter.get('/exercises', asyncHandler(async (req, res) => {
   const userId = req.userId!;
 
   const sessionExercises = await prisma.sessionExercise.findMany({
@@ -58,7 +59,7 @@ progressRouter.get('/exercises', async (req, res) => {
     .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
   res.json(exercises);
-});
+}));
 
 type ExerciseLike = { id: string; inputType: string };
 
@@ -82,7 +83,7 @@ export async function buildProgressData(userId: string, exercise: ExerciseLike, 
 }
 
 // GET /api/progress/routine/:routineId -> progreso de cada ejercicio de la rutina
-progressRouter.get('/routine/:routineId', async (req, res) => {
+progressRouter.get('/routine/:routineId', asyncHandler(async (req, res) => {
   const userId = req.userId!;
 
   const routine = await prisma.routine.findFirst({
@@ -99,10 +100,10 @@ progressRouter.get('/routine/:routineId', async (req, res) => {
   );
 
   res.json({ routine: { id: routine.id, name: routine.name, category: routine.category }, items });
-});
+}));
 
 // GET /api/progress/:exerciseId
-progressRouter.get('/:exerciseId', async (req, res) => {
+progressRouter.get('/:exerciseId', asyncHandler(async (req, res) => {
   const userId = req.userId!;
 
   const exercise = await prisma.exercise.findUnique({ where: { id: req.params.exerciseId } });
@@ -110,4 +111,4 @@ progressRouter.get('/:exerciseId', async (req, res) => {
 
   const data = await buildProgressData(userId, exercise);
   res.json({ exercise, ...data });
-});
+}));

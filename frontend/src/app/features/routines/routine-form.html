@@ -1,9 +1,19 @@
 <div class="lw-page lw-page-wide rf">
   <header class="lw-head">
-    <a routerLink="/rutinas" class="lw-icon-btn lw-icon-btn-bordered" aria-label="Volver a Rutinas">
+    <a
+      [routerLink]="backLink()"
+      [queryParams]="backQueryParams()"
+      class="lw-icon-btn lw-icon-btn-bordered"
+      [attr.aria-label]="isForOther() ? 'Volver a las rutinas de ' + targetUserName() : 'Volver a Rutinas'"
+    >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
     </a>
     <h1 class="lw-title">{{ isEdit() ? 'Editar rutina' : 'Nueva rutina' }}</h1>
+    <!-- Editar la rutina de otra persona se parece demasiado a editar la tuya:
+         el nombre de quien la va a seguir se queda a la vista todo el rato. -->
+    @if (isForOther()) {
+      <span class="rf-owner">de {{ targetUserName() }}</span>
+    }
   </header>
 
   @if (loading()) {
@@ -113,6 +123,21 @@
       </aside>
 
       <div class="rf-main">
+        <!-- El calentamiento es de la rutina entera, no de un ejercicio, y va
+             antes que el primero: aquí ocupa el mismo sitio que ocupará en la
+             hoja de registro. -->
+        <button type="button" class="rf-warmup" [class.has-warmup]="hasWarmup()" (click)="openWarmupDialog()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span class="rf-warmup-text">
+            {{ hasWarmup() ? 'Calentamiento' : 'Añadir calentamiento' }}
+          </span>
+          @if (hasWarmup()) {
+            <span class="rf-warmup-badge">Añadido</span>
+          }
+        </button>
+
         <div class="rf-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
           @for (item of exercises(); track item.exerciseId; let i = $index) {
             <article class="lw-card lw-spine rf-row" cdkDrag [style.border-left-color]="categoryColor[item.exercise.category]">
@@ -130,20 +155,21 @@
                   <span class="rf-row-type" [style.color]="categoryColor[item.exercise.category]">
                     {{ typeLabel[item.exercise.type] }}
                   </span>
+                  @if (item.exercise.primaryMuscles?.length) {
+                    <span class="rf-row-muscles">{{ item.exercise.primaryMuscles!.join(' · ') }}</span>
+                  }
                 </div>
 
                 <button
                   type="button"
                   class="lw-icon-btn rf-note"
-                  [class.has-note]="item.note"
+                  [class.has-note]="item.note || item.description || item.videoUrl"
                   (click)="openNoteDialog(i)"
-                  [attr.aria-label]="item.note ? 'Ver o editar la nota de ' + item.exercise.name : 'Añadir una nota a ' + item.exercise.name"
+                  [attr.aria-label]="'Consejos, vídeo y nota de ' + item.exercise.name"
                 >
-                  @if (item.note) {
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                  } @else {
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-                  }
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" />
+                  </svg>
                 </button>
 
                 <button type="button" class="lw-icon-btn rf-remove" (click)="askRemoveExercise(i)" [attr.aria-label]="'Quitar ' + item.exercise.name">
@@ -176,6 +202,14 @@
                   <app-number-wheel [min]="1" [max]="200" [step]="1" [unit]="'max ' + repsUnit(item.exercise.inputType)" compact [value]="item.targetRepsMax" (valueChange)="setTarget(i, 'targetRepsMax', $event)" />
                 </div>
               }
+
+              <div class="rf-rest">
+                <span class="lw-label">Descanso entre series</span>
+                <div class="rf-rest-wheels">
+                  <app-number-wheel [min]="0" [max]="10" [step]="1" unit="min" compact [value]="restMinutes(i)" (valueChange)="setRestMinutes(i, $event)" />
+                  <app-number-wheel [min]="0" [max]="45" [step]="15" unit="seg" compact [value]="restRemainderSeconds(i)" (valueChange)="setRestRemainderSeconds(i, $event)" />
+                </div>
+              </div>
             </article>
           } @empty {
             <div class="lw-empty">
@@ -206,6 +240,63 @@
       </div>
     </div>
 
+    <!-- Calentamiento de la rutina: se rellena uno de los dos campos, o los dos. -->
+    <p-dialog
+      [visible]="warmupDialogOpen()"
+      (visibleChange)="onWarmupDialogVisibleChange($event)"
+      [modal]="true"
+      [draggable]="false"
+      [dismissableMask]="true"
+      appendTo="body"
+      position="center"
+      header="Calentamiento"
+      [style]="{ width: '90vw', maxWidth: '520px', maxHeight: '85vh' }"
+      [contentStyle]="{ overflowY: 'auto' }"
+    >
+      <div class="rf-dialog-field">
+        <label class="lw-label" for="rf-warmup-description">Descripción</label>
+        <p class="rf-dialog-hint">Qué hacer antes de empezar. Lo verá quien siga la rutina, antes del primer ejercicio.</p>
+        <textarea
+          id="rf-warmup-description"
+          class="lw-textarea"
+          rows="5"
+          placeholder="Ej. 5 min de bici suave, movilidad de hombro y dos series de aproximación."
+          [value]="warmupDescription()"
+          (input)="setWarmupDescription($event)"
+        ></textarea>
+      </div>
+
+      <div class="rf-dialog-field">
+        <label class="lw-label" for="rf-warmup-video">Vídeo de YouTube</label>
+        <p class="rf-dialog-hint">Se verá dentro de la propia aplicación, sin salir a YouTube.</p>
+        <input
+          id="rf-warmup-video"
+          class="lw-input"
+          type="url"
+          inputmode="url"
+          placeholder="https://www.youtube.com/watch?v=…"
+          [value]="warmupVideoUrl()"
+          (input)="setWarmupVideoUrl($event)"
+        />
+        @if (warmupVideoInvalid()) {
+          <p class="rf-dialog-error" role="alert">
+            Tiene que ser un enlace de YouTube. Vale el de la barra de direcciones, el de «Compartir» y el de un Short.
+          </p>
+        }
+      </div>
+
+      <div class="rf-note-actions rf-warmup-actions">
+        @if (hasWarmup()) {
+          <button type="button" class="rf-warmup-clear" (click)="clearWarmup()">Quitar calentamiento</button>
+        }
+        <button type="button" class="lw-btn-primary" [disabled]="warmupVideoInvalid()" (click)="closeWarmupDialog()">
+          Listo
+        </button>
+      </div>
+    </p-dialog>
+
+    <!-- Lo que quien monta la rutina prepara para quien la va a seguir: cómo se
+         hace el ejercicio, un vídeo que lo enseñe, y una nota corta propia. -->
     <p-dialog
       [visible]="noteDialogIndex() !== null"
       (visibleChange)="onNoteDialogVisibleChange($event)"
@@ -214,19 +305,59 @@
       [dismissableMask]="true"
       appendTo="body"
       position="center"
-      header="Nota del ejercicio"
-      [style]="{ width: '90vw', maxWidth: '420px', maxHeight: '80vh' }"
+      header="Detalles del ejercicio"
+      [style]="{ width: '90vw', maxWidth: '520px', maxHeight: '85vh' }"
       [contentStyle]="{ overflowY: 'auto' }"
     >
       @if (noteDialogIndex() !== null) {
-        <textarea
-          class="lw-textarea"
-          rows="6"
-          aria-label="Nota del ejercicio"
-          placeholder="Ej. foco en la excéntrica, agarre neutro…"
-          [value]="exercises()[noteDialogIndex()!].note"
-          (input)="setNote(noteDialogIndex()!, $event)"
-        ></textarea>
+        <p class="rf-dialog-for">{{ exercises()[noteDialogIndex()!].exercise.name }}</p>
+
+        <div class="rf-dialog-field">
+          <label class="lw-label" for="rf-description">Cómo hacerlo</label>
+          <p class="rf-dialog-hint">
+            Se muestra en la tarjeta del ejercicio al registrar el entreno. Útil para dar consejos a quien empieza.
+          </p>
+          <textarea
+            id="rf-description"
+            class="lw-textarea"
+            rows="5"
+            placeholder="Ej. baja controlando dos segundos, escápulas retraídas y codos a 45º."
+            [value]="exercises()[noteDialogIndex()!].description"
+            (input)="setDescription(noteDialogIndex()!, $event)"
+          ></textarea>
+        </div>
+
+        <div class="rf-dialog-field">
+          <label class="lw-label" for="rf-video">Vídeo</label>
+          <p class="rf-dialog-hint">Enlace a un vídeo que muestre la ejecución. Aparecerá como botón «Vídeo».</p>
+          <input
+            id="rf-video"
+            class="lw-input"
+            type="url"
+            inputmode="url"
+            placeholder="https://www.youtube.com/watch?v=…"
+            [value]="exercises()[noteDialogIndex()!].videoUrl"
+            (input)="setVideoUrl(noteDialogIndex()!, $event)"
+          />
+          @if (videoUrlInvalid(noteDialogIndex()!)) {
+            <p class="rf-dialog-error" role="alert">
+              El enlace no es válido. Tiene que empezar por http:// o https://
+            </p>
+          }
+        </div>
+
+        <div class="rf-dialog-field">
+          <label class="lw-label" for="rf-note">Nota</label>
+          <p class="rf-dialog-hint">Un recordatorio corto para ti, junto al objetivo del ejercicio.</p>
+          <textarea
+            id="rf-note"
+            class="lw-textarea"
+            rows="3"
+            placeholder="Ej. foco en la excéntrica, agarre neutro…"
+            [value]="exercises()[noteDialogIndex()!].note"
+            (input)="setNote(noteDialogIndex()!, $event)"
+          ></textarea>
+        </div>
       }
       <div class="rf-note-actions">
         <button type="button" class="lw-btn-primary" (click)="closeNoteDialog()">Listo</button>

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeMode, ThemeService } from '../../core/services/theme.service';
 import { AvatarService } from '../../core/services/avatar.service';
 import { AVATAR_IDS, avatarSrc } from '../../core/utils/avatar';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
@@ -29,6 +30,7 @@ const THEME_OPTIONS = [
 })
 export class Profile implements OnDestroy {
   private readonly authService = inject(AuthService);
+  private readonly themeService = inject(ThemeService);
   private readonly avatarService = inject(AvatarService);
 
   private readonly user = this.authService.currentUser;
@@ -36,17 +38,25 @@ export class Profile implements OnDestroy {
   readonly name = signal('');
   readonly email = computed(() => this.user()?.email ?? '');
   readonly isAdmin = computed(() => this.user()?.isAdmin ?? false);
-  readonly hasPassword = computed(() => this.user()?.hasPassword ?? false);
-
-  readonly passwordRequestSending = signal(false);
-  readonly passwordRequestSent = signal(false);
-  readonly passwordRequestError = signal<string | null>(null);
   readonly avatarId = signal<string | null>(null);
   readonly themeColor = signal('#ffbf00');
   readonly initial = computed(() => (this.name().charAt(0) || '?').toUpperCase());
 
   readonly avatarIds = AVATAR_IDS;
   readonly themeOptions = THEME_OPTIONS;
+
+  /** Claro / oscuro / el que diga el sistema. */
+  readonly themeMode = this.themeService.mode;
+
+  readonly themeModeOptions: { key: ThemeMode; label: string }[] = [
+    { key: 'system', label: 'Sistema' },
+    { key: 'light', label: 'Claro' },
+    { key: 'dark', label: 'Oscuro' },
+  ];
+
+  selectThemeMode(mode: ThemeMode): void {
+    this.themeService.set(mode);
+  }
 
   readonly avatarMenuOpen = signal(false);
   readonly themeMenuOpen = signal(false);
@@ -136,24 +146,6 @@ export class Profile implements OnDestroy {
           this.error.set('No se ha podido guardar los cambios.');
         },
       });
-  }
-
-  requestPasswordEmail(): void {
-    if (this.passwordRequestSending()) return;
-
-    this.passwordRequestSending.set(true);
-    this.passwordRequestSent.set(false);
-    this.passwordRequestError.set(null);
-    this.authService.forgotPassword(this.email()).subscribe({
-      next: () => {
-        this.passwordRequestSending.set(false);
-        this.passwordRequestSent.set(true);
-      },
-      error: () => {
-        this.passwordRequestSending.set(false);
-        this.passwordRequestError.set('No se ha podido enviar el email. Inténtalo de nuevo.');
-      },
-    });
   }
 
   logout(): void {

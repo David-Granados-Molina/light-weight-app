@@ -8,7 +8,12 @@ export interface Exercise {
   category: Category;
   type: ExerciseType;
   inputType: InputType;
+  /** Etiqueta corta heredada ("Pecho/Tríceps"). Los músculos reales van en los arrays. */
   muscleGroup: string | null;
+  /* Opcionales a propósito: una API todavía sin migrar no los envía, y la
+     interfaz tiene que aguantarlo sin romperse. */
+  primaryMuscles?: string[];
+  secondaryMuscles?: string[];
   createdAt: string;
 }
 
@@ -18,4 +23,6 @@ export interface ExerciseInput {
   type: ExerciseType;
   inputType: InputType;
   muscleGroup?: string | null;
+  primaryMuscles?: string[];
+  secondaryMuscles?: string[];
 }

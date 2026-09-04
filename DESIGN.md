@@ -9,6 +9,7 @@ colors:
   surface-hover: "#1D222C"
   scroll-thumb: "#2A303C"
   scroll-thumb-hover: "#39414F"
+  avatar-canvas: "#FFFFFF"
   line: "rgba(255, 255, 255, 0.07)"
   line-strong: "rgba(255, 255, 255, 0.13)"
   text: "#F1F3F7"
@@ -25,6 +26,29 @@ colors:
   cali: "#FB923C"
   positive: "#4ADE80"
   negative: "#F87171"
+  scrim: "rgb(4 5 7 / 72%)"
+  light-ground: "#F7F8FA"
+  light-chrome: "#FFFFFF"
+  light-surface: "#FFFFFF"
+  light-surface-raised: "#F1F3F7"
+  light-surface-hover: "#E7EAF0"
+  light-scroll-thumb: "#C6CCD6"
+  light-scroll-thumb-hover: "#AEB6C2"
+  light-line: "rgba(15, 23, 42, 0.10)"
+  light-line-strong: "rgba(15, 23, 42, 0.18)"
+  light-text: "#12151C"
+  light-text-secondary: "#4C5563"
+  light-text-muted: "#656D7B"
+  light-accent-solid: "var(--color-accent)"
+  light-accent-ink: "oklch(from var(--color-accent) clamp(0, (0.62 - l) * 1000, 1) 0 h)"
+  light-accent-text: "oklch(from var(--color-accent) min(l, 0.45) min(c, 0.16) h)"
+  light-accent-soft: "oklch(from var(--color-accent) 0.95 min(c, 0.04) h)"
+  light-accent-line: "oklch(from var(--color-accent) 0.78 min(c, 0.09) h)"
+  light-gym: "#0E7490"
+  light-cali: "#C2410C"
+  light-positive: "#15803D"
+  light-negative: "#B91C1C"
+  light-scrim: "rgb(15 23 42 / 32%)"
 typography:
   display:
     fontFamily: "Archivo, system-ui, sans-serif"
@@ -152,6 +176,8 @@ Dos escenas, no dos anchos:
 
 ## Colors
 
+Dos temas: oscuro (por defecto) y claro. `ThemeService` resuelve la opción «sistema» en TypeScript y estampa siempre `data-theme="light"` o `data-theme="dark"` en `<html>`, de modo que la hoja de estilos solo necesita un bloque de tokens claros en vez de repetirlo bajo el atributo y bajo `prefers-color-scheme`. `index.html` resuelve el tema en un script previo al primer pintado para que la pantalla de arranque no dé un fogonazo.
+
 ### Primary
 
 `--color-accent` es el valor crudo que `app.ts` escribe en `<html>` desde el `themeColor` del usuario. **Nunca se usa directamente para texto ni para rellenos con texto encima.** Cuatro de los ocho temas (`#9d1d1d` rojo, `#005492` azul, `#69418b` morado, `#32673d` verde) son colores oscuros: sobre el fondo negro dan entre 2,4:1 y 3,5:1 y en la implementación anterior hacían ilegible el botón principal.
@@ -166,7 +192,19 @@ Todo consume tokens derivados con sintaxis de color relativa, que preservan el t
 | `--accent-soft` | `oklch(from var(--color-accent) 0.26 min(c, 0.07) h)` | Fondo de estado seleccionado (chip activo, enlace de rail activo) |
 | `--accent-line` | `oklch(from var(--color-accent) 0.42 min(c, 0.12) h)` | Bordes de elementos seleccionados, anillo de foco |
 
-Hay un bloque de reserva estático antes del `@supports` de color relativo, para navegadores que no lo soportan. `--accent-default: #FFBF00` (ámbar) es el valor por defecto cuando el usuario no ha elegido tema; es el único sitio donde el acento aparece como literal, porque la pantalla de arranque de `index.html` se pinta antes de que Angular sepa quién ha iniciado sesión.
+Hay un bloque de reserva estático antes del `@supports` de color relativo, para navegadores que no lo soportan.
+
+**En tema claro la regla se invierte.** El relleno conserva el color exacto que eligió el usuario (sobre blanco no hace falta aclararlo) y lo que cambia es la tinta, que se decide por luminosidad:
+
+```css
+--accent-ink: oklch(from var(--color-accent) clamp(0, (0.62 - l) * 1000, 1) 0 h);
+```
+
+Multiplicar por mil satura el `clamp` y lo convierte en un escalón: un acento claro (ámbar, gris, menta) recibe tinta negra y uno oscuro (azul, rojo, morado, verde, rosa) tinta blanca. Es la manera de ramificar por luminosidad en CSS puro mientras `contrast-color()` no esté disponible. `--accent-text` mantiene un techo de `l ≤ 0.45` para seguir siendo legible como texto sobre fondo claro.
+
+Los colores de categoría también cambian en claro: el cian y el naranja del tema oscuro dan 2:1 sobre blanco, así que pasan a `#0E7490` y `#C2410C`.
+
+La paleta clara completa vive en el frontmatter con prefijo `light-`. Los valores sin prefijo son los del tema oscuro, que es el de partida. `--accent-default: #FFBF00` (ámbar) es el valor por defecto cuando el usuario no ha elegido tema; es el único sitio donde el acento aparece como literal, porque la pantalla de arranque de `index.html` se pinta antes de que Angular sepa quién ha iniciado sesión.
 
 ### Secondary — categoría como dato
 
@@ -187,6 +225,10 @@ Cinco planos, no dos. La diferencia entre `chrome` y `surface` es lo que hace qu
 - `--surface-hover #1D222C` — hover y pulsado
 
 Texto: `#F1F3F7` (14,8:1), `#98A0AE` secundario (7,1:1), `#666E7C` apagado (3,6:1 — solo para texto no esencial y de tamaño ≥14 px, nunca para etiquetas de formulario).
+
+Fuera de los planos, un solo lienzo fijo:
+
+- `--avatar-canvas #FFFFFF` — el fondo de todo avatar, **idéntico en los dos temas**. Los SVG del catálogo son dibujos de trazo negro sobre transparente: sobre cualquier plano oscuro el contorno desaparece y solo queda la mancha de color. No es un plano de la interfaz, es el papel del dibujo, y por eso es la única superficie que no se invierte con el tema.
 
 ### Named Rules
 
@@ -257,6 +299,7 @@ Cuatro niveles. Todas las sombras llevan desplazamiento y desenfoque; un halo de
 - `--shadow-1: 0 1px 2px rgba(0,0,0,.5), 0 2px 6px -2px rgba(0,0,0,.4)` — tarjetas apoyadas.
 - `--shadow-2: 0 2px 4px rgba(0,0,0,.4), 0 10px 24px -10px rgba(0,0,0,.7)` — desplegables y avisos flotantes.
 - `--shadow-3: 0 4px 8px rgba(0,0,0,.5), 0 24px 56px -16px rgba(0,0,0,.8)` — modales y overlays.
+- `--scrim` — el velo detrás de modales y overlays. Un solo token por tema: casi negro al 72 % en oscuro, azul pizarra al 32 % en claro, porque un velo negro sobre una interfaz clara se lee como un agujero y no como una capa.
 - `--shadow-rail: 1px 0 0 var(--line)` — el cromo se separa con una regla, no con una sombra.
 
 La profundidad principal no es la sombra sino el **plano**: `chrome` < `ground` < `surface` < `surface-raised`. La sombra solo se usa cuando un elemento flota de verdad por encima del plano de la página.
@@ -336,7 +379,7 @@ El componente que más se toca en el gimnasio. Rediseñado como instrumento: `�
 
 ### Don't:
 
-- Bordes laterales de color de más de 1 px en tarjetas, filas o avisos.
+- Bordes laterales de color de más de 1 px en tarjetas, filas o avisos. **Única excepción**, pedida expresamente: el ejercicio marcado como completado lleva un filete de 2 px del acento en el borde izquierdo del panel, además del tinte de fondo y la insignia «Hecho». Es un estado que el usuario acaba de accionar y tiene que reconocer de un vistazo desde el otro lado del gimnasio.
 - Tarjetas anidadas, ni rejillas de tarjetas idénticas de icono + título + texto como estructura de página.
 - La plantilla de métrica heroica (número enorme, etiqueta pequeña, tres estadísticas gemelas y acento). Progreso muestra récord, actual y variación como una fila de datos junto a la gráfica, no como tres tarjetas iguales.
 - Emoji o glifos Unicode como iconos.

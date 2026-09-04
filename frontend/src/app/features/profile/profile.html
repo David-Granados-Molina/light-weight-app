@@ -35,6 +35,23 @@
       <section class="lw-section" aria-label="Apariencia">
         <h2 class="lw-label">Apariencia</h2>
 
+        <div class="prof-mode">
+          <span class="prof-mode-label">Modo</span>
+          <div class="prof-mode-switch" role="group" aria-label="Modo claro u oscuro">
+            @for (option of themeModeOptions; track option.key) {
+              <button
+                type="button"
+                class="prof-mode-btn"
+                [class.is-active]="themeMode() === option.key"
+                [attr.aria-pressed]="themeMode() === option.key"
+                (click)="selectThemeMode(option.key)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
+        </div>
+
         <div class="prof-dropdown">
           <button
             type="button"
@@ -142,31 +159,22 @@
       <section class="lw-section" aria-label="Cuenta">
         <h2 class="lw-label">Cuenta</h2>
 
-        <div class="prof-rows">
-          <button type="button" class="prof-row" [disabled]="passwordRequestSending()" (click)="requestPasswordEmail()">
-            <span>{{ hasPassword() ? 'Cambiar contraseña' : 'Crear contraseña' }}</span>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 6l6 6-6 6" />
-            </svg>
-          </button>
-
-          @if (isAdmin()) {
+        <!-- Ya no hay contraseña que cambiar: se entra con un código enviado al email. -->
+        @if (isAdmin()) {
+          <div class="prof-rows">
+            <a routerLink="/dieta" class="prof-row">
+              <span>Dieta</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </a>
             <a routerLink="/amigos" class="prof-row">
               <span>Amigos</span>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M9 6l6 6-6 6" />
               </svg>
             </a>
-          }
-        </div>
-
-        @if (passwordRequestSent()) {
-          <div class="lw-success" role="status">
-            Te hemos enviado un email con el enlace para {{ hasPassword() ? 'cambiar' : 'crear' }} tu contraseña.
           </div>
-        }
-        @if (passwordRequestError()) {
-          <div class="lw-error" role="alert">{{ passwordRequestError() }}</div>
         }
 
         <button type="button" class="lw-btn-danger prof-logout" (click)="logout()">Cerrar sesión</button>

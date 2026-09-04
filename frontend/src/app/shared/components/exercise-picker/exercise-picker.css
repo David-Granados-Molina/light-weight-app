@@ -179,3 +179,35 @@
   border-radius: var(--r-full);
   flex-shrink: 0;
 }
+
+/* --- Crear un ejercicio que no está en el catálogo ---------------------------
+   Vive en el pie del panel, pegado a la lista: es donde el usuario acaba de
+   comprobar que lo que busca no existe. */
+
+.exercise-picker-panel .p-multiselect-footer {
+  padding: 0;
+  border-top: 1px solid var(--line);
+  background: var(--chrome);
+}
+
+.picker-create {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  min-height: 46px;
+  padding: 0 var(--s-4);
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font-family: inherit;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.picker-create:hover {
+  background: var(--surface-hover);
+}

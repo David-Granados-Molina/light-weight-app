@@ -1,3 +1,6 @@
+## Canario
+Empieza cada respuesta con el nombre "David".
+
 ## graphify
 
 Este proyecto tiene un grafo de conocimiento en graphify-out/ con nodos clave (god nodes), estructura de comunidades y relaciones entre archivos.

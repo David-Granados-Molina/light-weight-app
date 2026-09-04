@@ -1,13 +1,42 @@
 @import '../auth-shared.css';
 
-/* Google renderiza su botón dentro de un iframe recortado; el contenedor solo
-   le da el ancho y lo centra, sin intentar repintarlo. */
-.google-btn-wrap {
-  display: flex;
-  justify-content: center;
-  min-height: 44px;
+/* El código es lo único que hay que teclear en esta pantalla: se le da tamaño de
+   dato, no de campo de formulario, y separación entre dígitos para poder
+   contrastarlo de un vistazo con el del email. */
+.auth-code-input {
+  font-size: var(--t-display);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-align: center;
 }
 
-.google-btn-wrap :is(iframe, div) {
-  max-width: 100%;
+.auth-email {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.auth-notice {
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+}
+
+/* El aviso de que el correo no salió no es un error —el código existe— pero
+   tampoco es una confirmación: va en el color de acento, que aquí significa
+   "atiende a esto". */
+.auth-notice.is-warning {
+  color: var(--accent-text);
+  font-weight: 550;
+}
+
+/* Vuelve al paso anterior; es un botón, no un enlace, así que se le quita el
+   aspecto de botón y se le deja el de enlace de .auth-inline-link. */
+.auth-back {
+  align-self: center;
+  border: 0;
+  background: transparent;
+}
+
+.auth-back:disabled {
+  opacity: 0.5;
 }

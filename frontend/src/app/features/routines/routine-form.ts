@@ -4,6 +4,7 @@ import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } fro
 import { Dialog } from 'primeng/dialog';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { RoutineService } from '../../core/services/routine.service';
+import { AdminService } from '../../core/services/admin.service';
 import { Category, Exercise, ExerciseType, InputType } from '../../core/models/exercise.model';
 import { RoutineInput } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/labels';
@@ -11,6 +12,7 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
+import { youtubeEmbedUrl } from '../../core/utils/video';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -21,6 +23,12 @@ interface ExerciseRow {
   targetWeight: number | null;
   targetRIR: number | null;
   note: string;
+  /** Consejos para quien vaya a seguir la rutina. */
+  description: string;
+  /** Enlace a un vídeo que muestra la ejecución. */
+  videoUrl: string;
+  /** Descanso entre series, en segundos. */
+  restSeconds: number | null;
 }
 
 const EXERCISE_TYPES: ExerciseType[] = ['empuje', 'tiron', 'pierna', 'core', 'cardio'];
@@ -37,6 +45,7 @@ export class RoutineForm {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly routineService = inject(RoutineService);
+  private readonly adminService = inject(AdminService);
   private readonly exerciseService = inject(ExerciseService);
 
   readonly categoryColor = CATEGORY_COLOR;
@@ -48,7 +57,33 @@ export class RoutineForm {
   readonly routineId = signal<string | null>(null);
   readonly isEdit = computed(() => this.routineId() !== null);
 
+  /**
+   * Dueño de la rutina cuando el admin edita la de otra persona. `null` es el
+   * caso normal: la rutina es de quien está usando la aplicación.
+   *
+   * Es lo único que cambia entre los dos modos —la pantalla y las validaciones
+   * son idénticas—, así que en vez de duplicar el formulario se elige aquí a qué
+   * servicio se le habla.
+   */
+  readonly targetUserId = signal<string | null>(null);
+  readonly targetUserName = signal<string | null>(null);
+  readonly isForOther = computed(() => this.targetUserId() !== null);
+
+  /** A dónde vuelve la pantalla al guardar, cancelar o borrar. */
+  readonly backLink = computed(() =>
+    this.isForOther() ? ['/amigos', this.targetUserId()!, 'rutinas'] : ['/rutinas'],
+  );
+
+  readonly backQueryParams = computed(() => (this.isForOther() ? { name: this.targetUserName() } : {}));
+
   readonly name = signal('');
+
+  /* Calentamiento de la rutina entera: una explicación, un vídeo, o los dos. */
+  readonly warmupDescription = signal('');
+  readonly warmupVideoUrl = signal('');
+  readonly warmupDialogOpen = signal(false);
+  readonly hasWarmup = computed(() => !!this.warmupDescription().trim() || !!this.warmupVideoUrl().trim());
+
   readonly exercises = signal<ExerciseRow[]>([]);
   readonly catalog = signal<Exercise[]>([]);
   readonly saving = signal(false);
@@ -75,17 +110,33 @@ export class RoutineForm {
 
   readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
 
-  readonly canSave = computed(() => this.name().trim().length >= 2 && this.exercises().length > 0 && !this.saving());
+  readonly canSave = computed(
+    () =>
+      this.name().trim().length >= 2 &&
+      this.exercises().length > 0 &&
+      !this.saving() &&
+      !this.hasInvalidVideo() &&
+      !this.warmupVideoInvalid(),
+  );
 
   constructor() {
     this.exerciseService.getAll().subscribe((list) => this.catalog.set(list));
 
+    // Con `userId` en la ruta (/amigos/:userId/rutinas/...) el formulario opera
+    // sobre la rutina de esa persona; sin él, sobre la de quien está dentro.
+    const userId = this.route.snapshot.paramMap.get('userId');
+    this.targetUserId.set(userId);
+    this.targetUserName.set(this.route.snapshot.queryParamMap.get('name'));
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.routineId.set(id);
-      this.routineService.getOne(id).subscribe({
+      const load$ = userId ? this.adminService.getRoutine(userId, id) : this.routineService.getOne(id);
+      load$.subscribe({
         next: (routine) => {
           this.name.set(routine.name);
+          this.warmupDescription.set(routine.warmupDescription ?? '');
+          this.warmupVideoUrl.set(routine.warmupVideoUrl ?? '');
           this.exercises.set(
             routine.exercises.map((e) => ({
               exerciseId: e.exerciseId,
@@ -96,6 +147,9 @@ export class RoutineForm {
               targetWeight: e.targetWeight,
               targetRIR: e.targetRIR,
               note: e.note ?? '',
+              description: e.description ?? '',
+              videoUrl: e.videoUrl ?? '',
+              restSeconds: e.restSeconds ?? null,
             })),
           );
           this.loading.set(false);
@@ -127,6 +181,9 @@ export class RoutineForm {
         targetWeight: null,
         targetRIR: null,
         note: '',
+        description: '',
+        videoUrl: '',
+        restSeconds: isCardio ? null : 90,
       },
     ]);
   }
@@ -211,6 +268,101 @@ export class RoutineForm {
     this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, note: value } : row)));
   }
 
+  setDescription(index: number, event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, description: value } : row)));
+  }
+
+  setVideoUrl(index: number, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, videoUrl: value } : row)));
+  }
+
+  /** El descanso se pide en minutos y segundos, pero se guarda en segundos. */
+  restMinutes(index: number): number {
+    return Math.floor((this.exercises()[index]?.restSeconds ?? 0) / 60);
+  }
+
+  restRemainderSeconds(index: number): number {
+    return (this.exercises()[index]?.restSeconds ?? 0) % 60;
+  }
+
+  setRestMinutes(index: number, minutes: number | null): void {
+    const total = (minutes ?? 0) * 60 + this.restRemainderSeconds(index);
+    this.setRestSeconds(index, total);
+  }
+
+  setRestRemainderSeconds(index: number, seconds: number | null): void {
+    const total = this.restMinutes(index) * 60 + (seconds ?? 0);
+    this.setRestSeconds(index, total);
+  }
+
+  private setRestSeconds(index: number, total: number): void {
+    this.exercises.update((list) =>
+      list.map((row, i) => (i === index ? { ...row, restSeconds: total > 0 ? total : null } : row)),
+    );
+  }
+
+  /** Un enlace vacío es válido; uno escrito a medias no, y avisarlo aquí evita un 400 al guardar. */
+  videoUrlInvalid(index: number): boolean {
+    const raw = this.exercises()[index]?.videoUrl?.trim();
+    if (!raw) return false;
+    try {
+      const url = new URL(raw);
+      return url.protocol !== 'http:' && url.protocol !== 'https:';
+    } catch {
+      return true;
+    }
+  }
+
+  readonly hasInvalidVideo = computed(() =>
+    this.exercises().some((row) => {
+      const raw = row.videoUrl?.trim();
+      if (!raw) return false;
+      try {
+        const url = new URL(raw);
+        return url.protocol !== 'http:' && url.protocol !== 'https:';
+      } catch {
+        return true;
+      }
+    }),
+  );
+
+  openWarmupDialog(): void {
+    this.warmupDialogOpen.set(true);
+  }
+
+  closeWarmupDialog(): void {
+    this.warmupDialogOpen.set(false);
+  }
+
+  onWarmupDialogVisibleChange(visible: boolean): void {
+    this.warmupDialogOpen.set(visible);
+  }
+
+  setWarmupDescription(event: Event): void {
+    this.warmupDescription.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  setWarmupVideoUrl(event: Event): void {
+    this.warmupVideoUrl.set((event.target as HTMLInputElement).value);
+  }
+
+  /** Vacía el calentamiento de un gesto, sin tener que borrar los dos campos. */
+  clearWarmup(): void {
+    this.warmupDescription.set('');
+    this.warmupVideoUrl.set('');
+  }
+
+  /**
+   * El vídeo del calentamiento se incrusta en «Registrar», así que tiene que ser
+   * de YouTube; cualquier otro enlace se avisa aquí y no al guardar.
+   */
+  readonly warmupVideoInvalid = computed(() => {
+    const raw = this.warmupVideoUrl().trim();
+    return !!raw && youtubeEmbedUrl(raw) === null;
+  });
+
   openNoteDialog(index: number): void {
     this.noteDialogIndex.set(index);
   }
@@ -279,6 +431,8 @@ export class RoutineForm {
     const input: RoutineInput = {
       name: this.name().trim(),
       category: this.category(),
+      warmupDescription: this.warmupDescription().trim() || null,
+      warmupVideoUrl: this.warmupVideoUrl().trim() || null,
       exercises: this.exercises().map((e) => ({
         exerciseId: e.exerciseId,
         targetSets: e.targetSets,
@@ -287,22 +441,36 @@ export class RoutineForm {
         targetWeight: e.targetWeight,
         targetRIR: e.targetRIR,
         note: e.note.trim() || null,
+        description: e.description.trim() || null,
+        videoUrl: e.videoUrl.trim() || null,
+        restSeconds: e.restSeconds,
       })),
     };
 
     this.saving.set(true);
     this.error.set(null);
-    const obs = this.routineId()
-      ? this.routineService.update(this.routineId()!, input)
-      : this.routineService.create(input);
+
+    const userId = this.targetUserId();
+    const routineId = this.routineId();
+    const obs = userId
+      ? routineId
+        ? this.adminService.updateRoutine(userId, routineId, input)
+        : this.adminService.createRoutine(userId, input)
+      : routineId
+        ? this.routineService.update(routineId, input)
+        : this.routineService.create(input);
 
     obs.subscribe({
-      next: () => this.router.navigate(['/rutinas']),
+      next: () => this.goBack(),
       error: () => {
         this.saving.set(false);
         this.error.set('No se ha podido guardar la rutina.');
       },
     });
+  }
+
+  private goBack(): void {
+    this.router.navigate(this.backLink(), { queryParams: this.backQueryParams() });
   }
 
   askDeleteRoutine(): void {
@@ -317,8 +485,12 @@ export class RoutineForm {
     const id = this.routineId();
     if (!id) return;
     this.confirmDeleteRoutine.set(false);
-    this.routineService.delete(id).subscribe({
-      next: () => this.router.navigate(['/rutinas']),
+
+    const userId = this.targetUserId();
+    const obs = userId ? this.adminService.deleteRoutine(userId, id) : this.routineService.delete(id);
+
+    obs.subscribe({
+      next: () => this.goBack(),
       error: () => this.error.set('No se ha podido eliminar la rutina.'),
     });
   }

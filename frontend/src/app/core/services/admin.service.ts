@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 import { AdminUser } from '../models/admin.model';
 import { Category } from '../models/exercise.model';
-import { Routine } from '../models/routine.model';
+import { Routine, RoutineInput } from '../models/routine.model';
 import { RoutineProgressData } from '../models/progress.model';
 import { WorkoutSession } from '../models/session.model';
 
@@ -29,6 +29,25 @@ export class AdminService {
 
   getRoutines(userId: string): Observable<Routine[]> {
     return this.http.get<Routine[]>(`${this.baseUrl}/users/${userId}/routines`);
+  }
+
+  /* Alta, edición y baja de rutinas ajenas. El backend valida con el mismo
+     esquema que las propias, así que `RoutineInput` sirve igual. */
+
+  getRoutine(userId: string, routineId: string): Observable<Routine> {
+    return this.http.get<Routine>(`${this.baseUrl}/users/${userId}/routines/${routineId}`);
+  }
+
+  createRoutine(userId: string, input: RoutineInput): Observable<Routine> {
+    return this.http.post<Routine>(`${this.baseUrl}/users/${userId}/routines`, input);
+  }
+
+  updateRoutine(userId: string, routineId: string, input: RoutineInput): Observable<Routine> {
+    return this.http.put<Routine>(`${this.baseUrl}/users/${userId}/routines/${routineId}`, input);
+  }
+
+  deleteRoutine(userId: string, routineId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${userId}/routines/${routineId}`);
   }
 
   getRoutineProgress(userId: string, routineId: string): Observable<RoutineProgressData> {

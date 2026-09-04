@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" class="app-dark">
+<html lang="es" class="app-dark" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <title>Light Weight</title>
@@ -13,7 +13,6 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* Pantalla de arranque. Vive aquí porque tiene que pintarse antes de que
        cargue nada de Angular; repite a mano los valores del sistema. */
@@ -59,7 +58,26 @@
     @media (prefers-reduced-motion: reduce) {
       .app-boot-fill { animation: none; width: 100%; opacity: 0.5; }
     }
+
+    html[data-theme="light"] .app-boot { background: #f7f8fa; color: #6b7280; }
+    html[data-theme="light"] .app-boot-mark { color: #12151c; }
+    html[data-theme="light"] .app-boot-track { background: #e7eaf0; }
   </style>
+  <script>
+    // Resuelve el tema antes del primer pintado: si esto esperase a Angular, la
+    // pantalla de arranque saldría oscura y daría un fogonazo al pasar a claro.
+    (function () {
+      try {
+        var stored = localStorage.getItem('lw_theme');
+        var mode = stored === 'light' || stored === 'dark' ? stored :
+          (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', mode);
+        document.documentElement.classList.toggle('app-dark', mode === 'dark');
+      } catch (e) {
+        // Sin localStorage se queda el oscuro por defecto del atributo.
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root>

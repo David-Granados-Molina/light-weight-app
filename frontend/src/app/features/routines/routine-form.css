@@ -149,6 +149,137 @@
   text-transform: uppercase;
 }
 
+.rf-row-muscles {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* --- Descanso entre series -------------------------------------------------- */
+
+.rf-rest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+
+.rf-rest-wheels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: var(--s-2);
+  max-width: 320px;
+}
+
+/* Aviso de que la rutina es de otra persona, junto al título. */
+.rf-owner {
+  padding: 3px var(--s-3);
+  border-radius: var(--r-full);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--t-xs);
+  font-weight: 650;
+}
+
+/* --- Calentamiento --------------------------------------------------------------
+   Va sobre la lista, con la misma caja que una tarjeta de ejercicio pero
+   punteada mientras está vacío: es un hueco por rellenar, no una fila más. */
+
+.rf-warmup {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: var(--s-3) var(--s-4);
+  margin-bottom: var(--s-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  text-align: left;
+  transition:
+    color var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out);
+}
+
+.rf-warmup:hover {
+  border-color: var(--accent-line);
+  color: var(--accent-text);
+}
+
+/* Con contenido ya no es un hueco: pasa a línea continua y a texto pleno. */
+.rf-warmup.has-warmup {
+  border-style: solid;
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.rf-warmup-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.rf-warmup-badge {
+  flex-shrink: 0;
+  padding: 2px var(--s-2);
+  border-radius: var(--r-full);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--t-xs);
+  font-weight: 650;
+}
+
+.rf-warmup-actions {
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.rf-warmup-clear {
+  border: 0;
+  background: transparent;
+  color: var(--color-negative);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  border-radius: var(--r-xs);
+}
+
+.rf-warmup-clear:hover {
+  text-decoration: underline;
+}
+
+/* --- Diálogo de detalles ----------------------------------------------------- */
+
+.rf-dialog-for {
+  margin-bottom: var(--s-4);
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.rf-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-5);
+}
+
+.rf-dialog-hint {
+  margin-top: calc(var(--s-1) * -1);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
+.rf-dialog-error {
+  color: var(--color-negative);
+  font-size: var(--t-xs);
+}
+
 .rf-note,
 .rf-remove {
   flex-shrink: 0;

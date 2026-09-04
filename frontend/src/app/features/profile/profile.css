@@ -52,6 +52,55 @@
   color: var(--text-muted);
 }
 
+/* --- Modo claro / oscuro --------------------------------------------------------
+   Control segmentado y no desplegable: son tres opciones y conviene verlas todas
+   a la vez para poder comparar el resultado de un toque. */
+
+.prof-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.prof-mode-label {
+  font-size: var(--t-body);
+  font-weight: 550;
+}
+
+.prof-mode-switch {
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+}
+
+.prof-mode-btn {
+  min-width: 72px;
+  min-height: 34px;
+  padding: 0 var(--s-3);
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.prof-mode-btn:hover:not(.is-active) {
+  color: var(--text);
+}
+
+.prof-mode-btn.is-active {
+  background: var(--accent-solid);
+  color: var(--accent-ink);
+}
+
 /* --- Desplegables -------------------------------------------------------------- */
 
 .prof-dropdown {
@@ -226,7 +275,7 @@
 
 .prof-save {
   align-self: flex-start;
-  min-width: 200px;
+  min-width: 100%;
 }
 
 /* --- Cuenta ---------------------------------------------------------------------
@@ -276,7 +325,7 @@
 
 .prof-logout {
   align-self: flex-start;
-  min-width: 180px;
+  min-width: 100%;
 }
 
 /* --- Vista ampliada del avatar ----------------------------------------------------- */
@@ -286,7 +335,7 @@
   aspect-ratio: 1;
   border-radius: var(--r-lg);
   overflow: hidden;
-  background: var(--surface);
+  background: var(--avatar-canvas);
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-3);
   animation: lw-rise var(--dur-slow) var(--ease-out);

@@ -5,7 +5,6 @@ export interface AuthUser {
   avatarUrl: string | null;
   themeColor: string | null;
   isAdmin: boolean;
-  hasPassword: boolean;
 }
 
 export interface UpdateProfileInput {
@@ -14,12 +13,19 @@ export interface UpdateProfileInput {
   themeColor?: string | null;
 }
 
-export interface LoginInput {
-  email: string;
-  password: string;
-}
-
 export interface AuthResponse {
   token: string;
   user: AuthUser;
+}
+
+/**
+ * Respuesta al pedir un código.
+ *
+ * `delivered` es `false` cuando el servidor no tiene el correo configurado: el
+ * código existe, pero está en su log y no en ningún buzón. La pantalla necesita
+ * saberlo para no mandar a nadie a mirar su email.
+ */
+export interface RequestCodeResponse {
+  delivered: boolean;
+  message: string;
 }

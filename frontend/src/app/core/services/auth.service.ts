@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { AuthResponse, AuthUser, LoginInput, UpdateProfileInput } from '../models/auth.model';
+import { AuthResponse, AuthUser, RequestCodeResponse, UpdateProfileInput } from '../models/auth.model';
 import { WorkoutDraftStore } from './workout-draft.store';
 
 const TOKEN_KEY = 'lw_token';
@@ -30,22 +30,21 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
-  login(input: LoginInput): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, input).pipe(tap((res) => this.setSession(res)));
+  /** Paso 1: pide que envíen un código al email. No abre sesión todavía. */
+  requestCode(email: string): Observable<RequestCodeResponse> {
+    return this.http.post<RequestCodeResponse>(`${this.baseUrl}/request-code`, { email });
   }
 
-  loginWithGoogle(idToken: string): Observable<AuthResponse> {
+  /** Paso 2: el código correcto abre la sesión. */
+  verifyCode(email: string, code: string): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.baseUrl}/google`, { idToken })
+      .post<AuthResponse>(`${this.baseUrl}/verify-code`, { email, code })
       .pipe(tap((res) => this.setSession(res)));
   }
 
-  forgotPassword(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.baseUrl}/forgot-password`, { email });
-  }
-
-  resetPassword(token: string, password: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.baseUrl}/reset-password`, { token, password });
+  /** Cuenta de demostración: entra directa, sin email ni código. */
+  loginAsTestUser(): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/test-login`, {}).pipe(tap((res) => this.setSession(res)));
   }
 
   updateProfile(input: UpdateProfileInput): Observable<AuthUser> {

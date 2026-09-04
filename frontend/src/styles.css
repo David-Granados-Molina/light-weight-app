@@ -24,6 +24,12 @@
   --scroll-thumb: #2a303c;
   --scroll-thumb-hover: #39414f;
 
+  /* Lienzo de los avatares. Los SVG del catálogo son dibujos de trazo negro
+     sobre transparente: sobre cualquiera de los planos oscuros el contorno
+     desaparece y solo queda la mancha de color. Por eso es blanco fijo en
+     ambos temas: no es un plano de la interfaz, es el papel del dibujo. */
+  --avatar-canvas: #ffffff;
+
   --line: rgb(255 255 255 / 7%);
   --line-strong: rgb(255 255 255 / 13%);
 
@@ -91,6 +97,10 @@
   --shadow-2: 0 2px 4px rgb(0 0 0 / 40%), 0 10px 24px -10px rgb(0 0 0 / 70%);
   --shadow-3: 0 4px 8px rgb(0 0 0 / 50%), 0 24px 56px -16px rgb(0 0 0 / 80%);
 
+  /* Velo de modales y overlays. Un solo sitio: se repetía como literal en tres
+     ficheros y se olvidaba en el tema claro. */
+  --scrim: rgb(4 5 7 / 72%);
+
   /* --- Movimiento --------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 120ms;
@@ -124,6 +134,74 @@
   :root {
     --t-display: 2rem;
     --gutter: 32px;
+  }
+}
+
+/* ============================================================================
+   TEMA CLARO
+   `ThemeService` resuelve "system" en TypeScript y estampa siempre un valor
+   concreto en `data-theme`, así que aquí basta un solo bloque de tokens.
+
+   Los colores de categoría se oscurecen: el cian y el naranja del tema oscuro
+   sobre blanco dan 2:1 y dejarían la categoría ilegible. Y el acento invierte
+   su regla — en oscuro se le pone un suelo de luminosidad, aquí un techo — con
+   tinta blanca encima, porque sobre fondo claro lo que hay que garantizar es
+   que el relleno sea lo bastante oscuro.
+   ========================================================================== */
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --ground: #f7f8fa;
+  --chrome: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f1f3f7;
+  --surface-hover: #e7eaf0;
+  --scroll-thumb: #c6ccd6;
+  --scroll-thumb-hover: #aeb6c2;
+
+  --line: rgb(15 23 42 / 10%);
+  --line-strong: rgb(15 23 42 / 18%);
+
+  --text: #12151c;
+  --text-secondary: #4c5563;
+  --text-muted: #656d7b;
+
+  --accent-solid: var(--color-accent);
+  --accent-text: var(--color-accent);
+  --accent-ink: #ffffff;
+  --accent-soft: rgb(15 23 42 / 6%);
+  --accent-line: rgb(15 23 42 / 22%);
+
+  --color-gym: #0e7490;
+  --color-cali: #c2410c;
+
+  --color-positive: #15803d;
+  --color-negative: #b91c1c;
+
+  --shadow-1: 0 1px 2px rgb(15 23 42 / 8%), 0 2px 6px -2px rgb(15 23 42 / 8%);
+  --shadow-2: 0 2px 4px rgb(15 23 42 / 8%), 0 10px 24px -10px rgb(15 23 42 / 18%);
+  --shadow-3: 0 4px 8px rgb(15 23 42 / 10%), 0 24px 56px -16px rgb(15 23 42 / 24%);
+
+  /* Un velo casi negro sobre una interfaz clara es un agujero, no una capa. */
+  --scrim: rgb(15 23 42 / 32%);
+}
+
+@supports (color: oklch(from white l c h)) {
+  :root[data-theme='light'] {
+    /* En claro el relleno conserva el color tal cual lo eligió el usuario: sobre
+       fondo blanco no hace falta aclararlo. Lo que cambia es la tinta.
+
+       `clamp(0, (0.62 - l) * 1000, 1)` es un escalón: multiplicar por mil
+       satura el clamp, así que un acento claro (ámbar, menta, gris) recibe
+       tinta negra y uno oscuro (azul, rojo, morado) tinta blanca. Es la forma
+       de decidir por luminosidad en CSS sin `contrast-color()`, que todavía no
+       está disponible. */
+    --accent-solid: var(--color-accent);
+    --accent-ink: oklch(from var(--color-accent) clamp(0, (0.62 - l) * 1000, 1) 0 h);
+    --accent-text: oklch(from var(--color-accent) min(l, 0.45) min(c, 0.16) h);
+    --accent-soft: oklch(from var(--color-accent) 0.95 min(c, 0.04) h);
+    --accent-line: oklch(from var(--color-accent) 0.78 min(c, 0.09) h);
   }
 }
 
@@ -368,16 +446,16 @@ img {
   transform: translateY(0);
 }
 
-/* Filete de categoría de exactamente 1 px. La categoría se lee sobre todo por
+/* Filete de categoría de exactamente 3 px. La categoría se lee sobre todo por
    su punto y su etiqueta; el filete solo ayuda a barrer la lista. */
 .lw-spine {
-  border-left-width: 1px;
+  border-left-width: 3px;
   border-left-style: solid;
 }
 
 .lw-rule {
   border: 0;
-  border-top: 1px solid var(--line);
+  border-top: 3px solid var(--line);
   margin: 0;
 }
 
@@ -665,7 +743,7 @@ img {
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-10) var(--s-5);
-  border: 1px dashed var(--line-strong);
+  border: 2px dashed var(--line-strong);
   border-radius: var(--r-md);
   text-align: center;
   color: var(--text-secondary);
@@ -752,7 +830,7 @@ img {
   align-items: center;
   justify-content: center;
   padding: var(--s-5);
-  background: rgb(4 5 7 / 72%);
+  background: var(--scrim);
   backdrop-filter: blur(6px);
   animation: lw-fade var(--dur) var(--ease-out);
 }
@@ -838,7 +916,7 @@ img {
 }
 
 .p-dialog-mask {
-  background: rgb(4 5 7 / 72%);
+  background: var(--scrim);
   backdrop-filter: blur(6px);
 }
 

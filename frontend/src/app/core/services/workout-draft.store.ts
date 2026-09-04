@@ -16,6 +16,16 @@ export interface AddedExercise {
   note?: string;
   /** Si no es null, sustituye al inputType del ejercicio solo para este entreno (ver EMOM puntual). */
   inputTypeOverride?: InputType | null;
+  /** Consejos y vídeo que trae la rutina de la que se cargó este ejercicio. */
+  description?: string | null;
+  videoUrl?: string | null;
+  /** Descanso entre series recomendado por la rutina, en segundos. */
+  restSeconds?: number | null;
+  /**
+   * Marcado como hecho durante este entreno. Solo vive en el borrador: es una
+   * ayuda para no perder el hilo entre series, no un dato del entreno guardado.
+   */
+  completed?: boolean;
 }
 
 interface DraftSnapshot {
