@@ -118,3 +118,29 @@ function getClient(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY;
   return apiKey ? new Resend(apiKey) : null;
 }
+
+/**
+ * Una línea al arrancar diciendo cómo va a entregar los códigos.
+ *
+ * Existe porque «no me llega el correo» tiene tres causas posibles —falta la API
+ * key, falta el reenvío, o el dominio no está verificado— y desde fuera las tres
+ * se ven igual. Con esto, el log del servidor lo dice sin tener que adivinar.
+ * Nunca imprime la API key, solo si está o no.
+ */
+export function describeMailConfig(): string {
+  const hasKey = !!process.env.RESEND_API_KEY?.trim();
+  const relayTo = process.env.LOGIN_CODE_RELAY_TO?.trim();
+
+  if (!hasKey) {
+    return '[mailer] SIN RESEND_API_KEY: los códigos no se envían, solo se escriben aquí como [CODIGO-ACCESO].';
+  }
+  if (relayTo) {
+    return `[mailer] API key OK · reenvío activo: TODOS los códigos van a ${relayTo}.`;
+  }
+  return (
+    '[mailer] API key OK · SIN reenvío: cada código se envía al email de su usuario. ' +
+    `Con el remitente ${FROM_ADDRESS} esto solo funciona si el dominio está verificado en Resend; ` +
+    'si no, fallará para todo el mundo menos para el dueño de la cuenta. ' +
+    'Define LOGIN_CODE_RELAY_TO para que lleguen todos a un buzón.'
+  );
+}

@@ -10,6 +10,7 @@ import { progressRouter } from './routes/progress';
 import { adminRouter } from './routes/admin';
 import { dietRouter } from './routes/diet';
 import { requireAuth } from './middleware/requireAuth';
+import { describeMailConfig } from './lib/mailer';
 import { requireAdmin } from './middleware/requireAdmin';
 
 /**
@@ -60,4 +61,9 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 const port = Number(process.env.PORT ?? 3000);
-app.listen(port, () => console.log(`fitness-api escuchando en http://localhost:${port}`));
+app.listen(port, () => {
+  console.log(`fitness-api escuchando en http://localhost:${port}`);
+  // Cómo se van a entregar los códigos de acceso, dicho en el arranque: es la
+  // primera pregunta cuando alguien no puede entrar.
+  console.log(describeMailConfig());
+});
