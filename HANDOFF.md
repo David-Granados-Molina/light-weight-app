@@ -9,9 +9,9 @@ Rama activa: **`main`**, HEAD en `e85f3af`, árbol limpio, **todo subido y despl
 
 La tanda de la versión 2 está **cerrada y en producción**. Lo que en el handoff anterior eran 79 ficheros sin commitear hoy son cuatro commits en `main`, ya desplegados.
 
-Queda **un asunto abierto**: los códigos de acceso por email no llegan en producción. Está diagnosticado y con las herramientas puestas para cerrarlo en un minuto, pero hace falta que mires los logs de Render. Ver el apartado 6.
+**No queda nada bloqueante.** Los códigos de acceso, que era el asunto abierto del handoff anterior, llegan: el reenvío estaba bien configurado y solo faltaba comprobarlo. Lo que sigue costando es que los códigos de los demás usuarios pasan por tu buzón, y eso lo cierra un dominio verificado. Ver el apartado 6.
 
-Y queda **una migración escrita y sin aplicar**, la primera destructiva del proyecto, que limpia la estructura huérfana. Se aplica sola al empujar. Ver el apartado 3.
+La estructura huérfana está limpia: la quinta migración, la primera destructiva del proyecto, se aplicó en el despliegue. Ver el apartado 3.
 
 ---
 
@@ -50,9 +50,9 @@ Y queda **una migración escrita y sin aplicar**, la primera destructiva del pro
 | `20260904140000_diet` | `Diet`, `DietMeal`, `DietItem`, `ShoppingItem` y sus enums |
 | `20260904160000_diet_slots_and_plan` | `DietSlotInfo`, `DietSupplement`, `DietPlanEntry` y `Diet.shoppingNotes` |
 
-### La quinta migración: limpieza, escrita y sin aplicar
+### La quinta migración: la limpieza
 
-`20260906120000_drop_password_and_diet_item_kind` es la **primera migración destructiva** del proyecto y la única que no está aplicada. Se hizo de una vez, no de una en una, y borra lo que sobraba:
+`20260906120000_drop_password_and_diet_item_kind` es la **primera migración destructiva** del proyecto. Se hizo de una vez, no de una en una, y borra lo que sobraba:
 
 - `User.passwordHash` y la tabla `PasswordResetToken`, huérfanas desde que el login pasa por código.
 - `User.googleId`, huérfana desde que no hay login con Google. Su índice único se va con la columna.
@@ -60,9 +60,9 @@ Y queda **una migración escrita y sin aplicar**, la primera destructiva del pro
 
 Nada de eso se leía ni se escribía desde el código: comprobado buscando los cinco nombres en `backend/src` y `frontend/src`. El `schema.prisma`, el `create` de `diet.ts` y el seed `seed-diet-david.ts` ya no los mencionan; `tsc --noEmit` sigue en cero.
 
-**Se aplica sola al desplegar.** El `buildCommand` del servicio de API en `render.yaml` termina en `npx prisma migrate deploy`, así que el push que lleve este commit la ejecuta contra Neon. Es irreversible: conviene tener a mano la copia de seguridad de Neon antes de empujar.
+**Se aplicó al desplegar**, no a mano: el `buildCommand` del servicio de API en `render.yaml` termina en `npx prisma migrate deploy`, así que el push la ejecutó contra Neon. Antes se hizo una *snapshot* de la base en Neon, que es el único camino de vuelta —un `DROP COLUMN` no se deshace con otra migración—.
 
-> **Mientras tanto, no guardes una dieta.** El código ya no escribe `DietItem.kind` pero la columna sigue en la base con `NOT NULL` y sin valor por defecto, así que un guardado de dieta falla hasta que la migración corra. Y como `DATABASE_URL` apunta a Neon también en local, esto vale igual arrancando aquí. Es la única operación afectada; leer la dieta, las rutinas y las sesiones siguen bien. Se cierra empujando.
+> **Si algún día se repite una migración destructiva**, entre el commit y el despliegue hay una ventana en la que el código ya no escribe la columna pero la base todavía la exige. Aquí duró lo que tardó el despliegue y afectaba solo a guardar una dieta (`DietItem.kind` es `NOT NULL` sin valor por defecto). Como `DATABASE_URL` apunta a Neon también en local, la ventana vale igual arrancando aquí.
 
 ---
 
@@ -117,37 +117,40 @@ El manifest declara **`display: standalone`**, así que desde la pantalla de ini
 
 ---
 
-## 6. ABIERTO: los códigos de acceso no llegan en producción
+## 6. Los códigos de acceso: funcionando, por reenvío
 
-Es lo único pendiente de verdad, y lo único que puede dejar a un usuario fuera sin alternativa.
+**Cerrado.** La línea del arranque dice `[mailer] API key OK · reenvío activo: TODOS los códigos van a davidgranadosmolina@gmail.com`, y los códigos llegan. Nunca hubo un fallo distinto del que ya se conocía: la variable sí estaba llegando al proceso. Lo que quedaba de este apartado era comprobarlo.
 
-### Qué se sabe con certeza
+### Cómo está entregando ahora
 
-- El backend está desplegado y responde; la petición **llega**, y es **Resend quien la rechaza**.
-- El remitente es `onboarding@resend.dev`, la dirección compartida de pruebas de Resend, que **solo entrega al correo dueño de la cuenta**. Ninguna API key arregla eso.
-- **`light-weight-app.onrender.com` no sirve para verificar dominio**: esa zona DNS es de Render, no tuya, y Resend no ofrece alternativa de remitente único. Verificado buscándolo en su documentación.
-- Por eso se puso **`LOGIN_CODE_RELAY_TO`**: con esa variable, **todos los códigos van a un solo buzón** —el tuyo— con el email de quien lo pidió en el asunto, y se pasan a mano. El código se escribe además en el log con la marca `[CODIGO-ACCESO]`.
-- Que siga fallando significa que **esa variable no está llegando al proceso que corre**. Sospecha principal: **el frontend y el backend son dos servicios distintos en Render**, y es un sitio clásico donde poner las variables en el equivocado. Segunda sospecha: el servicio no se reinició después de añadirlas.
-- Pista que era: **`LOGIN_CODE_RELAY_TO` no estaba declarada en `render.yaml`**, mientras que las demás (`RESEND_API_KEY`, `DATABASE_URL`…) sí, con `sync: false` —«la pongo yo a mano en el panel»—. Una variable que no figura en el *blueprint* es candidata a desaparecer cuando Render lo sincroniza. **Ya está declarada** con `sync: false`, en el servicio de API y no en el estático, así que la duda de «está en el sitio equivocado» queda cerrada por el fichero. Sigue habiendo que ponerle valor en el panel.
-- **En el modo en que está ahora, el código no se registra en ninguna parte.** `[CODIGO-ACCESO]` solo se escribe cuando no hay API key (`mailer.ts:37`) o cuando el reenvío está activo (`mailer.ts:54`). Con API key y sin reenvío, el código se manda a Resend, Resend lo rechaza y ahí se pierde. Es la razón de que no haya forma de entrar en una cuenta real hoy, ni siquiera mirando los logs.
+El remitente es `onboarding@resend.dev`, la dirección compartida de pruebas de Resend, que **solo entrega al correo dueño de la cuenta**. Ninguna API key arregla eso, y `light-weight-app.onrender.com` no vale para verificar dominio: esa zona DNS es de Render, no tuya.
 
-### Qué tienes que hacer tú
+Por eso está `LOGIN_CODE_RELAY_TO`. Con esa variable **todos los códigos van a un solo buzón** —el tuyo— con el email de quien lo pidió en el asunto. El código se escribe además en el log con la marca `[CODIGO-ACCESO]` (`mailer.ts:54`), por si el correo tarda.
 
-Abrir los logs del servicio **backend** en Render (no el del frontend) y buscar la línea `[mailer]` del arranque. Dice exactamente cuál de los tres casos es:
+### Lo que esto todavía cuesta
+
+Que funcione no quiere decir que esté terminado. Con el reenvío puesto:
+
+- **Ningún otro usuario puede entrar solo.** Cuando Filo pide un código, el código llega a tu buzón, no al suyo; hay que leerlo y pasárselo. Para ti es transparente —tu propio código llega a tu propio correo, que es el mismo buzón—, y por eso desde dentro parece que todo va bien.
+- Quien administra ve el código de cualquier usuario y puede entrar en cualquier cuenta. Hoy no importa: el único administrador eres tú y las cuentas las das de alta tú. Queda dicho por si algún día administra otro.
+
+### El arreglo definitivo
+
+Verificar un dominio propio en Resend → Domains (ojo con no crear un segundo registro SPF; se fusiona con el que ya haya), cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` a una dirección de ese dominio y **borrar `LOGIN_CODE_RELAY_TO`** de las variables y de `render.yaml`. Los códigos irán solos a su destinatario sin tocar más código.
+
+**No se puede adelantar.** Cambiar el remitente antes de verificar el dominio hace que Resend rechace *todos* los envíos, incluidos los que hoy sí llegan.
+
+### La línea de diagnóstico, para la próxima
+
+Se imprime **en el arranque**, después de `fitness-api escuchando en…` (`index.ts:68`), en el servicio `light-weight-api` y no en el estático. Si el servicio lleva días levantado no la verás en la cola del log: hay que subir hasta el último despliegue o reiniciar.
 
 | Línea | Significado |
 |---|---|
 | `[mailer] SIN RESEND_API_KEY: …` | La API key no llega al proceso. |
-| `[mailer] API key OK · SIN reenvío: …` | La key llega pero **`LOGIN_CODE_RELAY_TO` no**. Es la sospecha principal. |
-| `[mailer] API key OK · reenvío activo: TODOS los códigos van a <buzón>` | La configuración es correcta; entonces el fallo es otro y lo dirá `[request-code]` con el error literal de Resend. |
+| `[mailer] API key OK · SIN reenvío: …` | La key llega pero `LOGIN_CODE_RELAY_TO` no. |
+| `[mailer] API key OK · reenvío activo: …` | **El caso actual.** |
 
-La línea nunca imprime la API key, solo si está o no.
-
-### El arreglo definitivo, cuando quieras dejarlo bien
-
-Verificar un dominio propio en Resend → Domains (ojo con no crear un segundo registro SPF; se fusiona con el que ya haya), cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` a una dirección de ese dominio y **borrar `LOGIN_CODE_RELAY_TO`**. Los códigos irán solos a su destinatario sin tocar más código.
-
-Es cuestión de comodidad, no de seguridad: mientras haya reenvío, quien administra ve el código de cualquier usuario y puede entrar en cualquier cuenta, pero el único administrador eres tú y las cuentas las das de alta tú. Queda dicho para que no sorprenda a nadie si algún día administra otro.
+Nunca imprime la API key, solo si está o no.
 
 ---
 
@@ -187,18 +190,18 @@ Es cuestión de comodidad, no de seguridad: mientras haya reenvío, quien admini
 ## 10. Pendiente
 
 ### Bloqueante
-- **Los códigos de acceso** (apartado 6). Requiere que mires los logs del backend en Render.
+Nada.
 
 ### Conviene, sin prisa
-- **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real, y entrar en ella exige precisamente un código. Depende del apartado 6, no de más código.
-- **Empujar la migración de limpieza** (apartado 3). Se aplica sola en el despliegue y es irreversible; el momento lo eliges tú.
+- **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real. Ya no hay nada que lo impida: el acceso por código funciona.
 - **Verificar dominio propio en Resend** y con él cerrar el apartado 6 del todo: cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` y borrar `LOGIN_CODE_RELAY_TO` de las variables y de `render.yaml`. Hasta que el dominio esté verificado no se puede tocar el remitente: un dominio sin verificar hace que Resend rechace **todos** los envíos, incluidos los que hoy sí llegan por reenvío.
 
 ### Cerrado desde el handoff anterior
-- La deuda de esquema: escrita como migración, apartado 3.
+- **Los códigos de acceso**: llegan. El reenvío estaba bien configurado; apartado 6.
+- La deuda de esquema: limpiada en la quinta migración, ya aplicada; apartado 3.
 - El acceso directo del Pixel: descartado a propósito.
 - `GOOGLE_CLIENT_ID`: quitado de las variables de Render y de `render.yaml`.
-- `User.googleId`: entra en la migración de limpieza.
+- `User.googleId`: borrado en la misma migración.
 - `graphify update .`: lanzado, el grafo vuelve a estar al día.
 
 ---
