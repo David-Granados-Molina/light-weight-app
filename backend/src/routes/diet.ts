@@ -143,9 +143,6 @@ dietRouter.put('/', asyncHandler(async (req, res) => {
         order,
         items: {
           create: meal.items.map((item, i) => ({
-            // `kind` es vestigial (ver el enum en schema.prisma): desde que los
-            // suplementos son de la comida y no de la opción, aquí solo hay comida.
-            kind: 'alimento' as const,
             name: item.name,
             quantity: item.quantity || null,
             order: i,

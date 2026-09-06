@@ -285,7 +285,6 @@ async function main() {
           order,
           items: {
             create: meal.items.map(([name, quantity], i) => ({
-              kind: 'alimento' as const,
               name,
               quantity: quantity ?? null,
               order: i,

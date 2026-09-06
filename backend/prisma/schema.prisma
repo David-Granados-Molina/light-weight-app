@@ -29,19 +29,17 @@ enum InputType {
 }
 
 model User {
-  id           String               @id @default(uuid())
-  name         String
-  email        String               @unique
-  passwordHash String?
-  googleId     String?              @unique
-  avatarUrl    String?
-  themeColor   String?
-  createdAt    DateTime             @default(now())
-  routines     Routine[]
-  sessions     WorkoutSession[]
-  resetTokens  PasswordResetToken[]
-  loginCodes   LoginCode[]
-  diet         Diet?
+  id         String           @id @default(uuid())
+  name       String
+  email      String           @unique
+  googleId   String?          @unique
+  avatarUrl  String?
+  themeColor String?
+  createdAt  DateTime         @default(now())
+  routines   Routine[]
+  sessions   WorkoutSession[]
+  loginCodes LoginCode[]
+  diet       Diet?
 }
 
 /// Código de un solo uso que se envía por email para entrar. Sustituye a la
@@ -63,30 +61,11 @@ model LoginCode {
   @@index([userId, createdAt])
 }
 
-model PasswordResetToken {
-  id        String    @id @default(uuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String    @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
-}
-
 /// Las tres comidas del día. El orden del enum es el orden en que se muestran.
 enum MealSlot {
   desayuno
   comida
   cena
-}
-
-/// VESTIGIAL. Los suplementos se movieron a `DietSlotInfo` cuando quedó claro que
-/// se toman con la comida entera y no con una opción concreta, así que hoy todos
-/// los `DietItem` son `alimento`. Se conserva para no hacer una migración
-/// destructiva sobre producción; pendiente de limpiar junto a `passwordHash`.
-enum DietItemKind {
-  alimento
-  suplemento
 }
 
 /// Secciones de la lista de la compra, en el orden en que se recorre un súper.
@@ -190,10 +169,9 @@ model DietMeal {
 }
 
 model DietItem {
-  id       String       @id @default(uuid())
+  id       String   @id @default(uuid())
   mealId   String
-  meal     DietMeal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  kind     DietItemKind
+  meal     DietMeal @relation(fields: [mealId], references: [id], onDelete: Cascade)
   name     String
   /// Texto libre ("150 g", "2 unidades", "un puñado"): pedir un número y una
   /// unidad cerrada obligaría a inventar un catálogo de unidades para nada.
@@ -233,19 +211,19 @@ model Exercise {
 }
 
 model Routine {
-  id        String            @id @default(uuid())
-  userId    String
-  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  category  Category
-  notes     String?
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  category          Category
+  notes             String?
   /// Calentamiento de la rutina entera, no de un ejercicio: qué hacer antes de
   /// empezar, y/o un vídeo que lo enseñe. Los dos son opcionales por separado.
   warmupDescription String?
   warmupVideoUrl    String?
-  createdAt DateTime          @default(now())
-  exercises RoutineExercise[]
-  sessions  WorkoutSession[]
+  createdAt         DateTime          @default(now())
+  exercises         RoutineExercise[]
+  sessions          WorkoutSession[]
 }
 
 model RoutineExercise {
