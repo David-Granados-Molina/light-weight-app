@@ -2,7 +2,7 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 }
 
-<div class="app-shell" [class.is-auth]="isAuthRoute()">
+<div class="app-shell" [class.is-auth]="isAuthRoute()" [class.has-console]="showConsole()">
   @if (!isAuthRoute()) {
     <app-side-rail class="app-rail" />
   }
@@ -10,6 +10,10 @@
   <main class="app-main" id="contenido">
     <router-outlet />
   </main>
+
+  @if (showConsole()) {
+    <app-session-console />
+  }
 </div>
 
 @if (!isAuthRoute()) {

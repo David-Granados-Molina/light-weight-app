@@ -4,8 +4,9 @@
 
 /* ---------------------------------------------------------------------------
    Tres regímenes, conmutados por estructura y no por escala tipográfica.
-   < 900px   : una columna + tab-bar inferior   (el gimnasio)
-   >= 900px  : rail lateral + contenido          (la mesa)
+   < 900px   : una columna + tab-bar inferior          (el gimnasio)
+   900–1279  : rail + contenido, consola flotante      (la mesa)
+   >= 1280   : rail + contenido + consola en columna   (la mesa entera)
    --------------------------------------------------------------------------- */
 
 .app-shell {
@@ -18,6 +19,12 @@
   flex: 1;
   min-width: 0;
   padding: var(--s-6) var(--gutter) calc(var(--tabbar-h) + var(--safe-b) + var(--s-8));
+}
+
+/* Hueco para la barra de sesión acoplada, solo cuando existe. Sin esto la
+   consola tapa el último elemento de la lista. */
+.app-shell.has-console .app-main {
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-b) + 96px);
 }
 
 /* --- Autenticación: sin rail, sin tab-bar, sin consola --------------------- */
@@ -39,6 +46,18 @@
 @media (min-width: 900px) {
   .app-main {
     padding: var(--s-10) var(--gutter) var(--s-12);
+  }
+
+  .app-shell.has-console .app-main {
+    /* La consola flota abajo a la derecha; solo hay que dejar aire, no una
+       banda completa. */
+    padding-bottom: 160px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-shell.has-console .app-main {
+    padding-bottom: var(--s-12);
   }
 }
 
