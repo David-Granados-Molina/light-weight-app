@@ -160,6 +160,20 @@
                   }
                 </div>
 
+                @if (item.videoUrl) {
+                  <button
+                    type="button"
+                    class="lw-icon-btn rf-video"
+                    (click)="openVideo(i)"
+                    [attr.aria-label]="'Ver el vídeo de ' + item.exercise.name"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="2" y="4" width="20" height="16" rx="3" />
+                      <path d="M10 9l5 3-5 3z" />
+                    </svg>
+                  </button>
+                }
+
                 <button
                   type="button"
                   class="lw-icon-btn rf-details"
@@ -296,6 +310,43 @@
         <button type="button" class="lw-btn-primary" [disabled]="warmupVideoInvalid()" (click)="closeWarmupDialog()">
           Listo
         </button>
+      </div>
+    </p-dialog>
+
+    <!-- El vídeo de un ejercicio, desde su propia fila. -->
+    <p-dialog
+      [visible]="videoIndex() !== null"
+      (visibleChange)="onVideoDialogVisibleChange($event)"
+      [modal]="true"
+      [draggable]="false"
+      [dismissableMask]="true"
+      appendTo="body"
+      position="center"
+      [header]="videoExerciseName()"
+      [style]="{ width: '92vw', maxWidth: '620px', maxHeight: '88vh' }"
+      [contentStyle]="{ overflowY: 'auto' }"
+    >
+      @if (videoEmbed(); as embed) {
+        <div class="lw-video" [class.is-portrait]="videoPortrait()">
+          <iframe
+            [src]="embed"
+            [title]="'Vídeo de ' + videoExerciseName()"
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+      } @else if (videoRawUrl(); as raw) {
+        <p class="lw-video-fallback">Este vídeo no se puede ver aquí dentro. Se abrirá en una pestaña nueva.</p>
+        <a class="lw-btn-primary" [href]="raw" target="_blank" rel="noopener noreferrer">Abrir el vídeo</a>
+      }
+
+      <div class="rf-dialog-actions">
+        @if (videoProviderLabel(); as provider) {
+          <span class="lw-video-source">Desde {{ provider }}</span>
+        }
+        <button type="button" class="lw-btn-primary" (click)="closeVideo()">Listo</button>
       </div>
     </p-dialog>
 

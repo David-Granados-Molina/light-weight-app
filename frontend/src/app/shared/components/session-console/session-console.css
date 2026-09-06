@@ -70,9 +70,13 @@
   align-items: baseline;
   gap: var(--s-2);
   min-width: 0;
+  overflow: hidden;
 }
 
+/* Los dos van en `nowrap` y sin sitio de sobra en la barra del móvil: sin
+   recorte se salían de su columna y aparecían por debajo del botón. */
 .console-kind {
+  flex-shrink: 0;
   font-size: var(--t-label);
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -82,6 +86,9 @@
 }
 
 .console-date {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--t-xs);
   color: var(--text-muted);
   white-space: nowrap;
@@ -132,6 +139,11 @@
 
 .console-cta:hover {
   background: var(--accent-text);
+}
+
+/* La segunda palabra solo cuando la consola deja de ser una barra estrecha. */
+.console-cta-rest {
+  display: none;
 }
 
 /* --- Escritorio medio: tarjeta flotante ------------------------------------ */
@@ -202,6 +214,10 @@
 
   .console-cta {
     justify-content: center;
+  }
+
+  .console-cta-rest {
+    display: inline;
   }
 }
 

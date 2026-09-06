@@ -129,20 +129,18 @@
 
               <span class="cell-cat" [style.color]="categoryColor[s.category]">
                 <span class="lw-dot" [style.background]="categoryColor[s.category]"></span>{{ categoryLabel[s.category] }}
+                @if (s.hasNotes) {
+                  <svg class="cell-note-mark" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Con notas">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                }
               </span>
 
               <span class="cell-type">{{ s.typeLabel }}</span>
 
               <span class="cell-list">{{ s.exercisesText }}</span>
 
-              <span class="cell-count lw-num">
-                {{ s.count }}
-                @if (s.hasNotes) {
-                  <svg class="cell-note-mark" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Con notas">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
-                }
-              </span>
+              <span class="cell-count lw-num">{{ s.count }}</span>
             </button>
 
             @if (!targetUserId()) {

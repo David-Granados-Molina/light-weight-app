@@ -88,7 +88,7 @@ Se acabaron el registro público, la contraseña y el login con Google. Ahora:
 
 Se separaron, porque compartir nombre las hacía intercambiables y no lo son:
 
-- La **nota** es lo que se apunta en el momento de hacer la serie —«hoy ha salido floja»— y vive en el entreno (`SessionExercise.note`). Se escribe en «Registrar» y se lee después en Historial, Calendario e Inicio.
+- La **nota** es lo que se apunta en el momento de hacer la serie —«hoy ha salido floja»— y vive en el entreno (`SessionExercise.note`). Se escribe en «Registrar» y se lee después en Historial, Calendario e Inicio. En Historial la fila cerrada lleva una marca junto a la categoría cuando guarda notas dentro.
 - La **descripción** («Cómo hacerlo») es lo permanente de ESE ejercicio en ESA rutina, y vive en la rutina.
 
 Por eso **el modal de detalles de la rutina ya no tiene campo de nota**: solo «Cómo hacerlo» y «Vídeo». La rutina tampoco precarga ya una nota en el entreno, que era el camino por el que un texto permanente acababa copiado en cada sesión.
@@ -101,7 +101,7 @@ Idempotente y con simulación por defecto, como el resto. Cuando esté pasado, l
 
 ### Vídeos: YouTube, TikTok e Instagram
 
-Los tres, en los dos sitios donde se puede pegar un enlace —el vídeo del calentamiento y el del ejercicio—, y los tres se incrustan dentro de la aplicación. `frontend/src/app/core/utils/video.ts` reconoce las formas que reparte cada sitio: barra de direcciones, «Compartir», Shorts, Reels y las de vídeo ya incrustado.
+Los tres, en los dos sitios donde se puede pegar un enlace —el vídeo del calentamiento y el del ejercicio—, y los tres se incrustan dentro de la aplicación. Se ven desde la hoja de registro y también desde el formulario de la rutina, con un botón en la propia fila del ejercicio: al montar una rutina se comprueban varios vídeos seguidos, y abrir la ficha de detalles para cada uno es un paso de más. `frontend/src/app/core/utils/video.ts` reconoce las formas que reparte cada sitio: barra de direcciones, «Compartir», Shorts, Reels y las de vídeo ya incrustado.
 
 Dos límites que conviene saber antes de pegar un enlace y extrañarse:
 
@@ -114,7 +114,7 @@ Un enlace de cualquier otro sitio no se rechaza: se guarda, se avisa de que no s
 
 Recuperada de la rama `rediseno/consola-de-sesion`, que por lo demás sigue descartada. `WorkoutDraftStore` ya guardaba el entreno a medias, pero la única señal de que existía era un punto de 6 px sobre el icono de registrar; ahora ese estado es un objeto visible desde cualquier pantalla, con los ejercicios metidos y un botón para volver.
 
-Un solo DOM y tres presentaciones: barra acoplada sobre la tab-bar en móvil, tarjeta flotante entre 900 y 1279 px, y tercera columna pegajosa a partir de 1280. Quién la muestra lo decide `App`, que es lo único que conoce a la vez la ruta y el hueco que hay que reservar al pie: se esconde dentro de «Registrar», donde el entreno ya es la pantalla entera.
+Un solo DOM y tres presentaciones: barra acoplada sobre la tab-bar en móvil, tarjeta flotante entre 900 y 1279 px, y tercera columna pegajosa a partir de 1280. En la barra del móvil el botón dice solo **«Continuar»**: con las dos palabras no cabía y se comía la fecha de al lado. Quién la muestra lo decide `App`, que es lo único que conoce a la vez la ruta y el hueco que hay que reservar al pie: se esconde dentro de «Registrar», donde el entreno ya es la pantalla entera.
 
 ### Dieta (`/dieta`)
 

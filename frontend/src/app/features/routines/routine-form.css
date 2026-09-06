@@ -285,6 +285,11 @@
   flex-shrink: 0;
 }
 
+.rf-video {
+  color: var(--accent-text);
+  flex-shrink: 0;
+}
+
 .rf-details.has-details {
   color: var(--accent-text);
 }
@@ -336,7 +341,9 @@
 
 .rf-dialog-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--s-3);
   margin-top: var(--s-4);
 }
 

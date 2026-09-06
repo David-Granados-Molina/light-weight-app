@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Dialog } from 'primeng/dialog';
 import { ExerciseService } from '../../core/services/exercise.service';
@@ -12,7 +13,7 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
-import { videoEmbedUrl } from '../../core/utils/video';
+import { parseVideoUrl, VIDEO_PROVIDER_LABEL, videoEmbedUrl } from '../../core/utils/video';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -46,6 +47,7 @@ export class RoutineForm {
   private readonly routineService = inject(RoutineService);
   private readonly adminService = inject(AdminService);
   private readonly exerciseService = inject(ExerciseService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly categoryColor = CATEGORY_COLOR;
   readonly typeLabel = TYPE_LABEL;
@@ -106,6 +108,46 @@ export class RoutineForm {
   readonly removeIndex = signal<number | null>(null);
   readonly confirmDeleteRoutine = signal(false);
   readonly detailsDialogIndex = signal<number | null>(null);
+
+  /**
+   * Índice del ejercicio cuyo vídeo se está viendo. Se puede abrir desde la
+   * propia fila, sin entrar en los detalles: al montar una rutina se comprueba
+   * el vídeo de varios ejercicios seguidos, y abrir y cerrar una ficha entera
+   * para cada uno es un paso de más.
+   */
+  readonly videoIndex = signal<number | null>(null);
+
+  private readonly videoRef = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? null : parseVideoUrl(this.exercises()[index]?.videoUrl);
+  });
+
+  /** Sanitizada aquí: Angular exige un `SafeResourceUrl` en el `src` de un iframe. */
+  readonly videoEmbed = computed(() => {
+    const ref = this.videoRef();
+    return ref ? this.sanitizer.bypassSecurityTrustResourceUrl(ref.embedUrl) : null;
+  });
+
+  /** Vertical en TikTok e Instagram, apaisado en YouTube (ver `.lw-video`). */
+  readonly videoPortrait = computed(() => {
+    const provider = this.videoRef()?.provider;
+    return provider === 'tiktok' || provider === 'instagram';
+  });
+
+  readonly videoProviderLabel = computed(() => {
+    const provider = this.videoRef()?.provider;
+    return provider ? VIDEO_PROVIDER_LABEL[provider] : null;
+  });
+
+  readonly videoRawUrl = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? null : (this.exercises()[index]?.videoUrl ?? null);
+  });
+
+  readonly videoExerciseName = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? '' : (this.exercises()[index]?.exercise.name ?? '');
+  });
 
   readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
 
@@ -358,6 +400,18 @@ export class RoutineForm {
 
   openDetailsDialog(index: number): void {
     this.detailsDialogIndex.set(index);
+  }
+
+  openVideo(index: number): void {
+    this.videoIndex.set(index);
+  }
+
+  closeVideo(): void {
+    this.videoIndex.set(null);
+  }
+
+  onVideoDialogVisibleChange(visible: boolean): void {
+    if (!visible) this.closeVideo();
   }
 
   closeDetailsDialog(): void {
