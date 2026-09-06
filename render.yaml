@@ -13,9 +13,14 @@ services:
         sync: false
       - key: JWT_EXPIRES_IN
         value: 180d
-      - key: GOOGLE_CLIENT_ID
-        sync: false
       - key: RESEND_API_KEY
+        sync: false
+      # Mientras el remitente sea la dirección compartida de Resend, TODOS los
+      # códigos van a este buzón con el email de quien lo pidió en el asunto.
+      # Declarada aquí, y no solo en el panel, para que una sincronización del
+      # blueprint no se la lleve por delante y para que no haya duda de en cuál
+      # de los dos servicios vive. Se borra cuando haya dominio verificado.
+      - key: LOGIN_CODE_RELAY_TO
         sync: false
       - key: ADMIN_EMAIL
         sync: false

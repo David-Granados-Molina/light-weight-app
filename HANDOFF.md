@@ -55,15 +55,14 @@ Y queda **una migración escrita y sin aplicar**, la primera destructiva del pro
 `20260906120000_drop_password_and_diet_item_kind` es la **primera migración destructiva** del proyecto y la única que no está aplicada. Se hizo de una vez, no de una en una, y borra lo que sobraba:
 
 - `User.passwordHash` y la tabla `PasswordResetToken`, huérfanas desde que el login pasa por código.
+- `User.googleId`, huérfana desde que no hay login con Google. Su índice único se va con la columna.
 - `DietItem.kind` y su enum `DietItemKind`: los suplementos se movieron a `DietSlotInfo` y desde entonces la columna valía `alimento` en todas las filas.
 
-Nada de eso se leía ni se escribía desde el código: comprobado buscando los cuatro nombres en `backend/src` y `frontend/src`. El `schema.prisma`, el `create` de `diet.ts` y el seed `seed-diet-david.ts` ya no los mencionan; `tsc --noEmit` sigue en cero.
+Nada de eso se leía ni se escribía desde el código: comprobado buscando los cinco nombres en `backend/src` y `frontend/src`. El `schema.prisma`, el `create` de `diet.ts` y el seed `seed-diet-david.ts` ya no los mencionan; `tsc --noEmit` sigue en cero.
 
 **Se aplica sola al desplegar.** El `buildCommand` del servicio de API en `render.yaml` termina en `npx prisma migrate deploy`, así que el push que lleve este commit la ejecuta contra Neon. Es irreversible: conviene tener a mano la copia de seguridad de Neon antes de empujar.
 
 > **Mientras tanto, no guardes una dieta.** El código ya no escribe `DietItem.kind` pero la columna sigue en la base con `NOT NULL` y sin valor por defecto, así que un guardado de dieta falla hasta que la migración corra. Y como `DATABASE_URL` apunta a Neon también en local, esto vale igual arrancando aquí. Es la única operación afectada; leer la dieta, las rutinas y las sesiones siguen bien. Se cierra empujando.
-
-**Queda `User.googleId`**, del mismo tipo y por la misma razón —el login con Google ya no existe—, pero fuera de esta migración porque no estaba en la lista. Añadirlo es una línea.
 
 ---
 
@@ -129,7 +128,8 @@ Es lo único pendiente de verdad, y lo único que puede dejar a un usuario fuera
 - **`light-weight-app.onrender.com` no sirve para verificar dominio**: esa zona DNS es de Render, no tuya, y Resend no ofrece alternativa de remitente único. Verificado buscándolo en su documentación.
 - Por eso se puso **`LOGIN_CODE_RELAY_TO`**: con esa variable, **todos los códigos van a un solo buzón** —el tuyo— con el email de quien lo pidió en el asunto, y se pasan a mano. El código se escribe además en el log con la marca `[CODIGO-ACCESO]`.
 - Que siga fallando significa que **esa variable no está llegando al proceso que corre**. Sospecha principal: **el frontend y el backend son dos servicios distintos en Render**, y es un sitio clásico donde poner las variables en el equivocado. Segunda sospecha: el servicio no se reinició después de añadirlas.
-- Pista añadida: **`LOGIN_CODE_RELAY_TO` no está declarada en `render.yaml`**. Las que sí lo están (`RESEND_API_KEY`, `DATABASE_URL`…) aparecen con `sync: false`, que es «la pongo yo a mano en el panel». Si Render vuelve a sincronizar el *blueprint*, una variable que no figura en el fichero es candidata a desaparecer. Declararla ahí con `sync: false` la ata al servicio correcto y quita la duda de encima.
+- Pista que era: **`LOGIN_CODE_RELAY_TO` no estaba declarada en `render.yaml`**, mientras que las demás (`RESEND_API_KEY`, `DATABASE_URL`…) sí, con `sync: false` —«la pongo yo a mano en el panel»—. Una variable que no figura en el *blueprint* es candidata a desaparecer cuando Render lo sincroniza. **Ya está declarada** con `sync: false`, en el servicio de API y no en el estático, así que la duda de «está en el sitio equivocado» queda cerrada por el fichero. Sigue habiendo que ponerle valor en el panel.
+- **En el modo en que está ahora, el código no se registra en ninguna parte.** `[CODIGO-ACCESO]` solo se escribe cuando no hay API key (`mailer.ts:37`) o cuando el reenvío está activo (`mailer.ts:54`). Con API key y sin reenvío, el código se manda a Resend, Resend lo rechaza y ahí se pierde. Es la razón de que no haya forma de entrar en una cuenta real hoy, ni siquiera mirando los logs.
 
 ### Qué tienes que hacer tú
 
@@ -192,13 +192,13 @@ Es cuestión de comodidad, no de seguridad: mientras haya reenvío, quien admini
 ### Conviene, sin prisa
 - **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real, y entrar en ella exige precisamente un código. Depende del apartado 6, no de más código.
 - **Empujar la migración de limpieza** (apartado 3). Se aplica sola en el despliegue y es irreversible; el momento lo eliges tú.
-- **`GOOGLE_CLIENT_ID` sigue declarado en `render.yaml`** aunque ya lo hayas quitado del panel. Mientras esté en el fichero, una sincronización del *blueprint* puede volver a pedirlo. Se borra en la misma pasada en que se declare `LOGIN_CODE_RELAY_TO` (apartado 6).
-- **`User.googleId`**, la última pieza huérfana del login de Google (apartado 3).
+- **Verificar dominio propio en Resend** y con él cerrar el apartado 6 del todo: cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` y borrar `LOGIN_CODE_RELAY_TO` de las variables y de `render.yaml`. Hasta que el dominio esté verificado no se puede tocar el remitente: un dominio sin verificar hace que Resend rechace **todos** los envíos, incluidos los que hoy sí llegan por reenvío.
 
 ### Cerrado desde el handoff anterior
 - La deuda de esquema: escrita como migración, apartado 3.
 - El acceso directo del Pixel: descartado a propósito.
-- `GOOGLE_CLIENT_ID` en las variables de Render: quitado.
+- `GOOGLE_CLIENT_ID`: quitado de las variables de Render y de `render.yaml`.
+- `User.googleId`: entra en la migración de limpieza.
 - `graphify update .`: lanzado, el grafo vuelve a estar al día.
 
 ---
