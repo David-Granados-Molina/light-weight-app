@@ -136,6 +136,9 @@ sessionsRouter.post('/', asyncHandler(async (req, res) => {
       exercises: {
         create: exercises.map((e, i) => ({
           exerciseId: e.exerciseId,
+          // La nota se escribe durante el entreno y es lo único que no se puede
+          // reconstruir después: si no se guarda aquí, se pierde al terminar.
+          note: e.note ?? null,
           order: i,
           inputTypeOverride: e.inputTypeOverride ?? null,
           sets: {

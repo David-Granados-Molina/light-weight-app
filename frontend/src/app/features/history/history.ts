@@ -114,6 +114,10 @@ export class History {
       dateLabel: relativeDayLabel(s.date),
       exercisesText: s.exercises.map((e) => e.exercise.name).join(' · '),
       count: `${s.exercises.length} ejercicios`,
+      /* Con la fila cerrada no hay forma de saber que hay algo escrito dentro.
+         Una nota se apunta una vez y se busca semanas después: si no se anuncia,
+         no se abre. */
+      hasNotes: s.exercises.some((e) => !!e.note),
       exercises: s.exercises,
     })),
   );

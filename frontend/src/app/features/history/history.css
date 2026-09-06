@@ -296,3 +296,11 @@
     text-align: left;
   }
 }
+
+/* Aviso de que la fila cerrada guarda notas dentro. Del color del acento porque
+   es lo único de la fila que pide que se abra. */
+.cell-note-mark {
+  margin-left: var(--s-2);
+  vertical-align: -2px;
+  color: var(--accent-text);
+}
