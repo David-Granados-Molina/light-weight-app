@@ -162,10 +162,10 @@
 
                 <button
                   type="button"
-                  class="lw-icon-btn rf-note"
-                  [class.has-note]="item.note || item.description || item.videoUrl"
-                  (click)="openNoteDialog(i)"
-                  [attr.aria-label]="'Consejos, vídeo y nota de ' + item.exercise.name"
+                  class="lw-icon-btn rf-details"
+                  [class.has-details]="item.description || item.videoUrl"
+                  (click)="openDetailsDialog(i)"
+                  [attr.aria-label]="'Cómo hacer ' + item.exercise.name + ' y su vídeo'"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" />
@@ -267,8 +267,10 @@
       </div>
 
       <div class="rf-dialog-field">
-        <label class="lw-label" for="rf-warmup-video">Vídeo de YouTube</label>
-        <p class="rf-dialog-hint">Se verá dentro de la propia aplicación, sin salir a YouTube.</p>
+        <label class="lw-label" for="rf-warmup-video">Vídeo</label>
+        <p class="rf-dialog-hint">
+          De YouTube, TikTok o Instagram. Se verá dentro de la propia aplicación, sin salir a ninguno de los tres.
+        </p>
         <input
           id="rf-warmup-video"
           class="lw-input"
@@ -280,12 +282,14 @@
         />
         @if (warmupVideoInvalid()) {
           <p class="rf-dialog-error" role="alert">
-            Tiene que ser un enlace de YouTube. Vale el de la barra de direcciones, el de «Compartir» y el de un Short.
+            Tiene que ser un enlace de YouTube, TikTok o Instagram que lleve al vídeo. Valen los de la barra de
+            direcciones y los de «Compartir»; los acortados de TikTok (vm.tiktok.com) no, porque no llevan dentro el
+            vídeo al que apuntan.
           </p>
         }
       </div>
 
-      <div class="rf-note-actions rf-warmup-actions">
+      <div class="rf-dialog-actions rf-warmup-actions">
         @if (hasWarmup()) {
           <button type="button" class="rf-warmup-clear" (click)="clearWarmup()">Quitar calentamiento</button>
         }
@@ -296,10 +300,12 @@
     </p-dialog>
 
     <!-- Lo que quien monta la rutina prepara para quien la va a seguir: cómo se
-         hace el ejercicio, un vídeo que lo enseñe, y una nota corta propia. -->
+         hace el ejercicio y un vídeo que lo enseñe. Aquí no hay notas: la nota es
+         lo que se apunta en el momento de hacer la serie, y vive en el entreno.
+         Lo permanente de ESE ejercicio en ESTA rutina es «Cómo hacerlo». -->
     <p-dialog
-      [visible]="noteDialogIndex() !== null"
-      (visibleChange)="onNoteDialogVisibleChange($event)"
+      [visible]="detailsDialogIndex() !== null"
+      (visibleChange)="onDetailsDialogVisibleChange($event)"
       [modal]="true"
       [draggable]="false"
       [dismissableMask]="true"
@@ -309,58 +315,50 @@
       [style]="{ width: '90vw', maxWidth: '520px', maxHeight: '85vh' }"
       [contentStyle]="{ overflowY: 'auto' }"
     >
-      @if (noteDialogIndex() !== null) {
-        <p class="rf-dialog-for">{{ exercises()[noteDialogIndex()!].exercise.name }}</p>
+      @if (detailsDialogIndex() !== null) {
+        <p class="rf-dialog-for">{{ exercises()[detailsDialogIndex()!].exercise.name }}</p>
 
         <div class="rf-dialog-field">
           <label class="lw-label" for="rf-description">Cómo hacerlo</label>
           <p class="rf-dialog-hint">
-            Se muestra en la tarjeta del ejercicio al registrar el entreno. Útil para dar consejos a quien empieza.
+            Se queda fijo en este ejercicio de esta rutina y se muestra en su tarjeta al registrar el entreno. Para lo
+            que se apunta sobre la marcha están las notas de cada entreno, en «Registrar».
           </p>
           <textarea
             id="rf-description"
             class="lw-textarea"
             rows="5"
             placeholder="Ej. baja controlando dos segundos, escápulas retraídas y codos a 45º."
-            [value]="exercises()[noteDialogIndex()!].description"
-            (input)="setDescription(noteDialogIndex()!, $event)"
+            [value]="exercises()[detailsDialogIndex()!].description"
+            (input)="setDescription(detailsDialogIndex()!, $event)"
           ></textarea>
         </div>
 
         <div class="rf-dialog-field">
           <label class="lw-label" for="rf-video">Vídeo</label>
-          <p class="rf-dialog-hint">Enlace a un vídeo que muestre la ejecución. Aparecerá como botón «Vídeo».</p>
+          <p class="rf-dialog-hint">
+            Enlace a un vídeo que muestre la ejecución, de YouTube, TikTok o Instagram. Se verá dentro de la aplicación
+            al registrar el entreno.
+          </p>
           <input
             id="rf-video"
             class="lw-input"
             type="url"
             inputmode="url"
             placeholder="https://www.youtube.com/watch?v=…"
-            [value]="exercises()[noteDialogIndex()!].videoUrl"
-            (input)="setVideoUrl(noteDialogIndex()!, $event)"
+            [value]="exercises()[detailsDialogIndex()!].videoUrl"
+            (input)="setVideoUrl(detailsDialogIndex()!, $event)"
           />
-          @if (videoUrlInvalid(noteDialogIndex()!)) {
+          @if (videoUrlInvalid(detailsDialogIndex()!)) {
             <p class="rf-dialog-error" role="alert">
               El enlace no es válido. Tiene que empezar por http:// o https://
             </p>
           }
         </div>
 
-        <div class="rf-dialog-field">
-          <label class="lw-label" for="rf-note">Nota</label>
-          <p class="rf-dialog-hint">Un recordatorio corto para ti, junto al objetivo del ejercicio.</p>
-          <textarea
-            id="rf-note"
-            class="lw-textarea"
-            rows="3"
-            placeholder="Ej. foco en la excéntrica, agarre neutro…"
-            [value]="exercises()[noteDialogIndex()!].note"
-            (input)="setNote(noteDialogIndex()!, $event)"
-          ></textarea>
-        </div>
       }
-      <div class="rf-note-actions">
-        <button type="button" class="lw-btn-primary" (click)="closeNoteDialog()">Listo</button>
+      <div class="rf-dialog-actions">
+        <button type="button" class="lw-btn-primary" (click)="closeDetailsDialog()">Listo</button>
       </div>
     </p-dialog>
   }

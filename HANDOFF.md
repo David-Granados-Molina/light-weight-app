@@ -80,9 +80,41 @@ Se acabaron el registro público, la contraseña y el login con Google. Ahora:
 
 ### Rutinas
 
-- **Calentamiento por rutina** (descripción y/o vídeo de YouTube), independiente de los ejercicios. Se define con el botón «Añadir calentamiento» del formulario y aparece en la hoja de registro como una banda **CALENTAMIENTO** entre el buscador y el primer ejercicio. El vídeo **se incrusta dentro de la aplicación** (`youtube-nocookie.com`), no saca a nadie a YouTube a mitad de entreno. El enlace se valida antes de guardar: acepta las cuatro formas de URL de YouTube (barra de direcciones, «Compartir», Shorts y embed) y rechaza el resto.
+- **Calentamiento por rutina** (descripción y/o vídeo), independiente de los ejercicios. Se define con el botón «Añadir calentamiento» del formulario y aparece en la hoja de registro como una banda **CALENTAMIENTO** entre el buscador y el primer ejercicio. El vídeo **se incrusta dentro de la aplicación**, no saca a nadie a otra pestaña a mitad de entreno.
 - **El admin gestiona las rutinas de otros**: desde `/amigos/:userId/rutinas` puede crear, editar y eliminar. Usa el mismo formulario que las propias; lo único que cambia es el `userId` de la ruta, que decide a qué servicio se habla. Las tres operaciones de escritura viven en `routines.ts` (`createRoutineFor`, `updateRoutineFor`, `deleteRoutineFor`) y las comparten los dos routers, para que añadir un campo no deje una copia atrás.
 - **Rutinas de Filo cargadas**: «Rutina Empuje 2», «Rutina Tirón 2» y «Rutina Pierna 2», de la hoja 3 del Excel. El script es `backend/prisma/seed-routines-filo.ts`, idempotente y con simulación por defecto (sin `--apply` solo enseña lo que haría). Reutiliza los ejercicios que Filo ya tenía en vez de duplicarlos, porque el progreso se sigue por ejercicio y duplicar habría partido su historial en dos.
+
+### Notas y descripción: dos cosas que se llamaban igual
+
+Se separaron, porque compartir nombre las hacía intercambiables y no lo son:
+
+- La **nota** es lo que se apunta en el momento de hacer la serie —«hoy ha salido floja»— y vive en el entreno (`SessionExercise.note`). Se escribe en «Registrar» y se lee después en Historial, Calendario e Inicio.
+- La **descripción** («Cómo hacerlo») es lo permanente de ESE ejercicio en ESA rutina, y vive en la rutina.
+
+Por eso **el modal de detalles de la rutina ya no tiene campo de nota**: solo «Cómo hacerlo» y «Vídeo». La rutina tampoco precarga ya una nota en el entreno, que era el camino por el que un texto permanente acababa copiado en cada sesión.
+
+Queda `RoutineExercise.note` en la base con texto real dentro. **No se borra solo: se pierde la primera vez que se guarde cada rutina**, porque el formulario ya no envía el campo y las filas se recrean en cada guardado. Para no perderlo hay un script que lo pasa a la descripción:
+
+    npx tsx prisma/migrate-routine-notes-to-description.ts [--apply]
+
+Idempotente y con simulación por defecto, como el resto. Cuando esté pasado, la columna se puede borrar en la siguiente migración de limpieza.
+
+### Vídeos: YouTube, TikTok e Instagram
+
+Los tres, en los dos sitios donde se puede pegar un enlace —el vídeo del calentamiento y el del ejercicio—, y los tres se incrustan dentro de la aplicación. `frontend/src/app/core/utils/video.ts` reconoce las formas que reparte cada sitio: barra de direcciones, «Compartir», Shorts, Reels y las de vídeo ya incrustado.
+
+Dos límites que conviene saber antes de pegar un enlace y extrañarse:
+
+- **Los acortados de TikTok (`vm.tiktok.com/…`) no valen**: no llevan dentro el id del vídeo, así que no hay nada que incrustar sin seguir la redirección. Hay que usar el enlace largo, el de `/@usuario/video/…`.
+- **El diálogo lo pinta el sitio de origen, no nosotros.** El incrustado de TikTok enseña su propio aviso de cookies dentro del marco la primera vez, y algunos vídeos de Instagram piden sesión. No es un fallo de la aplicación y no se puede quitar desde aquí.
+
+Un enlace de cualquier otro sitio no se rechaza: se guarda, se avisa de que no se puede ver dentro y se ofrece abrirlo fuera.
+
+### La consola de sesión: el entreno en curso, en todas las pantallas
+
+Recuperada de la rama `rediseno/consola-de-sesion`, que por lo demás sigue descartada. `WorkoutDraftStore` ya guardaba el entreno a medias, pero la única señal de que existía era un punto de 6 px sobre el icono de registrar; ahora ese estado es un objeto visible desde cualquier pantalla, con los ejercicios metidos y un botón para volver.
+
+Un solo DOM y tres presentaciones: barra acoplada sobre la tab-bar en móvil, tarjeta flotante entre 900 y 1279 px, y tercera columna pegajosa a partir de 1280. Quién la muestra lo decide `App`, que es lo único que conoce a la vez la ruta y el hueco que hay que reservar al pie: se esconde dentro de «Registrar», donde el entreno ya es la pantalla entera.
 
 ### Dieta (`/dieta`)
 
@@ -160,6 +192,8 @@ Nunca imprime la API key, solo si está o no.
 
 **Fuera los `catch` que disfrazaban de 404 cualquier fallo.** `PUT` y `DELETE` de rutinas devolvían «Rutina no encontrada» ante *cualquier* error. Eso escondió un problema real durante el desarrollo. Ahora el 404 es solo cuando la rutina de verdad no está.
 
+**Las notas del entreno no se guardaban.** El `POST` de sesiones mapeaba `exerciseId`, `order`, `inputTypeOverride` y las series, y se dejaba `note` fuera; el `PUT` sí la escribía. O sea: la nota sobrevivía si editabas un entreno ya guardado, y se perdía siempre que registrabas uno nuevo —que es justo cuando se escribe—. Se veía como «las notas no aparecen en ningún sitio», y por eso parecía un problema de las pantallas que las muestran, que llevaban meses correctas. Reproducido con el usuario de prueba antes de tocar nada y verificado después: nota escrita, entreno guardado, nota en la base y en Historial.
+
 **Agujero de lectura cerrado.** `GET /api/routines/:id` filtraba solo por `id`: cualquier usuario autenticado podía leer la rutina de otro sabiendo su id. Ahora filtra también por dueño. Verificado: leer, editar o borrar una rutina ajena devuelve 404, y los endpoints de admin devuelven 403 a quien no lo es.
 
 ---
@@ -169,6 +203,8 @@ Nunca imprime la API key, solo si está o no.
 `PRODUCT.md` (verdad de producto) y `DESIGN.md` (tokens en frontmatter YAML + 8 secciones canónicas) siguen siendo la autoridad. Todo color, espaciado y tipografía sale de ahí.
 
 - **Escritorio nativo**, no móvil estirado: `side-rail` en ≥900px (solo iconos entre 900–1099px), `tab-bar` en móvil.
+- **La casilla fantasma también en móvil.** Lo que se levantó en esa misma serie el último día estaba solo a partir de 900px, o sea en todas partes menos donde se entrena. Ahora va en la fila del número de serie, con un «ÚLTIMA VEZ · fecha» encima del bloque: en el móvil no hay tooltip que consultar, y repetir la fecha en cada casilla tapaba lo que se viene a leer.
+- **El marco de vídeo (`.lw-video`) vive en `styles.css`**, no en un componente: lo comparten el diálogo del calentamiento y el del ejercicio, y duplicarlo sacaba a `register-workout.css` de su presupuesto de 14 kB.
 - **Accesibilidad del acento**: cuatro de los ocho acentos daban 2,4:1–3,5:1 sobre el fondo oscuro. Resuelto con *relative color syntax* — suelo de luminosidad en oscuro, y en claro una función escalón que elige tinta blanca o negra. Verificado con los ocho acentos en ambos temas.
 - **`--avatar-canvas: #FFFFFF`**: el fondo de todo avatar, **idéntico en los dos temas**. Los SVG son dibujos de trazo negro sobre transparente y sobre cualquier plano oscuro el contorno desaparecía. Es la única superficie que no se invierte con el tema, y está documentado como tal.
 
@@ -182,7 +218,7 @@ Nunca imprime la API key, solo si está o no.
 ## 9. Estado de la compilación
 
 - Backend `tsc --noEmit`: **0 errores**.
-- Build de producción: **~498 kB initial / ~117 kB transferidos**, sin avisos de presupuesto.
+- Build de producción: **~508 kB initial / ~120 kB transferidos**, sin avisos de presupuesto.
 - Presupuestos: `initial` warning en 560 kB; `anyComponentStyle` warning 14 kB, error 18 kB.
 
 ---
@@ -193,6 +229,7 @@ Nunca imprime la API key, solo si está o no.
 Nada.
 
 ### Conviene, sin prisa
+- **Pasar las notas de rutina a la descripción** antes de editar ninguna rutina: `npx tsx prisma/migrate-routine-notes-to-description.ts --apply`. Son cinco, con texto real, y se pierden de una en una si no. Ver el apartado 4.
 - **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real. Ya no hay nada que lo impida: el acceso por código funciona.
 - **Verificar dominio propio en Resend** y con él cerrar el apartado 6 del todo: cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` y borrar `LOGIN_CODE_RELAY_TO` de las variables y de `render.yaml`. Hasta que el dominio esté verificado no se puede tocar el remitente: un dominio sin verificar hace que Resend rechace **todos** los envíos, incluidos los que hoy sí llegan por reenvío.
 

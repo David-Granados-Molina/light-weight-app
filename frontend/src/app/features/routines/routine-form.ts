@@ -12,7 +12,7 @@ import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-di
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
-import { youtubeEmbedUrl } from '../../core/utils/video';
+import { videoEmbedUrl } from '../../core/utils/video';
 
 interface ExerciseRow {
   exerciseId: string;
@@ -22,7 +22,6 @@ interface ExerciseRow {
   targetRepsMax: number;
   targetWeight: number | null;
   targetRIR: number | null;
-  note: string;
   /** Consejos para quien vaya a seguir la rutina. */
   description: string;
   /** Enlace a un vídeo que muestra la ejecución. */
@@ -106,7 +105,7 @@ export class RoutineForm {
 
   readonly removeIndex = signal<number | null>(null);
   readonly confirmDeleteRoutine = signal(false);
-  readonly noteDialogIndex = signal<number | null>(null);
+  readonly detailsDialogIndex = signal<number | null>(null);
 
   readonly exerciseIds = computed(() => this.exercises().map((e) => e.exerciseId));
 
@@ -146,7 +145,6 @@ export class RoutineForm {
               targetRepsMax: e.targetRepsMax,
               targetWeight: e.targetWeight,
               targetRIR: e.targetRIR,
-              note: e.note ?? '',
               description: e.description ?? '',
               videoUrl: e.videoUrl ?? '',
               restSeconds: e.restSeconds ?? null,
@@ -180,7 +178,6 @@ export class RoutineForm {
         targetRepsMax: isCardio ? 30 : 12,
         targetWeight: null,
         targetRIR: null,
-        note: '',
         description: '',
         videoUrl: '',
         restSeconds: isCardio ? null : 90,
@@ -261,11 +258,6 @@ export class RoutineForm {
 
   setTargetRIR(index: number, value: number | null): void {
     this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, targetRIR: value } : row)));
-  }
-
-  setNote(index: number, event: Event): void {
-    const value = (event.target as HTMLTextAreaElement).value;
-    this.exercises.update((list) => list.map((row, i) => (i === index ? { ...row, note: value } : row)));
   }
 
   setDescription(index: number, event: Event): void {
@@ -356,23 +348,24 @@ export class RoutineForm {
 
   /**
    * El vídeo del calentamiento se incrusta en «Registrar», así que tiene que ser
-   * de YouTube; cualquier otro enlace se avisa aquí y no al guardar.
+   * de uno de los tres sitios que se saben incrustar; cualquier otro enlace se
+   * avisa aquí y no al guardar.
    */
   readonly warmupVideoInvalid = computed(() => {
     const raw = this.warmupVideoUrl().trim();
-    return !!raw && youtubeEmbedUrl(raw) === null;
+    return !!raw && videoEmbedUrl(raw) === null;
   });
 
-  openNoteDialog(index: number): void {
-    this.noteDialogIndex.set(index);
+  openDetailsDialog(index: number): void {
+    this.detailsDialogIndex.set(index);
   }
 
-  closeNoteDialog(): void {
-    this.noteDialogIndex.set(null);
+  closeDetailsDialog(): void {
+    this.detailsDialogIndex.set(null);
   }
 
-  onNoteDialogVisibleChange(visible: boolean): void {
-    if (!visible) this.closeNoteDialog();
+  onDetailsDialogVisibleChange(visible: boolean): void {
+    if (!visible) this.closeDetailsDialog();
   }
 
   startCreateExercise(): void {
@@ -440,7 +433,6 @@ export class RoutineForm {
         targetRepsMax: e.targetRepsMax,
         targetWeight: e.targetWeight,
         targetRIR: e.targetRIR,
-        note: e.note.trim() || null,
         description: e.description.trim() || null,
         videoUrl: e.videoUrl.trim() || null,
         restSeconds: e.restSeconds,

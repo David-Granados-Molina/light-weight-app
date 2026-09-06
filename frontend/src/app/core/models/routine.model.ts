@@ -9,7 +9,13 @@ export interface RoutineExercise {
   targetRepsMax: number;
   targetWeight: number | null;
   targetRIR: number | null;
-  note: string | null;
+  /**
+   * VESTIGIAL. La nota de un ejercicio de rutina se quitó: una nota es lo que se
+   * apunta en el momento de hacer la serie y vive en el entreno (`SessionExercise.note`).
+   * Lo permanente de este ejercicio en esta rutina es `description`. La API la
+   * sigue devolviendo mientras la columna exista; nadie la lee.
+   */
+  note?: string | null;
   /* Opcionales a propósito: una API todavía sin migrar no los envía. */
   /** Consejos escritos al montar la rutina, para quien la va a seguir. */
   description?: string | null;
@@ -41,7 +47,6 @@ export interface RoutineExerciseInput {
   targetRepsMax: number;
   targetWeight?: number | null;
   targetRIR?: number | null;
-  note?: string | null;
   description?: string | null;
   videoUrl?: string | null;
   restSeconds?: number | null;

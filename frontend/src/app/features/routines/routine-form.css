@@ -280,12 +280,12 @@
   font-size: var(--t-xs);
 }
 
-.rf-note,
+.rf-details,
 .rf-remove {
   flex-shrink: 0;
 }
 
-.rf-note.has-note {
+.rf-details.has-details {
   color: var(--accent-text);
 }
 
@@ -334,7 +334,7 @@
   }
 }
 
-.rf-note-actions {
+.rf-dialog-actions {
   display: flex;
   justify-content: flex-end;
   margin-top: var(--s-4);
