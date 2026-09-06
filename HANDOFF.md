@@ -1,13 +1,13 @@
 # HANDOFF — Light Weight
 
 Estado del proyecto al **6 de septiembre de 2026**.
-Rama activa: **`main`**, HEAD en `e85f3af`, árbol limpio, **todo subido y desplegado en Render**.
+Rama activa: **`main`**, HEAD en `09f2a69`, árbol limpio, **todo subido y desplegado en Render**.
 
 ---
 
 ## 1. Dónde estamos
 
-La tanda de la versión 2 está **cerrada y en producción**. Lo que en el handoff anterior eran 79 ficheros sin commitear hoy son cuatro commits en `main`, ya desplegados.
+La tanda de la versión 2 está **cerrada y en producción**, y encima de ella hay una segunda tanda con la limpieza de esquema, la separación entre nota y descripción, los vídeos de tres sitios y la consola de sesión. Todo desplegado.
 
 **No queda nada bloqueante.** Los códigos de acceso, que era el asunto abierto del handoff anterior, llegan: el reenvío estaba bien configurado y solo faltaba comprobarlo. Lo que sigue costando es que los códigos de los demás usuarios pasan por tu buzón, y eso lo cierra un dominio verificado. Ver el apartado 6.
 
@@ -19,15 +19,17 @@ La estructura huérfana está limpia: la quinta migración, la primera destructi
 
 | Rama | HEAD | Para qué sirve |
 |---|---|---|
-| `main` | `e85f3af` | **Producción.** Despliega en Render al hacer push. |
+| `main` | `09f2a69` | **Producción.** Despliega en Render al hacer push. |
 | `v1.0` | `325fd7e` | **Copia de seguridad** de la producción anterior a la versión 2. No tocar. |
 | `v2.0` | `2ec512b` | La rama donde se revisó la tanda, ya fusionada en `main`. Histórica. |
 | `rediseno/hoja-de-registro` | `1d62138` | La variante de diseño elegida. Histórica. |
-| `rediseno/consola-de-sesion` | `aaaa65b` | La variante descartada. Histórica. |
+| `rediseno/consola-de-sesion` | `aaaa65b` | La variante descartada, salvo la consola de sesión, que se recuperó de aquí. Histórica. |
 
 `v1.0` es el punto de retorno si algo sale mal: es exactamente lo que había en producción antes de todo esto.
 
-### Los cuatro commits de `main`
+### Los commits de `main`
+
+La primera tanda, la de la versión 2:
 
 | Commit | Qué trae |
 |---|---|
@@ -35,6 +37,18 @@ La estructura huérfana está limpia: la quinta migración, la primera destructi
 | `3ac657d` | Rutinas de la hoja 3 del Excel para Filo; línea de diagnóstico del correo al arrancar |
 | `4f4a686` | Icono nuevo de la aplicación |
 | `e85f3af` | Recorte correcto del icono y `manifest.webmanifest` para Android |
+
+La segunda:
+
+| Commit | Qué trae |
+|---|---|
+| `1ad03f3` | Limpieza del esquema huérfano en una sola migración, la primera destructiva |
+| `59b10f2` · `09d23bf` · `c05cc7a` | `googleId` en la limpieza, variables de correo en `render.yaml` y el handoff al día |
+| `9c98a58` | **La nota del ejercicio se perdía al crear el entreno** (apartado 7) |
+| `d753759` | La consola de sesión: el entreno en curso, en todas las pantallas |
+| `8f32358` | Series anteriores en móvil, y el vídeo del ejercicio dentro de la aplicación |
+| `597638e` | La nota es del entreno; la descripción, de la rutina |
+| `09f2a69` | Tres retoques de colocación sobre lo anterior |
 
 ---
 
@@ -93,11 +107,9 @@ Se separaron, porque compartir nombre las hacía intercambiables y no lo son:
 
 Por eso **el modal de detalles de la rutina ya no tiene campo de nota**: solo «Cómo hacerlo» y «Vídeo». La rutina tampoco precarga ya una nota en el entreno, que era el camino por el que un texto permanente acababa copiado en cada sesión.
 
-Queda `RoutineExercise.note` en la base con texto real dentro. **No se borra solo: se pierde la primera vez que se guarde cada rutina**, porque el formulario ya no envía el campo y las filas se recrean en cada guardado. Para no perderlo hay un script que lo pasa a la descripción:
+**Las notas que había ya están pasadas a la descripción.** Eran cinco, con texto real («3 seg excéntrico», «Barra: 20kg»), y se habrían perdido de una en una: el formulario ya no envía el campo y las filas se recrean en cada guardado, así que la primera vez que se guardase cada rutina se iban. Las movió `prisma/migrate-routine-notes-to-description.ts`, idempotente y con simulación por defecto como el resto; relanzarlo ahora dice que no queda ninguna.
 
-    npx tsx prisma/migrate-routine-notes-to-description.ts [--apply]
-
-Idempotente y con simulación por defecto, como el resto. Cuando esté pasado, la columna se puede borrar en la siguiente migración de limpieza.
+`RoutineExercise.note` se queda en la base, ya vacía. Es deuda del mismo tipo que la del apartado 3 y se borra en la siguiente migración de limpieza.
 
 ### Vídeos: YouTube, TikTok e Instagram
 
@@ -229,7 +241,7 @@ Nunca imprime la API key, solo si está o no.
 Nada.
 
 ### Conviene, sin prisa
-- **Pasar las notas de rutina a la descripción** antes de editar ninguna rutina: `npx tsx prisma/migrate-routine-notes-to-description.ts --apply`. Son cinco, con texto real, y se pierden de una en una si no. Ver el apartado 4.
+- **Borrar `RoutineExercise.note`**, ya vacía, en la próxima migración de limpieza (apartado 4). De una vez con lo que haya, no de una en una.
 - **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real. Ya no hay nada que lo impida: el acceso por código funciona.
 - **Verificar dominio propio en Resend** y con él cerrar el apartado 6 del todo: cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` y borrar `LOGIN_CODE_RELAY_TO` de las variables y de `render.yaml`. Hasta que el dominio esté verificado no se puede tocar el remitente: un dominio sin verificar hace que Resend rechace **todos** los envíos, incluidos los que hoy sí llegan por reenvío.
 
@@ -239,6 +251,8 @@ Nada.
 - El acceso directo del Pixel: descartado a propósito.
 - `GOOGLE_CLIENT_ID`: quitado de las variables de Render y de `render.yaml`.
 - `User.googleId`: borrado en la misma migración.
+- Las notas de rutina: pasadas a la descripción; apartado 4.
+- **Las notas del entreno**: se guardaban a medias y ya no; apartado 7.
 - `graphify update .`: lanzado, el grafo vuelve a estar al día.
 
 ---
