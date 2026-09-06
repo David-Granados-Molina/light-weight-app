@@ -14,7 +14,7 @@ import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
 import { effectiveInputType, formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
 import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
-import { youtubeEmbedUrl } from '../../core/utils/video';
+import { parseVideoUrl, VIDEO_PROVIDER_LABEL, videoEmbedUrl } from '../../core/utils/video';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
@@ -113,7 +113,7 @@ export class RegisterWorkout {
 
   /** Sanitizada aquí y no en la plantilla: Angular exige un `SafeResourceUrl` en el `src` de un iframe. */
   readonly warmupEmbedUrl = computed(() => {
-    const embed = youtubeEmbedUrl(this.selectedRoutine()?.warmupVideoUrl);
+    const embed = videoEmbedUrl(this.selectedRoutine()?.warmupVideoUrl);
     return embed ? this.sanitizer.bypassSecurityTrustResourceUrl(embed) : null;
   });
 
@@ -140,6 +140,47 @@ export class RegisterWorkout {
   /** Índice del ejercicio cuya nota se está escribiendo, y el texto en curso. */
   readonly noteEditIndex = signal<number | null>(null);
   readonly noteDraft = signal('');
+
+  /** Índice del ejercicio cuyo vídeo se está viendo. */
+  readonly videoIndex = signal<number | null>(null);
+
+  private readonly videoRef = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? null : parseVideoUrl(this.added()[index]?.videoUrl);
+  });
+
+  /**
+   * El vídeo del ejercicio se ve dentro de la aplicación, igual que el del
+   * calentamiento: a mitad de entreno, salir a otra pestaña es perder el sitio.
+   * Sanitizada aquí y no en la plantilla porque Angular exige un
+   * `SafeResourceUrl` en el `src` de un iframe.
+   */
+  readonly videoEmbed = computed(() => {
+    const ref = this.videoRef();
+    return ref ? this.sanitizer.bypassSecurityTrustResourceUrl(ref.embedUrl) : null;
+  });
+
+  /** Vertical en TikTok e Instagram, apaisado en YouTube (ver `.video-frame`). */
+  readonly videoPortrait = computed(() => {
+    const provider = this.videoRef()?.provider;
+    return provider === 'tiktok' || provider === 'instagram';
+  });
+
+  readonly videoProviderLabel = computed(() => {
+    const provider = this.videoRef()?.provider;
+    return provider ? VIDEO_PROVIDER_LABEL[provider] : null;
+  });
+
+  /** El enlace en crudo, para el pie del diálogo y para lo que no se sabe incrustar. */
+  readonly videoRawUrl = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? null : (this.added()[index]?.videoUrl ?? null);
+  });
+
+  readonly videoExerciseName = computed(() => {
+    const index = this.videoIndex();
+    return index === null ? '' : (this.added()[index]?.exercise.name ?? '');
+  });
 
   /** Ejercicio cuyo cambio de modo EMOM está pendiente de confirmar. */
   readonly emomConfirmIndex = signal<number | null>(null);
@@ -542,6 +583,18 @@ export class RegisterWorkout {
     this.noteEditIndex.set(null);
   }
 
+  openVideo(index: number): void {
+    this.videoIndex.set(index);
+  }
+
+  closeVideo(): void {
+    this.videoIndex.set(null);
+  }
+
+  onVideoDialogVisibleChange(visible: boolean): void {
+    if (!visible) this.closeVideo();
+  }
+
   onNoteEditorVisibleChange(visible: boolean): void {
     if (!visible) this.closeNoteEditor();
   }
@@ -629,7 +682,6 @@ export class RegisterWorkout {
       targetRepsMin: re.targetRepsMin,
       targetRepsMax: re.targetRepsMax,
       targetRIR: re.targetRIR ?? undefined,
-      note: re.note ?? undefined,
       description: re.description,
       videoUrl: re.videoUrl,
       restSeconds: re.restSeconds,

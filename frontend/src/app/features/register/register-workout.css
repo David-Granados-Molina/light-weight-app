@@ -349,21 +349,6 @@
 }
 
 /* El vídeo mantiene 16:9 pase lo que pase con el ancho del diálogo. */
-.warmup-video {
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  margin-bottom: var(--s-4);
-  border-radius: var(--r-sm);
-  overflow: hidden;
-  background: var(--ground);
-}
-
-.warmup-video iframe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
 
 .warmup-text {
   color: var(--text-secondary);
@@ -374,7 +359,9 @@
 
 .warmup-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--s-3);
   margin-top: var(--s-5);
 }
 
@@ -503,6 +490,13 @@
 
 /* --- Retícula de series ---------------------------------------------------------- */
 
+/* Da sentido a las casillas fantasma sin repetir la fecha en cada una. Toma la
+   forma de `.lw-label` y solo corrige el margen y el tono. */
+.ex-last-when {
+  margin: 0 0 calc(var(--s-2) * -1);
+  color: var(--text-muted);
+}
+
 .ex-grid-scroll {
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -525,10 +519,10 @@
 
 .cell {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    'n drop'
-    'wheels wheels';
+    'n ghost drop'
+    'wheels wheels wheels';
   align-items: center;
   gap: var(--s-1) var(--s-2);
   min-width: 0;
@@ -549,16 +543,24 @@
   text-transform: none;
 }
 
-/* Lo que se levantó en esta misma serie el último día. */
+/* Lo que se levantó en esta misma serie el último día. En móvil va en la misma
+   fila que el número de serie: es la comparación que se hace entre serie y
+   serie, y mandarla al escritorio dejaba sin ella justo donde se entrena. */
 .cell-ghost {
-  display: none;
+  grid-area: ghost;
+  justify-self: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--t-xs);
   font-weight: 550;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
+/* En escritorio la casilla vacía se marca con un guion para que la columna no
+   se descuadre. En móvil no hay columna que cuadrar, así que el guion sobra. */
 .cell-ghost.is-blank {
+  display: none;
   color: var(--line-strong);
 }
 
@@ -813,13 +815,15 @@
     text-align: center;
   }
 
-  /* Aquí sí cabe la casilla fantasma: el valor de esa misma serie el último día,
-     en la misma columna que el de hoy. */
+  /* En columna, la casilla fantasma va centrada debajo del número de serie, en
+     la misma columna que el valor de hoy. */
   .cell-ghost {
-    display: block;
+    justify-self: stretch;
     text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  }
+
+  .cell-ghost.is-blank {
+    display: block;
   }
 
   /* Peso encima de repeticiones, como se anota en la hoja de papel. */

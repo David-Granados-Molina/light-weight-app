@@ -934,3 +934,48 @@ img {
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Vídeo incrustado -------------------------------------------------------
+   Lo comparten el diálogo del calentamiento y el del ejercicio, así que vive
+   aquí y no en un componente. YouTube viene apaisado; TikTok e Instagram,
+   verticales, y forzarles 16/9 deja dos franjas negras que ocupan más que el
+   propio vídeo. */
+
+.lw-video {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  margin-bottom: var(--s-4);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--ground);
+}
+
+/* Un vertical a lo ancho del diálogo se sale de pantalla: se centra y se limita
+   a lo que cabe de alto. */
+.lw-video.is-portrait {
+  aspect-ratio: 9 / 16;
+  max-height: 62vh;
+  width: auto;
+  margin-inline: auto;
+}
+
+.lw-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* De un sitio que no se sabe incrustar: se explica y se ofrece abrirlo fuera. */
+.lw-video-fallback {
+  margin: 0 0 var(--s-4);
+  color: var(--text-secondary);
+  font-size: var(--t-body);
+  line-height: 1.6;
+}
+
+.lw-video-source {
+  margin-right: auto;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}

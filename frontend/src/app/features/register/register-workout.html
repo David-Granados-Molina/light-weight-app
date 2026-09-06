@@ -215,13 +215,13 @@
                   </button>
 
                   @if (item.videoUrl) {
-                    <a class="ex-action" [href]="item.videoUrl" target="_blank" rel="noopener noreferrer">
+                    <button type="button" class="ex-action" (click)="openVideo(exIndex)">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="2" y="4" width="20" height="16" rx="3" />
                         <path d="M10 9l5 3-5 3z" />
                       </svg>
                       Vídeo
-                    </a>
+                    </button>
                   }
 
                   @if (canToggleEmom(item)) {
@@ -242,7 +242,14 @@
                 }
 
                 <!-- La retícula de series: una columna por serie, con lo que se
-                     levantó ese mismo número de serie el último día justo encima. -->
+                     levantó ese mismo número de serie el último día justo encima.
+                     El cuándo se dice una vez aquí y no en cada casilla: en el
+                     móvil no hay tooltip que consultar, y repetirlo por serie
+                     tapaba lo que se viene a leer. -->
+                @if (lastWhen(item); as when) {
+                  <p class="lw-label ex-last-when">Última vez · {{ when }}</p>
+                }
+
                 <div class="ex-grid-scroll">
                   <div class="ex-grid">
                     @for (set of item.sets; track $index; let setIndex = $index) {
@@ -574,7 +581,7 @@
   [contentStyle]="{ overflowY: 'auto' }"
 >
   @if (warmupEmbedUrl(); as embed) {
-    <div class="warmup-video">
+    <div class="lw-video">
       <iframe
         [src]="embed"
         title="Vídeo del calentamiento"
@@ -622,6 +629,48 @@
       <button type="button" class="lw-btn-primary" (click)="saveNote()">Guardar nota</button>
     </div>
   }
+</p-dialog>
+
+<!-- El vídeo del ejercicio, dentro de la aplicación. A mitad de entreno, salir a
+     otra pestaña es perder el sitio en la hoja. -->
+<p-dialog
+  [visible]="videoIndex() !== null"
+  (visibleChange)="onVideoDialogVisibleChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  appendTo="body"
+  position="center"
+  [header]="videoExerciseName()"
+  [style]="{ width: '92vw', maxWidth: '620px', maxHeight: '88vh' }"
+  [contentStyle]="{ overflowY: 'auto' }"
+>
+  @if (videoEmbed(); as embed) {
+    <div class="lw-video" [class.is-portrait]="videoPortrait()">
+      <iframe
+        [src]="embed"
+        [title]="'Vídeo de ' + videoExerciseName()"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+      ></iframe>
+    </div>
+  } @else if (videoRawUrl(); as raw) {
+    <!-- De un sitio que no se sabe incrustar: se dice y se ofrece abrirlo fuera,
+         en vez de dejar un hueco negro sin explicación. -->
+    <p class="lw-video-fallback">
+      Este vídeo no se puede ver aquí dentro. Se abrirá en una pestaña nueva.
+    </p>
+    <a class="lw-btn-primary" [href]="raw" target="_blank" rel="noopener noreferrer">Abrir el vídeo</a>
+  }
+
+  <div class="warmup-actions">
+    @if (videoProviderLabel(); as provider) {
+      <span class="lw-video-source">Desde {{ provider }}</span>
+    }
+    <button type="button" class="lw-btn-primary" (click)="closeVideo()">Listo</button>
+  </div>
 </p-dialog>
 
 <!-- Alta rápida de un ejercicio que no está en el catálogo. Se abre desde el
