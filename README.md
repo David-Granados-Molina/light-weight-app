@@ -4,8 +4,6 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 
 **Demo:** [light-weight-app.onrender.com](https://light-weight-app.onrender.com/)
 
-**User test:** email -> test@test.com / password -> test
-
 ---
 
 ## Características
