@@ -100,7 +100,7 @@ authRouter.post('/request-code', asyncHandler(async (req, res) => {
       ? { delivered: true, message: 'Te hemos enviado un código a tu email.' }
       : {
           delivered: false,
-          message: 'El envío de correos todavía no está activo. Pídele tu código de acceso al administrador.',
+          message: 'Pídele tu código de acceso al administrador.',
         },
   );
 }));
