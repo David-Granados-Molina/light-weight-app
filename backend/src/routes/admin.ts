@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
 import { buildProgressData } from './progress';
 import {
+  copyRoutineTo,
   createRoutineFor,
   deleteRoutineFor,
   routineInclude,
@@ -23,10 +25,10 @@ adminRouter.get('/users', asyncHandler(async (req, res) => {
   res.json(users);
 }));
 
-// GET /api/admin/users/:userId/sessions?category=&q=&from=&to=
+// GET /api/admin/users/:userId/sessions?category=&q=&from=&to=&limit=&offset=
 adminRouter.get('/users/:userId/sessions', asyncHandler(async (req, res) => {
   const { userId } = req.params;
-  const { category, q, from, to } = req.query;
+  const { category, q, from, to, limit, offset } = req.query;
 
   const sessions = await prisma.workoutSession.findMany({
     where: {
@@ -43,6 +45,8 @@ adminRouter.get('/users/:userId/sessions', asyncHandler(async (req, res) => {
         : {}),
     },
     orderBy: { date: 'desc' },
+    take: limit ? Number(limit) : undefined,
+    skip: offset ? Number(offset) : undefined,
     include: sessionInclude,
   });
 
@@ -99,6 +103,19 @@ adminRouter.delete('/users/:userId/routines/:routineId', asyncHandler(async (req
   if (!deleted) return res.status(404).json({ error: 'Rutina no encontrada' });
 
   res.status(204).send();
+}));
+
+// POST /api/admin/routines/:routineId/copy  { targetUserId }
+const copyRoutineSchema = z.object({ targetUserId: z.string().min(1) });
+
+adminRouter.post('/routines/:routineId/copy', asyncHandler(async (req, res) => {
+  const parsed = copyRoutineSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const routine = await copyRoutineTo(req.params.routineId, parsed.data.targetUserId);
+  if (!routine) return res.status(404).json({ error: 'Rutina o usuario no encontrados' });
+
+  res.status(201).json(routine);
 }));
 
 // GET /api/admin/users/:userId/progress/routine/:routineId

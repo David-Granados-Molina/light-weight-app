@@ -18,12 +18,17 @@ export class AdminService {
     return this.http.get<AdminUser[]>(`${this.baseUrl}/users`);
   }
 
-  getSessions(userId: string, filters?: { category?: Category; q?: string; from?: string; to?: string }): Observable<WorkoutSession[]> {
+  getSessions(
+    userId: string,
+    filters?: { category?: Category; q?: string; from?: string; to?: string; limit?: number; offset?: number },
+  ): Observable<WorkoutSession[]> {
     const params: Record<string, string> = {};
     if (filters?.category) params['category'] = filters.category;
     if (filters?.q) params['q'] = filters.q;
     if (filters?.from) params['from'] = filters.from;
     if (filters?.to) params['to'] = filters.to;
+    if (filters?.limit) params['limit'] = String(filters.limit);
+    if (filters?.offset) params['offset'] = String(filters.offset);
     return this.http.get<WorkoutSession[]>(`${this.baseUrl}/users/${userId}/sessions`, { params });
   }
 
@@ -48,6 +53,10 @@ export class AdminService {
 
   deleteRoutine(userId: string, routineId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/users/${userId}/routines/${routineId}`);
+  }
+
+  copyRoutine(routineId: string, targetUserId: string): Observable<Routine> {
+    return this.http.post<Routine>(`${this.baseUrl}/routines/${routineId}/copy`, { targetUserId });
   }
 
   getRoutineProgress(userId: string, routineId: string): Observable<RoutineProgressData> {

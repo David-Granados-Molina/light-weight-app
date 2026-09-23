@@ -59,8 +59,10 @@ export class WorkoutDraftStore {
    */
   readonly pendingEditDate = signal<string | null>(null);
 
+  readonly committed = signal(false);
+
   /** Hay ejercicios añadidos sin guardar: el registro de un entreno está a medias. */
-  readonly hasInProgress = computed(() => this.added().length > 0);
+  readonly hasInProgress = computed(() => this.added().length > 0 && !this.committed());
 
   constructor() {
     this.hydrate();
@@ -79,6 +81,7 @@ export class WorkoutDraftStore {
     this.added.set([]);
     this.selectedRoutineId.set(null);
     this.editingSessionId.set(null);
+    this.committed.set(false);
   }
 
   resetAll(): void {
@@ -103,7 +106,7 @@ export class WorkoutDraftStore {
 
   private persist(snapshot: DraftSnapshot): void {
     try {
-      if (!snapshot.added.length) {
+      if (this.committed() || !snapshot.added.length) {
         localStorage.removeItem(STORAGE_KEY);
         return;
       }

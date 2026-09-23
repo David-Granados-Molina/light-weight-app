@@ -122,6 +122,29 @@
   color: var(--color-negative);
 }
 
+.row-copy {
+  position: absolute;
+  top: var(--s-3);
+  right: calc(var(--s-3) + 32px + var(--s-1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.row-copy:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
 .sheet-empty {
   display: flex;
   flex-direction: column;

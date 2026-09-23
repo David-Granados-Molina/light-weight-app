@@ -85,7 +85,7 @@
   flex-direction: column;
   gap: var(--s-2);
   width: 100%;
-  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  padding: var(--s-4);
   background: transparent;
   border: 0;
   text-align: left;
@@ -139,27 +139,51 @@
   color: var(--text-muted);
 }
 
-.row-edit {
-  position: absolute;
-  top: var(--s-3);
-  right: var(--s-3);
+.row-swipe {
   display: flex;
+  scroll-snap-type: x mandatory;
+}
+
+.row-swipe > .row-main {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+}
+
+.row-actions {
+  flex: 0 0 auto;
+  display: flex;
+  scroll-snap-align: end;
+}
+
+.row-action {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  gap: 4px;
+  width: 76px;
   border: 0;
-  border-radius: var(--r-xs);
-  background: transparent;
+  border-left: 1px solid var(--line);
+  background: var(--surface-raised);
   color: var(--text-secondary);
+  font-size: var(--t-xs);
+  font-weight: 600;
   transition:
     background var(--dur) var(--ease-out),
     color var(--dur) var(--ease-out);
 }
 
-.row-edit:hover {
+.row-action:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+
+.row-action.is-danger {
+  color: var(--color-negative);
+}
+
+.row-action.is-danger:hover {
+  background: rgb(248 113 113 / 10%);
 }
 
 /* --- Detalle desplegado -------------------------------------------------------- */
@@ -249,7 +273,7 @@
   }
 
   .sheet-cols {
-    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    padding: var(--s-3) calc(104px + var(--s-4)) var(--s-3) var(--s-5);
     border-bottom: 1px solid var(--line-strong);
     background: var(--chrome);
     font-size: var(--t-label);
@@ -278,10 +302,24 @@
     text-align: right;
   }
 
-  .row-edit {
-    top: 50%;
-    right: var(--s-4);
-    transform: translateY(-50%);
+  .row-swipe {
+    overflow: visible;
+    align-items: stretch;
+  }
+
+  .row-swipe > .row-main {
+    flex: 1 1 auto;
+    padding-right: var(--s-4);
+  }
+
+  .row-action {
+    width: 52px;
+    border-left: 0;
+    background: transparent;
+  }
+
+  .row-action-text {
+    display: none;
   }
 
   .row-detail {

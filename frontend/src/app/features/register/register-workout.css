@@ -146,9 +146,9 @@
   --p-accordion-panel-border-width: 0;
   --p-accordion-panel-border-color: transparent;
   --p-accordion-header-background: transparent;
-  --p-accordion-header-hover-background: var(--surface-raised);
+  --p-accordion-header-hover-background: transparent;
   --p-accordion-header-active-background: transparent;
-  --p-accordion-header-active-hover-background: var(--surface-raised);
+  --p-accordion-header-active-hover-background: transparent;
   --p-accordion-header-color: var(--text);
   --p-accordion-header-hover-color: var(--text);
   --p-accordion-header-active-color: var(--text);

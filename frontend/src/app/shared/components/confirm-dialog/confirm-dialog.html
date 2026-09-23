@@ -4,7 +4,7 @@
     @if (message()) {
       <p class="dialog-message">{{ message() }}</p>
     }
-    <div class="dialog-actions">
+    <div class="dialog-actions" [class.is-stacked]="!!altText()">
       <button
         type="button"
         class="lw-btn-secondary"
@@ -13,6 +13,9 @@
       >
         {{ cancelText() }}
       </button>
+      @if (altText()) {
+        <button type="button" class="lw-btn-secondary" (click)="alternate.emit()">{{ altText() }}</button>
+      }
       <button
         type="button"
         [class.lw-btn-danger]="danger()"

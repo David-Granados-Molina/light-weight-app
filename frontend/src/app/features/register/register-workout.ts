@@ -137,6 +137,23 @@ export class RegisterWorkout {
   readonly pendingRoutine = signal<Routine | null>(null);
   readonly pendingDate = signal<string | null>(null);
   readonly showDateConfirm = signal(false);
+
+  readonly duplicateOf = signal<WorkoutSession | null>(null);
+  private allowSecondOfDay = false;
+
+  readonly duplicateTitle = computed(() => {
+    const label = this.selectedDateLabel();
+    return label === 'Hoy' ? 'Ya tienes un entreno guardado hoy' : `Ya tienes un entreno el ${label.toLowerCase()}`;
+  });
+
+  readonly duplicateMessage = computed(() => {
+    const existing = this.duplicateOf();
+    if (!existing) return '';
+    const names = existing.exercises.map((e) => e.exercise.name).join(', ');
+    const count = existing.exercises.length;
+    const what = count === 1 ? '1 ejercicio' : `${count} ejercicios`;
+    return `Ese día ya tienes un entreno guardado con ${what}: ${names}.`;
+  });
   /** Índice del ejercicio cuya nota se está escribiendo, y el texto en curso. */
   readonly noteEditIndex = signal<number | null>(null);
   readonly noteDraft = signal('');
@@ -727,6 +744,7 @@ export class RegisterWorkout {
     this.added.set([]);
     this.selectedRoutineId.set(null);
     this.editingSessionId.set(null);
+    this.allowSecondOfDay = false;
     this.selectedDate.set(iso);
     this.loadSessionForDate(iso);
   }
@@ -779,6 +797,7 @@ export class RegisterWorkout {
     this.shareCopied.set(false);
     const wasToday = (this.selectedDate() ?? this.todayIso) === this.todayIso;
     this.editingSessionId.set(null);
+    this.allowSecondOfDay = false;
     if (wasToday) {
       this.draft.reset();
       return;
@@ -786,6 +805,7 @@ export class RegisterWorkout {
     this.selectedDate.set(this.todayIso);
     this.added.set([]);
     this.selectedRoutineId.set(null);
+    this.draft.committed.set(false);
   }
 
   goHistorial(): void {
@@ -842,6 +862,43 @@ export class RegisterWorkout {
   }
 
   private doSave(): void {
+    const editingId = this.editingSessionId();
+    if (editingId || this.allowSecondOfDay) {
+      this.sendSave(editingId);
+      return;
+    }
+
+    const date = this.selectedDate() ?? this.todayIso;
+    this.saving.set(true);
+    this.saveError.set(false);
+    this.sessionService.getByDate(date).subscribe({
+      next: (session) => {
+        this.saving.set(false);
+        this.duplicateOf.set(session);
+      },
+      error: () => this.sendSave(null),
+    });
+  }
+
+  confirmUpdateExisting(): void {
+    const existing = this.duplicateOf();
+    this.duplicateOf.set(null);
+    if (!existing) return;
+    this.editingSessionId.set(existing.id);
+    this.sendSave(existing.id);
+  }
+
+  confirmSaveSeparate(): void {
+    this.duplicateOf.set(null);
+    this.allowSecondOfDay = true;
+    this.sendSave(null);
+  }
+
+  cancelDuplicate(): void {
+    this.duplicateOf.set(null);
+  }
+
+  private sendSave(editingId: string | null): void {
     const added = this.added();
     const date = this.selectedDate() ?? this.todayIso;
 
@@ -865,13 +922,14 @@ export class RegisterWorkout {
 
     this.saving.set(true);
     this.saveError.set(false);
-    const editingId = this.editingSessionId();
     const request = editingId ? this.sessionService.update(editingId, input) : this.sessionService.create(input);
     request.subscribe({
-      next: () => {
+      next: (session) => {
         const series = this.totalSeries();
         this.savedSummary.set(series === 1 ? '1 serie guardada' : `${series} series guardadas`);
         this.comparisonMessage.set(pickRandom(this.comparisonPool()));
+        this.editingSessionId.set(session.id);
+        this.draft.committed.set(true);
         this.saving.set(false);
         this.saved.set(true);
         this.showReminder.set(false);

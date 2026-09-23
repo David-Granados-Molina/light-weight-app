@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signa
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { SessionService } from '../../core/services/session.service';
 import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { sessionTypeLabel } from '../../core/models/labels';
 import { dayLetter, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
@@ -50,13 +52,14 @@ const TIP_TICK_MS = 100;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CategoryTag, AppAvatar],
+  imports: [RouterLink, CategoryTag, AppAvatar, ConfirmDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   private readonly dashboardService = inject(DashboardService);
+  private readonly sessionService = inject(SessionService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -73,6 +76,10 @@ export class Dashboard {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly expandedId = signal<string | null>(null);
+
+  readonly deleteTarget = signal<{ id: string; dateLabel: string; typeLabel: string } | null>(null);
+  readonly deleting = signal(false);
+  readonly deleteError = signal(false);
 
   private tipOrder = shuffledIndices(TIPS.length);
   private tipPos = 0;
@@ -108,6 +115,45 @@ export class Dashboard {
     this.draft.selectedDate.set(iso);
     this.draft.pendingEditDate.set(iso);
     this.router.navigate(['/registrar']);
+  }
+
+  askDelete(session: { id: string; date: string; typeLabel: string }, event: Event): void {
+    event.stopPropagation();
+    this.deleteTarget.set({ id: session.id, dateLabel: relativeDayLabel(session.date), typeLabel: session.typeLabel });
+  }
+
+  cancelDelete(): void {
+    this.deleteTarget.set(null);
+    this.deleteError.set(false);
+  }
+
+  confirmDelete(): void {
+    const target = this.deleteTarget();
+    if (!target) return;
+    this.deleteError.set(false);
+    this.deleting.set(true);
+    this.sessionService.delete(target.id).subscribe({
+      next: () => {
+        this.dashboardService.getSummary().subscribe({
+          next: (summary) => {
+            this.summary.set(summary);
+            this.deleting.set(false);
+            this.deleteTarget.set(null);
+          },
+          error: () => {
+            this.summary.update((current) =>
+              current ? { ...current, recent: current.recent.filter((s) => s.id !== target.id) } : current,
+            );
+            this.deleting.set(false);
+            this.deleteTarget.set(null);
+          },
+        });
+      },
+      error: () => {
+        this.deleting.set(false);
+        this.deleteError.set(true);
+      },
+    });
   }
 
   constructor() {

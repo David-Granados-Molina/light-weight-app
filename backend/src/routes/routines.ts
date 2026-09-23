@@ -86,6 +86,34 @@ export async function updateRoutineFor(userId: string, routineId: string, data: 
   });
 }
 
+export async function copyRoutineTo(routineId: string, targetUserId: string) {
+  const [source, target] = await Promise.all([
+    prisma.routine.findUnique({ where: { id: routineId }, include }),
+    prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true } }),
+  ]);
+  if (!source || !target) return null;
+
+  return createRoutineFor(target.id, {
+    name: source.name,
+    category: source.category,
+    notes: source.notes,
+    warmupDescription: source.warmupDescription,
+    warmupVideoUrl: source.warmupVideoUrl,
+    exercises: source.exercises.map((e) => ({
+      exerciseId: e.exerciseId,
+      targetSets: e.targetSets,
+      targetRepsMin: e.targetRepsMin,
+      targetRepsMax: e.targetRepsMax,
+      targetWeight: e.targetWeight,
+      targetRIR: e.targetRIR,
+      note: e.note,
+      description: e.description,
+      videoUrl: e.videoUrl,
+      restSeconds: e.restSeconds,
+    })),
+  });
+}
+
 /** `false` si la rutina no existe o no es de ese usuario. */
 export async function deleteRoutineFor(userId: string, routineId: string): Promise<boolean> {
   const owned = await prisma.routine.findFirst({ where: { id: routineId, userId }, select: { id: true } });

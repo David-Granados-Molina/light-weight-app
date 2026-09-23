@@ -59,3 +59,7 @@
 .dialog-actions > * {
   flex: 1;
 }
+
+.dialog-actions.is-stacked {
+  flex-direction: column-reverse;
+}

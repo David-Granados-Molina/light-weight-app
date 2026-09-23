@@ -6,10 +6,11 @@ import { AdminService } from '../../core/services/admin.service';
 import { Routine, RoutineExercise } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../core/models/labels';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { RoutineCopyDialog } from '../../shared/components/routine-copy-dialog/routine-copy-dialog';
 
 @Component({
   selector: 'app-friend-routines',
-  imports: [RouterLink, ConfirmDialog],
+  imports: [RouterLink, ConfirmDialog, RoutineCopyDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './friend-routines.html',
   styleUrl: './friend-routines.css',
@@ -34,6 +35,16 @@ export class FriendRoutines {
 
   /** Rutina pendiente de que se confirme su borrado. */
   readonly deleteTarget = signal<{ id: string; name: string } | null>(null);
+
+  readonly copyTarget = signal<{ id: string; name: string } | null>(null);
+
+  askCopy(id: string, name: string): void {
+    this.copyTarget.set({ id, name });
+  }
+
+  closeCopy(): void {
+    this.copyTarget.set(null);
+  }
 
   /** Los enlaces al formulario llevan el nombre para que la cabecera pueda decir de quién es. */
   readonly nameQuery = computed(() => ({ name: this.targetUserName() }));

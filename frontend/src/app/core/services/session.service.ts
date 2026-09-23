@@ -17,6 +17,7 @@ export class SessionService {
     from?: string;
     to?: string;
     limit?: number;
+    offset?: number;
   }): Observable<WorkoutSession[]> {
     const params: Record<string, string> = {};
     if (filters?.category) params['category'] = filters.category;
@@ -25,6 +26,7 @@ export class SessionService {
     if (filters?.from) params['from'] = filters.from;
     if (filters?.to) params['to'] = filters.to;
     if (filters?.limit) params['limit'] = String(filters.limit);
+    if (filters?.offset) params['offset'] = String(filters.offset);
     return this.http.get<WorkoutSession[]>(this.baseUrl, { params });
   }
 

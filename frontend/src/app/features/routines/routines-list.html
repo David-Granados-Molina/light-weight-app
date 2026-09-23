@@ -41,6 +41,20 @@
               <span class="cell-count lw-num">{{ r.count }}</span>
             </a>
 
+            @if (isAdmin()) {
+              <button
+                type="button"
+                class="row-copy"
+                [attr.aria-label]="'Copiar la rutina ' + r.name + ' a otra cuenta'"
+                (click)="askCopy(r.id, r.name, $event)"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+            }
+
             <button
               type="button"
               class="row-delete"
@@ -69,6 +83,15 @@
     </section>
   }
 </div>
+
+@if (copyTarget(); as target) {
+  <app-routine-copy-dialog
+    [routineId]="target.id"
+    [routineName]="target.name"
+    (copied)="closeCopy()"
+    (cancelled)="closeCopy()"
+  />
+}
 
 @if (confirmDeleteId() !== null) {
   <app-confirm-dialog

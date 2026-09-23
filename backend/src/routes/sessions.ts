@@ -38,10 +38,10 @@ export const sessionInclude = {
 
 const include = sessionInclude;
 
-// GET /api/sessions?category=gym|calistenia&q=texto&exerciseId=...&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=20
+// GET /api/sessions?category=gym|calistenia&q=texto&exerciseId=...&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=20&offset=0
 sessionsRouter.get('/', asyncHandler(async (req, res) => {
   const userId = req.userId!;
-  const { category, q, exerciseId, from, to, limit } = req.query;
+  const { category, q, exerciseId, from, to, limit, offset } = req.query;
 
   const sessions = await prisma.workoutSession.findMany({
     where: {
@@ -66,6 +66,7 @@ sessionsRouter.get('/', asyncHandler(async (req, res) => {
     },
     orderBy: { date: 'desc' },
     take: limit ? Number(limit) : undefined,
+    skip: offset ? Number(offset) : undefined,
     include,
   });
 
@@ -116,7 +117,10 @@ sessionsRouter.get('/by-date/:date', asyncHandler(async (req, res) => {
 }));
 
 sessionsRouter.get('/:id', asyncHandler(async (req, res) => {
-  const session = await prisma.workoutSession.findUnique({ where: { id: req.params.id }, include });
+  const session = await prisma.workoutSession.findFirst({
+    where: { id: req.params.id, userId: req.userId! },
+    include,
+  });
   if (!session) return res.status(404).json({ error: 'Entreno no encontrado' });
   res.json(session);
 }));
@@ -164,6 +168,12 @@ sessionsRouter.put('/:id', asyncHandler(async (req, res) => {
 
   const { exercises, date, ...rest } = parsed.data;
 
+  const owned = await prisma.workoutSession.findFirst({
+    where: { id: req.params.id, userId: req.userId! },
+    select: { id: true },
+  });
+  if (!owned) return res.status(404).json({ error: 'Entreno no encontrado' });
+
   try {
     const session = await prisma.$transaction(async (tx) => {
       await tx.sessionExercise.deleteMany({ where: { sessionId: req.params.id } });
@@ -201,10 +211,10 @@ sessionsRouter.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 sessionsRouter.delete('/:id', asyncHandler(async (req, res) => {
-  try {
-    await prisma.workoutSession.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: 'Entreno no encontrado' });
-  }
+  const { count } = await prisma.workoutSession.deleteMany({
+    where: { id: req.params.id, userId: req.userId! },
+  });
+  if (!count) return res.status(404).json({ error: 'Entreno no encontrado' });
+
+  res.status(204).send();
 }));

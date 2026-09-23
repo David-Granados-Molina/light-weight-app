@@ -238,16 +238,57 @@
   overflow: hidden;
 }
 
-/* El botón cubre el resumen entero; el de editar vive fuera de él, porque un
-   botón dentro de otro no es HTML válido ni es navegable con teclado.
-   El hueco reservado a la derecha es literalmente lo que ocupa el de editar
-   —su margen, sus 36 px y un respiro—: con 40 px la fecha caía debajo de él. */
+.dash-swipe {
+  display: flex;
+  scroll-snap-type: x mandatory;
+}
+
+.dash-session-actions {
+  flex: 0 0 auto;
+  display: flex;
+  scroll-snap-align: end;
+  border-left: 1px solid var(--line);
+}
+
+.dash-session-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 76px;
+  border: 0;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.dash-session-action:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.dash-session-action.is-danger {
+  color: var(--color-negative);
+}
+
+.dash-session-action.is-danger:hover {
+  background: rgb(248 113 113 / 10%);
+}
+
+/* El botón cubre el resumen entero; las acciones viven fuera de él, porque un
+   botón dentro de otro no es HTML válido ni es navegable con teclado. */
 .dash-session-toggle {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  width: 100%;
-  padding: var(--s-4) calc(var(--s-4) + 36px + var(--s-3)) var(--s-4) var(--s-4);
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  padding: var(--s-4);
   background: transparent;
   border: 0;
   text-align: left;
@@ -286,10 +327,19 @@
   color: var(--text-secondary);
 }
 
-.dash-session-edit {
-  position: absolute;
-  top: var(--s-4);
-  right: var(--s-4);
+@media (min-width: 900px) {
+  .dash-swipe {
+    overflow: visible;
+  }
+
+  .dash-session-action {
+    width: 52px;
+    background: transparent;
+  }
+
+  .dash-session-action-text {
+    display: none;
+  }
 }
 
 .dash-session-detail {

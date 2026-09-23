@@ -1,0 +1,118 @@
+.dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-3);
+  animation: dialog-in var(--dur-slow) var(--ease-out);
+}
+
+.dialog::backdrop {
+  background: var(--scrim, rgb(4 5 7 / 72%));
+  backdrop-filter: blur(6px);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+.dialog-body {
+  padding: var(--s-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.dialog-title {
+  font-size: var(--t-title);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.016em;
+}
+
+.dialog-message {
+  color: var(--text-secondary);
+  font-size: var(--t-body);
+  max-width: 46ch;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+
+.dialog-actions > * {
+  flex: 1;
+}
+
+.copy-users {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  max-height: 40vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.copy-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  text-align: left;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out);
+}
+
+.copy-user.is-selected {
+  border-color: var(--accent-solid);
+  background: var(--accent-soft);
+}
+
+.copy-user-name {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.copy-user-email {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.copy-empty {
+  padding: var(--s-3);
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+  list-style: none;
+}
+
+.copy-error {
+  color: var(--color-negative);
+  font-size: var(--t-sm);
+}
+
+.copy-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.copy-skel-row {
+  height: 52px;
+  border-radius: var(--r-sm);
+}
