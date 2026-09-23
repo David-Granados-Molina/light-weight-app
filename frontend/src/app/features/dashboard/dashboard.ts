@@ -89,6 +89,12 @@ export class Dashboard {
 
   readonly hasDraftInProgress = this.draft.hasInProgress;
 
+  readonly ctaLabel = computed(() => {
+    const date = this.draft.selectedDate();
+    if (!this.hasDraftInProgress()) return 'Registrar entreno de hoy';
+    return date ? `Continuar el entreno ${dayPhrase(date)}` : 'Continuar el entreno';
+  });
+
   readonly weekEntrenos = computed(() => this.summary()?.weekEntrenos ?? 0);
   readonly recent = computed(() =>
     (this.summary()?.recent ?? []).map((s) => ({
