@@ -9,7 +9,7 @@ import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { sessionTypeLabel } from '../../core/models/labels';
-import { dayLetter, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
+import { dayLetter, dayPhrase, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
 
 interface WeekCheckView extends WeekBar {
   letter: string;
@@ -77,7 +77,7 @@ export class Dashboard {
   readonly error = signal(false);
   readonly expandedId = signal<string | null>(null);
 
-  readonly deleteTarget = signal<{ id: string; dateLabel: string; typeLabel: string } | null>(null);
+  readonly deleteTarget = signal<{ id: string; when: string; typeLabel: string } | null>(null);
   readonly deleting = signal(false);
   readonly deleteError = signal(false);
 
@@ -119,7 +119,7 @@ export class Dashboard {
 
   askDelete(session: { id: string; date: string; typeLabel: string }, event: Event): void {
     event.stopPropagation();
-    this.deleteTarget.set({ id: session.id, dateLabel: relativeDayLabel(session.date), typeLabel: session.typeLabel });
+    this.deleteTarget.set({ id: session.id, when: dayPhrase(session.date), typeLabel: session.typeLabel });
   }
 
   cancelDelete(): void {

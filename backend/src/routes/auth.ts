@@ -16,7 +16,7 @@ const CODE_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
 /** Cuenta de demostración: entra sin email ni código, a propósito. */
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL ?? 'test@test.com';
+const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || 'test@test.com';
 
 function toPublicUser(user: {
   id: string;

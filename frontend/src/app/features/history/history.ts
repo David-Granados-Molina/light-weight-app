@@ -8,7 +8,7 @@ import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
-import { effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { dayPhrase, effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 type HistFilter = 'todos' | Category;
@@ -74,7 +74,7 @@ export class History {
   readonly hasMore = signal(true);
   readonly expandedId = signal<string | null>(null);
 
-  readonly deleteTarget = signal<{ id: string; dateLabel: string; typeLabel: string } | null>(null);
+  readonly deleteTarget = signal<{ id: string; when: string; typeLabel: string } | null>(null);
   readonly deleting = signal(false);
   readonly deleteError = signal(false);
 
@@ -112,6 +112,7 @@ export class History {
       category: s.category,
       typeLabel: sessionTypeLabel(s.exercises.map((e) => e.exercise.type)),
       dateLabel: relativeDayLabel(s.date),
+      when: dayPhrase(s.date),
       exercisesText: s.exercises.map((e) => e.exercise.name).join(' · '),
       count: `${s.exercises.length} ejercicios`,
       /* Con la fila cerrada no hay forma de saber que hay algo escrito dentro.
@@ -133,10 +134,10 @@ export class History {
     this.expandedId.update((current) => (current === id ? null : id));
   }
 
-  askDelete(row: { id: string; dateLabel: string; typeLabel: string }, event: Event): void {
+  askDelete(row: { id: string; when: string; typeLabel: string }, event: Event): void {
     event.stopPropagation();
     if (this.targetUserId()) return;
-    this.deleteTarget.set(row);
+    this.deleteTarget.set({ id: row.id, when: row.when, typeLabel: row.typeLabel });
   }
 
   cancelDelete(): void {
