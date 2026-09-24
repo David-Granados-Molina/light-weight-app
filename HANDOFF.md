@@ -21,7 +21,7 @@ La estructura huérfana está limpia: la quinta migración, la primera destructi
 
 | Rama | HEAD | Para qué sirve |
 |---|---|---|
-| `main` | `1fed38d` | **Producción.** Despliega en Render al hacer push. |
+| `main` | `534ad13` | **Producción.** Despliega en Render al hacer push. |
 | `fix/entrenos-duplicados-borrado-historial` | `db4b6c5` | La tercera tanda, fusionada en `main` por la PR #1. Histórica. |
 | `v1.0` | `325fd7e` | **Copia de seguridad** de la producción anterior a la versión 2. No tocar. |
 | `v2.0` | `2ec512b` | La rama donde se revisó la tanda, ya fusionada en `main`. Histórica. |
