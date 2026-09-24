@@ -201,6 +201,7 @@
      sin nombre accesible deja cinco enlaces sin etiqueta para un lector de
      pantalla. */
   .rail-brand-name,
+  .rail-cta-text,
   .rail-link span,
   .rail-user-text {
     position: absolute;
