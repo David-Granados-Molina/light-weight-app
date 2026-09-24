@@ -83,7 +83,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          {{ hasDraftInProgress() ? 'Continuar el entreno de hoy' : 'Registrar entreno de hoy' }}
+          {{ ctaLabel() }}
         </a>
 
         <aside class="lw-card dash-tip">
@@ -109,33 +109,49 @@
                 class="lw-card lw-spine dash-session"
                 [style.border-left-color]="s.category === 'gym' ? 'var(--color-gym)' : 'var(--color-cali)'"
               >
-                <button
-                  type="button"
-                  class="dash-session-toggle"
-                  [attr.aria-expanded]="expandedId() === s.id"
-                  (click)="toggleExpand(s.id)"
-                >
-                  <span class="dash-session-top">
-                    <app-category-tag [category]="s.category" />
-                    <span class="dash-session-date lw-num">{{ relativeDayLabel(s.date) }}</span>
-                  </span>
-                  <span class="dash-session-type">{{ s.typeLabel }}</span>
-                  <span class="dash-session-count lw-num">
-                    {{ s.exerciseCount }} {{ s.exerciseCount === 1 ? 'ejercicio' : 'ejercicios' }}
-                  </span>
-                </button>
+                <div class="dash-swipe app-scroll">
+                  <button
+                    type="button"
+                    class="dash-session-toggle"
+                    [attr.aria-expanded]="expandedId() === s.id"
+                    (click)="toggleExpand(s.id)"
+                  >
+                    <span class="dash-session-top">
+                      <app-category-tag [category]="s.category" />
+                      <span class="dash-session-date lw-num">{{ relativeDayLabel(s.date) }}</span>
+                    </span>
+                    <span class="dash-session-type">{{ s.typeLabel }}</span>
+                    <span class="dash-session-count lw-num">
+                      {{ s.exerciseCount }} {{ s.exerciseCount === 1 ? 'ejercicio' : 'ejercicios' }}
+                    </span>
+                  </button>
 
-                <button
-                  type="button"
-                  class="lw-icon-btn dash-session-edit"
-                  [attr.aria-label]="'Editar el entreno del ' + relativeDayLabel(s.date)"
-                  (click)="editSession(s.date, $event)"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                </button>
+                  <div class="dash-session-actions">
+                    <button
+                      type="button"
+                      class="dash-session-action"
+                      [attr.aria-label]="'Editar el entreno del ' + relativeDayLabel(s.date)"
+                      (click)="editSession(s.date, $event)"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      <span class="dash-session-action-text">Editar</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="dash-session-action is-danger"
+                      [attr.aria-label]="'Eliminar el entreno del ' + relativeDayLabel(s.date)"
+                      (click)="askDelete(s, $event)"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      </svg>
+                      <span class="dash-session-action-text">Eliminar</span>
+                    </button>
+                  </div>
+                </div>
 
                 @if (expandedId() === s.id) {
                   <dl class="dash-session-detail">
@@ -169,3 +185,32 @@
     </div>
   }
 </div>
+
+@if (deleteTarget(); as target) {
+  @if (deleteError()) {
+    <app-confirm-dialog
+      title="No se ha podido eliminar"
+      message="El entreno sigue donde estaba. Comprueba la conexión y vuelve a intentarlo."
+      confirmText="Reintentar"
+      cancelText="Dejarlo"
+      [danger]="false"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  } @else if (!deleting()) {
+    <app-confirm-dialog
+      title="Eliminar este entreno"
+      [message]="
+        'Se borrará el entreno de ' +
+        target.typeLabel +
+        ' ' +
+        target.when +
+        ', con sus ejercicios y sus series. Esto no se puede deshacer.'
+      "
+      confirmText="Eliminar"
+      cancelText="Dejarlo"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
+}

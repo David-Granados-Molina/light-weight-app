@@ -52,6 +52,17 @@
               </a>
               <button
                 type="button"
+                class="lw-icon-btn"
+                (click)="askCopy(r.id, r.name)"
+                [attr.aria-label]="'Copiar la rutina ' + r.name + ' a otra cuenta'"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="9" y="9" width="11" height="11" rx="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              </button>
+              <button
+                type="button"
                 class="lw-icon-btn frr-delete"
                 (click)="askDelete(r.id, r.name)"
                 [attr.aria-label]="'Eliminar la rutina ' + r.name"
@@ -111,6 +122,16 @@
     </div>
   }
 </div>
+
+@if (copyTarget(); as target) {
+  <app-routine-copy-dialog
+    [routineId]="target.id"
+    [routineName]="target.name"
+    [ownerId]="targetUserId()"
+    (copied)="closeCopy()"
+    (cancelled)="closeCopy()"
+  />
+}
 
 @if (deleteTarget(); as target) {
   <app-confirm-dialog

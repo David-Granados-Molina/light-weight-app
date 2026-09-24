@@ -78,6 +78,14 @@ export function relativeDayLabel(isoDate: string): string {
   return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
 
+export function dayPhrase(isoDate: string): string {
+  const label = relativeDayLabel(isoDate);
+  if (label === 'Hoy') return 'de hoy';
+  if (label === 'Ayer') return 'de ayer';
+  if (WEEKDAY_SHORT.includes(label)) return `del ${WEEKDAY_LABELS[WEEKDAY_SHORT.indexOf(label)].toLowerCase()}`;
+  return `del ${label}`;
+}
+
 export function todayLabel(): string {
   const today = new Date();
   const weekday = WEEKDAY_LABELS[today.getDay()];

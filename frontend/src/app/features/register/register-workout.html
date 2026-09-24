@@ -555,6 +555,20 @@
   />
 }
 
+@if (duplicateOf()) {
+  <app-confirm-dialog
+    [title]="duplicateTitle()"
+    [message]="duplicateMessage()"
+    confirmText="Actualizar el que hay"
+    altText="Guardar aparte"
+    cancelText="Volver al entreno"
+    [danger]="false"
+    (confirmed)="confirmUpdateExisting()"
+    (alternate)="confirmSaveSeparate()"
+    (cancelled)="cancelDuplicate()"
+  />
+}
+
 @if (showDateConfirm()) {
   <app-confirm-dialog
     title="Este entreno no es de hoy"

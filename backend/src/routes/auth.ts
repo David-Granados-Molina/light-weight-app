@@ -1,6 +1,7 @@
 import { randomInt } from 'crypto';
 import { Router } from 'express';
 import { z } from 'zod';
+import { isAdminEmail, TEST_USER_EMAIL } from '../lib/accounts';
 import { asyncHandler } from '../lib/async-handler';
 import { compareLoginCode, hashLoginCode, signToken } from '../lib/auth';
 import { CodeDelivery, sendLoginCodeEmail } from '../lib/mailer';
@@ -15,9 +16,6 @@ const CODE_TTL_MS = 10 * 60 * 1000;
 /** Intentos fallidos antes de quemar el código. Ocho dígitos no aguantan fuerza bruta libre. */
 const MAX_ATTEMPTS = 5;
 
-/** Cuenta de demostración: entra sin email ni código, a propósito. */
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL ?? 'test@test.com';
-
 function toPublicUser(user: {
   id: string;
   name: string;
@@ -31,7 +29,7 @@ function toPublicUser(user: {
     email: user.email,
     avatarUrl: user.avatarUrl ?? null,
     themeColor: user.themeColor ?? null,
-    isAdmin: !!process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL,
+    isAdmin: isAdminEmail(user.email),
   };
 }
 
@@ -102,7 +100,7 @@ authRouter.post('/request-code', asyncHandler(async (req, res) => {
       ? { delivered: true, message: 'Te hemos enviado un código a tu email.' }
       : {
           delivered: false,
-          message: 'El envío de correos todavía no está activo. Pídele tu código de acceso al administrador.',
+          message: 'Pídele tu código de acceso al administrador.',
         },
   );
 }));

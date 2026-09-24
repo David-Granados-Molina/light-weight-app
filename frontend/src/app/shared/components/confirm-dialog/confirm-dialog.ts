@@ -30,6 +30,8 @@ export class ConfirmDialog {
   readonly confirmText = input('Eliminar');
   readonly cancelText = input('Cancelar');
 
+  readonly altText = input('');
+
   /**
    * Acción destructiva. Por defecto sí, porque el texto de confirmación por
    * defecto es "Eliminar": tiñe el botón de rojo y deja el foco inicial en
@@ -39,6 +41,7 @@ export class ConfirmDialog {
 
   readonly confirmed = output<void>();
   readonly cancelled = output<void>();
+  readonly alternate = output<void>();
 
   private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 

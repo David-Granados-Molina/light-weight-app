@@ -119,6 +119,7 @@
       <div class="sheet-rows">
         @for (s of rows(); track s.id) {
           <article class="sheet-row" [class.is-open]="expandedId() === s.id">
+            <div class="row-swipe app-scroll">
             <button
               type="button"
               class="row-main"
@@ -144,18 +145,33 @@
             </button>
 
             @if (!targetUserId()) {
-              <button
-                type="button"
-                class="row-edit"
-                [attr.aria-label]="'Editar el entreno del ' + s.dateLabel"
-                (click)="editSession(s.date, $event)"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </button>
+              <div class="row-actions">
+                <button
+                  type="button"
+                  class="row-action"
+                  [attr.aria-label]="'Editar el entreno del ' + s.dateLabel"
+                  (click)="editSession(s.date, $event)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                  <span class="row-action-text">Editar</span>
+                </button>
+                <button
+                  type="button"
+                  class="row-action is-danger"
+                  [attr.aria-label]="'Eliminar el entreno del ' + s.dateLabel"
+                  (click)="askDelete(s, $event)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  </svg>
+                  <span class="row-action-text">Eliminar</span>
+                </button>
+              </div>
             }
+            </div>
 
             @if (expandedId() === s.id) {
               <dl class="row-detail">
@@ -193,3 +209,32 @@
     </section>
   }
 </div>
+
+@if (deleteTarget(); as target) {
+  @if (deleteError()) {
+    <app-confirm-dialog
+      title="No se ha podido eliminar"
+      message="El entreno sigue donde estaba. Comprueba la conexión y vuelve a intentarlo."
+      confirmText="Reintentar"
+      cancelText="Dejarlo"
+      [danger]="false"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  } @else if (!deleting()) {
+  <app-confirm-dialog
+    title="Eliminar este entreno"
+    [message]="
+      'Se borrará el entreno de ' +
+      target.typeLabel +
+      ' ' +
+      target.when +
+      ', con sus ejercicios y sus series. Esto no se puede deshacer.'
+    "
+    confirmText="Eliminar"
+    cancelText="Dejarlo"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+  }
+}

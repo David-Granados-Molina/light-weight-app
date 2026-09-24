@@ -1,0 +1,58 @@
+<dialog #dialog class="dialog" (cancel)="onCancelEvent($event)" (click)="onBackdropClick($event)">
+  <div class="dialog-body">
+    @if (done(); as targetName) {
+      <h2 class="dialog-title">Rutina copiada</h2>
+      <p class="dialog-message">
+        «{{ routineName() }}» ya está en las rutinas de {{ targetName }}. Lo que cambie ahí no toca a esta.
+      </p>
+      <div class="dialog-actions">
+        <button type="button" class="lw-btn-primary" (click)="copied.emit(targetName)">Hecho</button>
+      </div>
+    } @else {
+    <h2 class="dialog-title">Copiar rutina</h2>
+    <p class="dialog-message">
+      Se creará una copia de «{{ routineName() }}» en la cuenta que elijas. La copia es suya: podrá cambiarla sin que
+      esta se entere.
+    </p>
+
+    @if (loading()) {
+      <div class="copy-skel" aria-busy="true">
+        <div class="lw-skel copy-skel-row"></div>
+        <div class="lw-skel copy-skel-row"></div>
+      </div>
+    } @else if (loadError()) {
+      <p class="copy-error" role="alert">No se ha podido cargar la lista de usuarios.</p>
+    } @else {
+      <ul class="copy-users">
+        @for (u of targets(); track u.id) {
+          <li>
+            <button
+              type="button"
+              class="copy-user"
+              [class.is-selected]="selectedId() === u.id"
+              [attr.aria-pressed]="selectedId() === u.id"
+              (click)="select(u.id)"
+            >
+              <span class="copy-user-name">{{ u.name }}</span>
+              <span class="copy-user-email">{{ u.email }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="copy-empty">No hay ninguna otra cuenta a la que copiarla.</li>
+        }
+      </ul>
+    }
+
+    @if (copyError()) {
+      <p class="copy-error" role="alert">No se ha podido copiar. Comprueba la conexión y vuelve a intentarlo.</p>
+    }
+
+    <div class="dialog-actions">
+      <button type="button" class="lw-btn-secondary" (click)="cancelled.emit()">Cancelar</button>
+      <button type="button" class="lw-btn-primary" [disabled]="!selectedId() || copying()" (click)="copy()">
+        {{ copying() ? 'Copiando…' : 'Copiar rutina' }}
+      </button>
+    </div>
+    }
+  </div>
+</dialog>

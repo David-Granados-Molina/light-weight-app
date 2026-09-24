@@ -8,7 +8,8 @@ import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { Category } from '../../core/models/exercise.model';
 import { WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
-import { effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { dayPhrase, effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 type HistFilter = 'todos' | Category;
 type DateMode = 'todos' | 'dia' | 'mes' | 'anio';
@@ -35,15 +36,11 @@ function isoDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-function subtractDays(iso: string, days: number): string {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() - days);
-  return isoDate(d);
-}
+const PAGE_SIZE = 5;
 
 @Component({
   selector: 'app-history',
-  imports: [RouterLink],
+  imports: [RouterLink, ConfirmDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './history.html',
   styleUrl: './history.css',
@@ -77,13 +74,16 @@ export class History {
   readonly hasMore = signal(true);
   readonly expandedId = signal<string | null>(null);
 
+  readonly deleteTarget = signal<{ id: string; when: string; typeLabel: string } | null>(null);
+  readonly deleting = signal(false);
+  readonly deleteError = signal(false);
+
   readonly dateMode = signal<DateMode>('todos');
   readonly selectedDay = signal(this.todayIso);
   readonly selectedMonth = signal(new Date().getMonth());
   readonly selectedYear = signal(new Date().getFullYear());
 
-  private weekCursor = this.todayIso;
-  private consecutiveEmptyWeeks = 0;
+  private offset = 0;
 
   readonly filterChips: { key: HistFilter; label: string }[] = [
     { key: 'todos', label: 'Todos' },
@@ -92,7 +92,7 @@ export class History {
   ];
 
   readonly dateModeChips: { key: DateMode; label: string }[] = [
-    { key: 'todos', label: 'Todas las fechas' },
+    { key: 'todos', label: 'General' },
     { key: 'dia', label: 'Día' },
     { key: 'mes', label: 'Mes' },
     { key: 'anio', label: 'Año' },
@@ -112,6 +112,7 @@ export class History {
       category: s.category,
       typeLabel: sessionTypeLabel(s.exercises.map((e) => e.exercise.type)),
       dateLabel: relativeDayLabel(s.date),
+      when: dayPhrase(s.date),
       exercisesText: s.exercises.map((e) => e.exercise.name).join(' · '),
       count: `${s.exercises.length} ejercicios`,
       /* Con la fila cerrada no hay forma de saber que hay algo escrito dentro.
@@ -131,6 +132,36 @@ export class History {
 
   toggleExpand(id: string): void {
     this.expandedId.update((current) => (current === id ? null : id));
+  }
+
+  askDelete(row: { id: string; when: string; typeLabel: string }, event: Event): void {
+    event.stopPropagation();
+    if (this.targetUserId()) return;
+    this.deleteTarget.set({ id: row.id, when: row.when, typeLabel: row.typeLabel });
+  }
+
+  cancelDelete(): void {
+    this.deleteTarget.set(null);
+    this.deleteError.set(false);
+  }
+
+  confirmDelete(): void {
+    const target = this.deleteTarget();
+    if (!target) return;
+    this.deleteError.set(false);
+    this.deleting.set(true);
+    this.sessionService.delete(target.id).subscribe({
+      next: () => {
+        this.sessions.update((list) => list.filter((s) => s.id !== target.id));
+        if (this.offset > 0) this.offset--;
+        this.deleting.set(false);
+        this.deleteTarget.set(null);
+      },
+      error: () => {
+        this.deleting.set(false);
+        this.deleteError.set(true);
+      },
+    });
   }
 
   editSession(date: string, event: Event): void {
@@ -179,14 +210,20 @@ export class History {
   }
 
   private reset(): void {
-    this.weekCursor = this.todayIso;
-    this.consecutiveEmptyWeeks = 0;
+    this.offset = 0;
     this.hasMore.set(true);
     this.sessions.set([]);
     this.loadChunk(true);
   }
 
-  private fetchSessions(params: { category?: Category; q?: string; from?: string; to?: string }) {
+  private fetchSessions(params: {
+    category?: Category;
+    q?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const targetUserId = this.targetUserId();
     return targetUserId ? this.adminService.getSessions(targetUserId, params) : this.sessionService.getAll(params);
   }
@@ -211,13 +248,10 @@ export class History {
       return;
     }
 
-    const to = this.weekCursor;
-    const from = subtractDays(to, 6);
-
     if (isFirst) this.loading.set(true);
     else this.loadingMore.set(true);
 
-    this.fetchSessions({ category, q, from, to }).subscribe({
+    this.fetchSessions({ category, q, limit: PAGE_SIZE, offset: this.offset }).subscribe({
       next: (sessions) => {
         if (isFirst) {
           this.sessions.set(sessions);
@@ -226,13 +260,8 @@ export class History {
           this.sessions.update((prev) => [...prev, ...sessions]);
           this.loadingMore.set(false);
         }
-        this.weekCursor = subtractDays(to, 7);
-        if (sessions.length === 0) {
-          this.consecutiveEmptyWeeks++;
-          if (this.consecutiveEmptyWeeks >= 2) this.hasMore.set(false);
-        } else {
-          this.consecutiveEmptyWeeks = 0;
-        }
+        this.offset += sessions.length;
+        this.hasMore.set(sessions.length === PAGE_SIZE);
       },
       error: () => {
         this.loading.set(false);
