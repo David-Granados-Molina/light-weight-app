@@ -1,17 +1,19 @@
 # HANDOFF — Light Weight
 
-Estado del proyecto al **6 de septiembre de 2026**.
-Rama activa: **`main`**, HEAD en `09f2a69`, árbol limpio, **todo subido y desplegado en Render**.
+Estado del proyecto al **24 de septiembre de 2026**.
+Rama activa: **`main`**, HEAD en `1fed38d`, árbol limpio, **todo subido y desplegado en Render**.
 
 ---
 
 ## 1. Dónde estamos
 
-La tanda de la versión 2 está **cerrada y en producción**, y encima de ella hay una segunda tanda con la limpieza de esquema, la separación entre nota y descripción, los vídeos de tres sitios y la consola de sesión. Todo desplegado.
+Sobre las dos tandas de la versión 2 hay ahora una **tercera, fusionada por la primera pull request del proyecto** ([#1](https://github.com/David-Granados-Molina/light-weight-app/pull/1)): cinco fallos vistos usando la aplicación, más dos agujeros de permisos que aparecieron por el camino. Ver el apartado 12.
 
-**No queda nada bloqueante.** Los códigos de acceso, que era el asunto abierto del handoff anterior, llegan: el reenvío estaba bien configurado y solo faltaba comprobarlo. Lo que sigue costando es que los códigos de los demás usuarios pasan por tu buzón, y eso lo cierra un dominio verificado. Ver el apartado 6.
+**No queda nada bloqueante.** Los códigos de acceso llegan; lo que sigue costando es que los de los demás usuarios pasan por tu buzón, y eso lo cierra un dominio verificado. Ver el apartado 6.
 
 La estructura huérfana está limpia: la quinta migración, la primera destructiva del proyecto, se aplicó en el despliegue. Ver el apartado 3.
+
+**Esta tanda no trae migraciones**: no se toca el esquema.
 
 ---
 
@@ -19,7 +21,8 @@ La estructura huérfana está limpia: la quinta migración, la primera destructi
 
 | Rama | HEAD | Para qué sirve |
 |---|---|---|
-| `main` | `09f2a69` | **Producción.** Despliega en Render al hacer push. |
+| `main` | `1fed38d` | **Producción.** Despliega en Render al hacer push. |
+| `fix/entrenos-duplicados-borrado-historial` | `db4b6c5` | La tercera tanda, fusionada en `main` por la PR #1. Histórica. |
 | `v1.0` | `325fd7e` | **Copia de seguridad** de la producción anterior a la versión 2. No tocar. |
 | `v2.0` | `2ec512b` | La rama donde se revisó la tanda, ya fusionada en `main`. Histórica. |
 | `rediseno/hoja-de-registro` | `1d62138` | La variante de diseño elegida. Histórica. |
@@ -49,6 +52,15 @@ La segunda:
 | `8f32358` | Series anteriores en móvil, y el vídeo del ejercicio dentro de la aplicación |
 | `597638e` | La nota es del entreno; la descripción, de la rutina |
 | `09f2a69` | Tres retoques de colocación sobre lo anterior |
+
+La tercera, entrada por la PR #1 (`1fed38d` es el commit de fusión):
+
+| Commit | Qué trae |
+|---|---|
+| `b049a1d` | Los cinco fallos de la tanda y el dueño en las rutas de entrenos por id |
+| `d02cf0b` | La cuenta de demostración no entraba en local; el diálogo decía «del hoy» |
+| `01016d3` | Esa cuenta nunca es admin; el botón de Inicio dice de qué día es el borrador |
+| `db4b6c5` | Mensaje del código de acceso más corto y analítica del CLI apagada |
 
 ---
 
@@ -127,6 +139,10 @@ Un enlace de cualquier otro sitio no se rechaza: se guarda, se avisa de que no s
 Recuperada de la rama `rediseno/consola-de-sesion`, que por lo demás sigue descartada. `WorkoutDraftStore` ya guardaba el entreno a medias, pero la única señal de que existía era un punto de 6 px sobre el icono de registrar; ahora ese estado es un objeto visible desde cualquier pantalla, con los ejercicios metidos y un botón para volver.
 
 Un solo DOM y tres presentaciones: barra acoplada sobre la tab-bar en móvil, tarjeta flotante entre 900 y 1279 px, y tercera columna pegajosa a partir de 1280. En la barra del móvil el botón dice solo **«Continuar»**: con las dos palabras no cabía y se comía la fecha de al lado. Quién la muestra lo decide `App`, que es lo único que conoce a la vez la ruta y el hueco que hay que reservar al pie: se esconde dentro de «Registrar», donde el entreno ya es la pantalla entera.
+
+### Lo que trajo la tercera tanda
+
+Eliminar entrenos deslizando la fila en Historial e Inicio, el filtro **General** del historial de 5 en 5, el aviso antes de guardar un segundo entreno el mismo día y copiar una rutina a otra cuenta. Todo en el apartado 12.
 
 ### Dieta (`/dieta`)
 
@@ -208,6 +224,8 @@ Nunca imprime la API key, solo si está o no.
 
 **Agujero de lectura cerrado.** `GET /api/routines/:id` filtraba solo por `id`: cualquier usuario autenticado podía leer la rutina de otro sabiendo su id. Ahora filtra también por dueño. Verificado: leer, editar o borrar una rutina ajena devuelve 404, y los endpoints de admin devuelven 403 a quien no lo es.
 
+**El mismo agujero seguía abierto en entrenos**, y se cerró en la tercera tanda junto con el de la cuenta de demostración. Apartado 12.
+
 ---
 
 ## 8. Diseño
@@ -230,7 +248,7 @@ Nunca imprime la API key, solo si está o no.
 ## 9. Estado de la compilación
 
 - Backend `tsc --noEmit`: **0 errores**.
-- Build de producción: **~508 kB initial / ~120 kB transferidos**, sin avisos de presupuesto.
+- Build de producción: **508,45 kB initial / 120,17 kB transferidos**, sin avisos de presupuesto. La tercera tanda apenas movió la cifra: +0,14 kB.
 - Presupuestos: `initial` warning en 560 kB; `anyComponentStyle` warning 14 kB, error 18 kB.
 
 ---
@@ -245,7 +263,10 @@ Nada.
 - **Ver la pantalla de Dieta con tu propia cuenta.** Se verificó entera sobre el usuario de prueba, con tus mismos datos cargados y borrados después; lo que no se ha visto es tu cuenta real. Ya no hay nada que lo impida: el acceso por código funciona.
 - **Verificar dominio propio en Resend** y con él cerrar el apartado 6 del todo: cambiar `FROM_ADDRESS` en `backend/src/lib/mailer.ts` y borrar `LOGIN_CODE_RELAY_TO` de las variables y de `render.yaml`. Hasta que el dominio esté verificado no se puede tocar el remitente: un dominio sin verificar hace que Resend rechace **todos** los envíos, incluidos los que hoy sí llegan por reenvío.
 
+- **Borrar la rama `pruebas-pr-1` en Neon**, la copia que se usó para probar la tercera tanda. Dentro quedaron un par de entrenos de prueba y una copia de la rutina «Tirón» en la cuenta de Adri; nada de eso está en producción.
+
 ### Cerrado desde el handoff anterior
+- **Los cinco fallos de uso y los dos agujeros de permisos**: apartado 12.
 - **Los códigos de acceso**: llegan. El reenvío estaba bien configurado; apartado 6.
 - La deuda de esquema: limpiada en la quinta migración, ya aplicada; apartado 3.
 - El acceso directo del Pixel: descartado a propósito.
@@ -262,4 +283,64 @@ Nada.
 - **El backend en marcha se queda con el cliente de Prisma antiguo** después de un `prisma generate`. `tsx watch` vigila el código fuente, no `node_modules`, así que tras generar hay que tocar un fichero de `src/` para forzar el reinicio. Ha pasado dos veces y las dos se manifestó como un 500 o un 404 desconcertante.
 - **`prisma migrate deploy` no se puede lanzar desde aquí**: el clasificador de permisos lo bloquea por escribir en producción. Tampoco hace falta a mano: el `buildCommand` del servicio de API en `render.yaml` termina en `npx prisma migrate deploy`, así que cada despliegue lo ejecuta. La consecuencia es que **una migración destructiva se aplica en cuanto se empuja**, sin un paso aparte donde pararse a pensar.
 - **El panel del navegador oculto congela las transiciones CSS** en `currentTime: 0` y bloquea `requestAnimationFrame`, y pinta negro al hacer scroll. Da valores computados falsos. Para medir, `getAnimations().forEach(a => a.finish())` o un viewport alto en vez de scroll. **No es un bug de la aplicación.**
-- **`graphify` se invoca como `python -m graphify`**, no por npm ni como binario suelto en el PATH.
+- **`graphify` se invoca como `python -m graphify`**, no por npm ni como binario suelto en el PATH. El paquete de PyPI se llama **`graphifyy`**, con dos íes griegas, y el extra de SQL (`graphifyy[sql]`) es lo que hace que las migraciones entren en el grafo.
+- **En PowerShell, `npm` resuelve a `npm.ps1`**, y con la política de ejecución en `Restricted` —el valor por defecto de una instalación nueva de Windows— no se ejecuta. Las tareas de VS Code llaman a **`npm.cmd`**, que no pasa por esa política, para no depender de un ajuste de seguridad de la máquina. A mano, o se usa `npm.cmd` o se levanta la política con `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+- **`.vscode/tasks.json` levanta los dos servidores con Ctrl+Shift+B**, cada uno en su terminal. Está en `.gitignore`, así que **no se sube y se pierde al formatear**.
+- **`tsx watch` no vigila el `.env`.** Cambiar `DATABASE_URL` o `ADMIN_EMAIL` no reinicia nada: hay que tocar un fichero de `src/`. Y `dotenv` **no pisa** una variable que ya esté en el entorno del proceso.
+- **Una variable vacía en el `.env` no es lo mismo que una variable ausente.** `process.env.X ?? 'defecto'` devuelve la cadena vacía, no el valor por defecto, y `.env.example` deja varias vacías. Por eso la cuenta de demostración no entraba en local (apartado 12); en el código vivo se usa `||`, pero el resto de valores por defecto con `??` siguen ahí.
+- **Para probar contra datos reales sin tocarlos, una rama de Neon.** Se crea en el panel en segundos, es copia completa y su cadena se pega en `backend/.env`. Conviene comprobar el aislamiento antes de borrar nada: crear un usuario marcador en la rama y preguntar por él a la API de producción, que debe responder 404. Al terminar, restaurar la cadena original y borrar la rama.
+
+---
+
+## 12. La tercera tanda: cinco fallos de uso y dos de permisos
+
+Entró por la **PR #1**, la primera del proyecto. Cuatro correcciones, una función nueva y dos agujeros de permisos que aparecieron al hacerlas. Probada sobre una rama de Neon con la cuenta de demostración; el apartado 11 cuenta cómo.
+
+### El mismo entreno se guardaba dos veces
+
+Eran dos fallos con una raíz común: **el borrador solo se limpiaba al cerrar el diálogo de «Entreno guardado»**, y cerrarlo es opcional. Quien guardaba y salía dejaba el entreno entero en `localStorage`; al volver, la aplicación le ofrecía «Continuar el entreno de hoy» por algo que ya estaba guardado, y continuarlo lo guardaba otra vez.
+
+Ahora `WorkoutDraftStore` tiene `committed`: en cuanto el servidor responde, el borrador deja de serlo, se borra del disco y `hasInProgress` pasa a falso. Los ejercicios siguen en memoria porque el resumen y el texto de compartir los necesitan.
+
+La otra mitad: entrar a Registrar **para hoy** parte siempre de una pantalla en blanco —decisión deliberada, comentada en el constructor—, y nada comprobaba si ese día ya tenía entreno. Antes de crear uno nuevo se pregunta ahora por la fecha; si ya hay algo, sale un diálogo que dice qué hay y ofrece **actualizar el que hay**, **guardar aparte** o volver. Editar no pregunta: ahí ya se sabe a qué entreno se escribe.
+
+Se permiten dos entrenos el mismo día a propósito (gym por la mañana, calistenia por la tarde); lo que no se permite es hacerlo sin enterarse. El permiso de «guardar aparte» dura un guardado y se retira al cerrar o al cambiar de día.
+
+Para la tercera salida, `ConfirmDialog` admite un `altText` opcional. Vacío por defecto, así que los seis diálogos que ya lo usaban no cambian; con tres botones se apilan en columna, porque en 420 px no caben en fila.
+
+**Los duplicados que ya había no se tocaron**: esto evita los siguientes, los viejos se borran a mano.
+
+### El hover apagaba el ejercicio marcado
+
+La cabecera del acordeón de PrimeNG pintaba `--surface-raised` al pasar por encima, y como es la única superficie del panel, tapaba el ámbar de `.ex-panel.is-done`. En un dedo el `:hover` se queda pegado tras tocar, así que el ejercicio se quedaba apagado hasta tocar otra cosa. Se veía sobre todo **editando**, porque un entreno guardado entra con todos los ejercicios marcados.
+
+Las tres variables de fondo valen ahora `transparent`. La fila se sigue anunciando pulsable por el cursor y por el chevrón.
+
+### Eliminar entrenos, deslizando la fila
+
+En Historial e Inicio el lápiz de la esquina se cambió por un carril que **se desliza en horizontal** y descubre Editar y Eliminar. Es `scroll-snap`, CSS puro: ancla la fila donde se suelte, sin gestos en JavaScript. A partir de 900 px el carril deja de desplazarse y los dos botones se quedan a la vista, solo icono: deslizar con rueda o trackpad es torpe cuando sobra ancho.
+
+Eliminar confirma con el día y el tipo delante, y la fila desaparece **solo cuando el servidor lo confirma**; si falla, el diálogo reintenta sobre el mismo entreno. En Inicio se vuelve a pedir el resumen entero en vez de quitar la tarjeta a mano, porque de ese entreno cuelgan el contador de la semana y las barras de días.
+
+### El historial escondía lo anterior a un parón
+
+«Todas las fechas» pedía **semana a semana hacia atrás** y se plantaba tras dos semanas vacías seguidas. Con el último entreno el 7 de septiembre y el calendario en el 23, el historial salía vacío: el backend estaba bien, la estrategia de carga no.
+
+Ahora la pestaña se llama **General** y pide entrenos, no días: `limit=5` y `offset`, con «Cargar más», y queda más si la tanda vino llena. Probado hasta el final: 160 entrenos seguidos, atravesando todos los huecos. `GET /api/sessions` y el equivalente de admin aceptan `offset`; el historial de un amigo es la misma pantalla y pide igual.
+
+### Copiar una rutina a otra cuenta
+
+Botón en Rutinas (solo para el admin) y en las rutinas de un amigo, los dos abren el mismo `RoutineCopyDialog`. Es **copia, no compartir**: la rutina que llega es suya y puede cambiarla sin que la original se entere. Los ejercicios no se duplican —apuntan al mismo catálogo compartido—, así que el progreso de los dos sigue contando por el mismo ejercicio, igual que se hizo al cargar las rutinas de Filo.
+
+El endpoint es `POST /api/admin/routines/:routineId/copy` y no cuelga de `/users/:userId` porque el origen puede ser una rutina ajena o propia. La lógica está en `copyRoutineTo`, junto a las otras tres funciones de `routines.ts` que llevan el dueño como parámetro.
+
+### Permisos: entrenos ajenos y la cuenta pública
+
+**`GET`, `PUT` y `DELETE /api/sessions/:id` filtraban solo por id.** Cualquier usuario autenticado podía leer, editar o borrar el entreno de otro sabiendo su id: el mismo agujero que se cerró en rutinas (apartado 7), pero en entrenos seguía abierto. Con un botón de borrar en la interfaz ya no era asumible. Las tres rutas filtran también por dueño, y el borrado usa `deleteMany` con el `userId` dentro del filtro: una sola consulta, sin orden que equivocar.
+
+**La cuenta de demostración no puede ser admin.** Entra sin email ni código y la conoce cualquiera; si se configurase como `ADMIN_EMAIL`, ese cualquiera podría crear, editar y borrar las rutinas de los demás y ver sus historiales. La regla de quién es admin vivía repetida en `toPublicUser` —que solo viste la interfaz— y en `requireAdmin` —que es la puerta de verdad—, así que se unificó en `isAdminEmail` (`lib/accounts.ts`), que excluye esa cuenta pase lo que pase con la variable. Comprobado con `ADMIN_EMAIL=test@test.com`: el token sale con `isAdmin` falso y `/api/admin/users` responde 403.
+
+### Dos cosas más, encontradas al probar
+
+- **La cuenta de demostración no entraba en local.** `.env.example` deja `TEST_USER_EMAIL` vacío y el código resolvía el valor por defecto con `??`: se buscaba un usuario con email `""`. En producción la variable no está declarada, así que allí nunca se notó. La cuenta existe en la base desde siempre; era el código.
+- **El diálogo de eliminar decía «del hoy»**, y el botón de Inicio ofrecía «Continuar el entreno de hoy» aunque el borrador fuese de otro día. La preposición la pone ahora `dayPhrase` en `format.ts`: «de hoy», «de ayer», «del lunes» o «del 28/12/26».
