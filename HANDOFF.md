@@ -1,7 +1,7 @@
 # HANDOFF — Light Weight
 
 Estado del proyecto al **24 de septiembre de 2026**.
-Rama activa: **`main`**, HEAD en `1fed38d`, árbol limpio, **todo subido y desplegado en Render**.
+Rama activa: **`main`**, HEAD en `534ad13`, árbol limpio, **todo subido y desplegado en Render**.
 
 ---
 
@@ -61,6 +61,14 @@ La tercera, entrada por la PR #1 (`1fed38d` es el commit de fusión):
 | `d02cf0b` | La cuenta de demostración no entraba en local; el diálogo decía «del hoy» |
 | `01016d3` | Esa cuenta nunca es admin; el botón de Inicio dice de qué día es el borrador |
 | `db4b6c5` | Mensaje del código de acceso más corto y analítica del CLI apagada |
+
+Y después de la fusión, directos sobre `main`:
+
+| Commit | Qué trae |
+|---|---|
+| `aa6065d` | Este handoff con la tercera tanda |
+| `e897117` | El buscador del selector de ejercicios coge el foco al abrirlo |
+| `534ad13` | En el rail estrecho, registrar entreno es solo el `+` |
 
 ---
 
@@ -344,3 +352,8 @@ El endpoint es `POST /api/admin/routines/:routineId/copy` y no cuelga de `/users
 
 - **La cuenta de demostración no entraba en local.** `.env.example` deja `TEST_USER_EMAIL` vacío y el código resolvía el valor por defecto con `??`: se buscaba un usuario con email `""`. En producción la variable no está declarada, así que allí nunca se notó. La cuenta existe en la base desde siempre; era el código.
 - **El diálogo de eliminar decía «del hoy»**, y el botón de Inicio ofrecía «Continuar el entreno de hoy» aunque el borrador fuese de otro día. La preposición la pone ahora `dayPhrase` en `format.ts`: «de hoy», «de ayer», «del lunes» o «del 28/12/26».
+
+### Dos retoques después de la fusión
+
+- **El buscador del selector de ejercicios coge el foco al abrirlo.** Antes había que pulsar el campo antes de poder escribir, un toque de más en mitad del entreno. El `p-multiselect` ya lo resuelve con `autofocusFilter`, que viene en `false`. Va en `ExercisePicker`, el componente compartido, así que vale para nueva rutina, editar rutina y registrar entreno, que son las tres pantallas donde se añaden ejercicios. Efecto secundario en el móvil: el teclado se abre al desplegar el selector y acorta la lista hasta que escribes.
+- **En el rail estrecho (900–1099 px), registrar entreno es solo el `+`.** La etiqueta se partía en dos líneas y desbordaba el botón de 44 px: el CSS que esconde las etiquetas del rail no la alcanzaba porque era un nodo de texto suelto, sin elemento al que apuntar. Ahora va en un `span` y entra en la misma regla, que oculta a la vista pero deja el nombre para el lector de pantalla. Por debajo de 900 px no hay rail —manda la tab-bar, que ya tenía su `+`— y a partir de 1100 px la etiqueta vuelve.
