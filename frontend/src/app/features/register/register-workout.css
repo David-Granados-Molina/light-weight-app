@@ -107,7 +107,7 @@
 
 @media (min-width: 900px) {
   .sheet-head {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1fr);
     align-items: end;
     padding: var(--s-5);
   }

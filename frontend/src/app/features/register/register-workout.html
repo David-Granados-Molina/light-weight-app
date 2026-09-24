@@ -54,18 +54,6 @@
         </div>
       </div>
 
-      @if (!loadingRoutines() && routines().length > 0) {
-        <div class="sheet-field">
-          <span class="lw-label">Rutina</span>
-          <app-routine-select
-            [routines]="routines()"
-            [selectedId]="selectedRoutineId()"
-            [allowEmpty]="true"
-            (changed)="onRoutineChanged($event)"
-          />
-        </div>
-      }
-
       <div class="sheet-field">
         <span class="lw-label">Añadir ejercicio</span>
         <app-exercise-picker
@@ -77,6 +65,18 @@
           (createRequested)="startCreateExercise()"
         />
       </div>
+
+      @if (!loadingRoutines() && routines().length > 0) {
+        <div class="sheet-field">
+          <span class="lw-label">Rutina</span>
+          <app-routine-select
+            [routines]="routines()"
+            [selectedId]="selectedRoutineId()"
+            [allowEmpty]="true"
+            (changed)="onRoutineChanged($event)"
+          />
+        </div>
+      }
     </header>
 
     @if (editingSessionId() && !loadingDay()) {
