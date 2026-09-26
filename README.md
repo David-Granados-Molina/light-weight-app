@@ -187,8 +187,6 @@ RESEND_API_KEY=
 LOGIN_CODE_RELAY_TO=
 ```
 
-Una variable **vacía no es lo mismo que una ausente**: varios valores por defecto se resuelven con `??`, que solo cae con `undefined`. Si no vas a usar una, déjala fuera del fichero en vez de en blanco.
-
 ### 3. Migraciones y seed
 
 ```bash
@@ -208,11 +206,6 @@ cd frontend && npm start
 ```
 
 El proxy de Angular (`proxy.conf.json`) redirige `/api` al backend local automáticamente.
-
-Dos cosas que ahorran un rato:
-
-- `ng` no está instalado como comando global; se usa `npm start`, que lo llama desde `node_modules`.
-- En PowerShell, `npm` resuelve a `npm.ps1` y con la política de ejecución en `Restricted` —el valor por defecto de Windows— no se ejecuta. O se llama a `npm.cmd`, o se levanta la política con `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ---
 
