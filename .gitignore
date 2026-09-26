@@ -13,4 +13,10 @@ dist/
 
 # graphify output
 /graphify-out/
-.impeccable/build/
+
+# Documentación de trabajo y configuración de herramientas: se queda en local
+.impeccable/
+/CLAUDE.md
+/DESIGN.md
+/HANDOFF.md
+/PRODUCT.md
