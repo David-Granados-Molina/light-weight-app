@@ -10,31 +10,52 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 
 ### Registro de entrenamientos
 - Registra series y repeticiones, peso, tiempo o rondas EMOM según el tipo de ejercicio
-- Edita cualquier entreno pasado directamente desde el historial o el dashboard
+- Hoja de registro plegable: cada ejercicio en su panel, con sus músculos, sus consejos y la marca de completado
+- Consulta lo que hiciste la última vez en ese mismo ejercicio, sin salir de la hoja
+- El entreno a medias sobrevive a cambiar de pantalla o recargar, y se ve desde cualquier sitio en la consola de sesión
+- Avisa antes de guardar un segundo entreno el mismo día: actualizar el que hay o crear uno aparte
+- Edita o elimina cualquier entreno pasado desde el historial o desde inicio
 - Comparte el resumen del entreno por WhatsApp o portapapeles
 
 ### Rutinas
 - Crea rutinas de gym y calistenia con ejercicios, series y rangos de repeticiones objetivo
+- Calentamiento por rutina, con explicación y vídeo
+- Consejos y vídeo por ejercicio: YouTube, TikTok e Instagram se ven dentro de la aplicación
 - Carga una rutina al registrar para partir de una plantilla prefijada
+- Copia una rutina a la cuenta de otra persona, sin rehacerla ejercicio a ejercicio
 
 ### Historial
-- Paginación semana a semana para no cargar todos los datos de golpe
+- Modo general paginado de cinco en cinco, para no cargar todo de golpe
 - Filtros por categoría (gym / calistenia) y texto libre por nombre de ejercicio
 - Vistas por día, mes o año
+- Las filas con notas dentro se anuncian con una marca
 
 ### Progreso
 - Gráficas por ejercicio (Chart.js) con rangos de 1 mes, 3 meses y 1 año
 - Volumen total, máximo peso y récord de repeticiones por periodo
+
+### Dieta
+- Objetivos del día en kcal, proteínas, carbohidratos y grasas
+- Desayuno, comida y cena con varias opciones, cada una con sus alimentos y cantidades
+- Suplementos e indicación por comida, no por opción
+- Calendario semanal de siete días por tres comidas, eligiendo las opciones con su contenido delante
+- Lista de la compra por secciones de supermercado
+- La API y la ruta son por usuario, aunque hoy el botón solo lo ve quien administra
 
 ### Perfil
 - 9 avatares SVG que adaptan su color al tema activo
 - 8 temas de color (ámbar, rosa, rojo, verde, azul, morado, gris, menta)
 - Lightbox del avatar con rendering nítido (sin blur por upscaling)
 
-### Autenticación
-- Registro y login con email + contraseña
-- Login con Google (OAuth 2.0)
-- Recuperación de contraseña por email (enlace seguro de un solo uso)
+### Acceso
+- Sin contraseñas: escribes tu email y recibes un código de 8 dígitos
+- El código vale 10 minutos, es de un solo uso, admite 5 intentos y se guarda hasheado
+- Las cuentas se dan de alta a mano; si el email no está, se dice claramente
+- Cuenta de demostración pública, sin email ni código, que nunca tiene permisos de administración
+
+### Administración
+- Quien administra consulta el historial y el progreso del resto de usuarios
+- Crea, edita y elimina rutinas ajenas con el mismo formulario que las propias
 
 ---
 
@@ -44,8 +65,9 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 | Tecnología | Uso |
 |---|---|
 | Angular 21 | Framework principal — componentes standalone, signals, OnPush |
-| PrimeNG | Componente de gráficas (p-chart) |
+| PrimeNG | Gráficas (p-chart), acordeón de la hoja de registro y selector de ejercicios |
 | Chart.js | Motor de gráficas |
+| Angular CDK | Reordenar ejercicios arrastrando |
 | Angular SSR | Prerenderizado de rutas estáticas |
 
 ### Backend
@@ -56,9 +78,8 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 | PostgreSQL (Neon) | Base de datos en producción |
 | Zod | Validación de esquemas en los endpoints |
 | JSON Web Tokens | Autenticación stateless |
-| Google Auth Library | Verificación de tokens de Google OAuth |
-| Resend | Envío de emails para recuperación de contraseña |
-| bcryptjs | Hash de contraseñas |
+| Resend | Envío de los códigos de acceso (HTTPS, no SMTP) |
+| bcryptjs | Hash de los códigos de acceso |
 
 ### Infraestructura
 | Servicio | Uso |
@@ -77,19 +98,20 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 │   ├── src/app/
 │   │   ├── core/
 │   │   │   ├── config/        # URL base de la API (dev/prod)
-│   │   │   ├── guards/        # authGuard y guestGuard
+│   │   │   ├── guards/        # authGuard, guestGuard y adminGuard
 │   │   │   ├── models/        # Interfaces TypeScript
-│   │   │   ├── services/      # AuthService, SessionService, etc.
-│   │   │   └── utils/         # format.ts, avatar.ts
-│   │   ├── features/          # Páginas (dashboard, historial, registrar…)
+│   │   │   ├── services/      # AuthService, SessionService, WorkoutDraftStore…
+│   │   │   └── utils/         # format.ts, avatar.ts, video.ts
+│   │   ├── features/          # Páginas (inicio, historial, registrar, dieta…)
 │   │   └── shared/            # Componentes reutilizables
-│   └── public/avatars/        # SVGs y PNGs de avatares
+│   ├── public/avatars/        # SVGs y PNGs de avatares
+│   └── public/icons/          # Iconos de la PWA, incluidos los maskable
 │
 ├── backend/                   # API Express
 │   ├── src/
-│   │   ├── lib/               # prisma.ts, dateUtils.ts, mailer.ts
-│   │   ├── middleware/        # authMiddleware.ts
-│   │   └── routes/            # auth, sessions, routines, progress, dashboard…
+│   │   ├── lib/               # prisma.ts, dateUtils.ts, mailer.ts, accounts.ts
+│   │   ├── middleware/        # requireAuth y requireAdmin
+│   │   └── routes/            # auth, sessions, routines, progress, dashboard, diet, admin
 │   └── prisma/
 │       ├── schema.prisma
 │       ├── migrations/
@@ -104,20 +126,27 @@ Aplicación web progresiva para el registro y seguimiento personal de entrenamie
 
 ```
 User ──< Routine ──< RoutineExercise >── Exercise
-     └─< WorkoutSession ──< SessionExercise >── Exercise
-                          └─< SessionSet
+     ├─< WorkoutSession ──< SessionExercise >── Exercise
+     │                     └─< SessionSet
+     ├─< LoginCode
+     └─- Diet ──< DietMeal ──< DietItem
+               ├─< DietSlotInfo ──< DietSupplement
+               ├─< DietPlanEntry
+               └─< ShoppingItem
 ```
 
 - **Exercise**: catálogo compartido con `inputType` (peso, reps, tiempo, emom, min)
-- **Routine**: plantilla de entreno con series y rangos de repeticiones objetivo
+- **Routine**: plantilla de entreno con series, repeticiones objetivo, calentamiento, consejos y vídeos
 - **WorkoutSession**: entreno registrado (fecha, categoría, ejercicios y series reales)
+- **LoginCode**: código de acceso hasheado, con caducidad, intentos y marca de uso
+- **Diet**: una por usuario, con sus comidas, opciones, suplementos, plan semanal y lista de la compra
 
 ---
 
 ## Desarrollo local
 
 ### Requisitos
-- Node.js ≥ 18
+- Node.js `^20.19` · `^22.12` · `>=24`, que es lo que exige Angular 21
 - PostgreSQL local o una base de datos Neon
 
 ### 1. Clonar e instalar dependencias
@@ -132,20 +161,33 @@ cd ../frontend && npm install
 
 ### 2. Variables de entorno del backend
 
-Crea `backend/.env`:
+Crea `backend/.env` a partir de `backend/.env.example`:
 
 ```env
 DATABASE_URL=postgresql://usuario:contraseña@host:5432/nombre_db
+PORT=3000
+CORS_ORIGIN=http://localhost:4200
+FRONTEND_URL=http://localhost:4200
+
 JWT_SECRET=un_secreto_largo_y_aleatorio
 JWT_EXPIRES_IN=180d
 
-GOOGLE_CLIENT_ID=tu_google_client_id
+# Email de quien administra: ve el historial, el progreso y las rutinas del resto.
+ADMIN_EMAIL=tu@email.com
 
-RESEND_API_KEY=tu_api_key_de_resend
+# Cuenta de demostración del botón "Acceder como test". Por defecto test@test.com.
+TEST_USER_EMAIL=
 
-FRONTEND_URL=http://localhost:4200
-CORS_ORIGIN=http://localhost:4200
+# Sin API key los códigos no se envían: se escriben en el log del servidor con
+# la marca [CODIGO-ACCESO], que sirve para desarrollar pero no para producción.
+RESEND_API_KEY=
+
+# Apaño mientras no haya un dominio propio verificado en Resend: manda todos los
+# códigos a esta dirección, con el email de quien lo pidió en el asunto.
+LOGIN_CODE_RELAY_TO=
 ```
+
+Una variable **vacía no es lo mismo que una ausente**: varios valores por defecto se resuelven con `??`, que solo cae con `undefined`. Si no vas a usar una, déjala fuera del fichero en vez de en blanco.
 
 ### 3. Migraciones y seed
 
@@ -162,10 +204,15 @@ npx prisma db seed
 cd backend && npm run dev
 
 # Terminal 2 — frontend (puerto 4200, proxy hacia :3000)
-cd frontend && ng serve
+cd frontend && npm start
 ```
 
 El proxy de Angular (`proxy.conf.json`) redirige `/api` al backend local automáticamente.
+
+Dos cosas que ahorran un rato:
+
+- `ng` no está instalado como comando global; se usa `npm start`, que lo llama desde `node_modules`.
+- En PowerShell, `npm` resuelve a `npm.ps1` y con la política de ejecución en `Restricted` —el valor por defecto de Windows— no se ejecuta. O se llama a `npm.cmd`, o se levanta la política con `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ---
 
@@ -182,6 +229,8 @@ Al conectar el repositorio en Render → **New Blueprint**, ambos servicios se c
 
 La compilación del frontend para producción usa `fileReplacements` en `angular.json` para sustituir `api.config.ts` por `api.config.prod.ts`, que apunta al backend en Render.
 
+El `buildCommand` de la API termina en `npx prisma migrate deploy`, así que **cada despliegue aplica las migraciones pendientes**: no hay un paso manual donde pararse a pensar antes de que una migración llegue a producción.
+
 ---
 
 ## Tipos de ejercicio
@@ -193,6 +242,14 @@ La compilación del frontend para producción usa `fileReplacements` en `angular
 | `tiempo` | segundos |
 | `emom` | rondas × reps por ronda |
 | `min` | horas + minutos (cardio) |
+
+---
+
+## Instalación como aplicación
+
+`manifest.webmanifest` declara `display: standalone`, así que desde la pantalla de inicio abre a pantalla completa, sin barra de direcciones. Los iconos incluyen los dos `maskable` que Android necesita para llenar la máscara circular del lanzador en vez de flotar dentro de un círculo blanco.
+
+Al cambiar el icono hay que rehacer el acceso directo: Android lo guarda al crearlo y no lo refresca solo.
 
 ---
 
