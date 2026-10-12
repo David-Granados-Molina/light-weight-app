@@ -37,6 +37,9 @@ export interface ExerciseProfile {
   imageData: string | null;
   /** Imagen del catálogo libre: se guarda el enlace, no una copia. */
   imageUrl: string | null;
+  /** Autoría de esa imagen: las de wger son CC-BY-SA y hay que citarla. */
+  imageAuthor: string | null;
+  imageLicense: string | null;
   videoUrl: string | null;
   description: string | null;
   tips: string | null;
@@ -46,12 +49,13 @@ export interface ExerciseProfile {
 
 export type ExerciseProfileInput = Omit<ExerciseProfile, 'id' | 'exerciseId'>;
 
-/** Candidato del catálogo libre (free-exercise-db, dominio público). */
+/** Candidato del catálogo libre de wger, con su autoría. */
 export interface FreeExerciseImage {
   id: string;
   name: string;
-  equipment: string | null;
-  level: string | null;
-  primaryMuscles: string[];
-  images: string[];
+  nameEn: string | null;
+  image: string;
+  thumbnail: string;
+  author: string | null;
+  license: string;
 }

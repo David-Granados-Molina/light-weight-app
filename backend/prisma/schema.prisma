@@ -208,6 +208,9 @@ model ExerciseProfile {
   imageData  String?
   /// Imagen externa (catálogo libre): se guarda el enlace, no una copia.
   imageUrl   String?
+  /// Autoría de esa imagen: las de wger son CC-BY-SA y obligan a citarla.
+  imageAuthor  String?
+  imageLicense String?
   videoUrl   String?
   description String?
   tips       String?

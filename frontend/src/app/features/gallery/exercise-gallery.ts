@@ -92,6 +92,8 @@ export class ExerciseGallery {
 
   readonly formImagen = signal<string | null>(null);
   readonly formImagenUrl = signal<string | null>(null);
+  readonly formImagenAutor = signal<string | null>(null);
+  readonly formImagenLicencia = signal<string | null>(null);
   readonly formVideo = signal('');
   readonly formDescripcion = signal('');
   readonly formConsejos = signal('');
@@ -170,6 +172,8 @@ export class ExerciseGallery {
 
     this.formImagen.set(tarjeta.profile?.imageData ?? null);
     this.formImagenUrl.set(tarjeta.profile?.imageUrl ?? null);
+    this.formImagenAutor.set(tarjeta.profile?.imageAuthor ?? null);
+    this.formImagenLicencia.set(tarjeta.profile?.imageLicense ?? null);
     this.formVideo.set(tarjeta.profile?.videoUrl ?? '');
     this.formDescripcion.set(tarjeta.profile?.description ?? '');
     this.formConsejos.set(tarjeta.profile?.tips ?? '');
@@ -192,6 +196,8 @@ export class ExerciseGallery {
 
     this.formImagen.set(null);
     this.formImagenUrl.set(null);
+    this.formImagenAutor.set(null);
+    this.formImagenLicencia.set(null);
     this.formVideo.set('');
     this.formDescripcion.set('');
     this.formConsejos.set('');
@@ -222,6 +228,8 @@ export class ExerciseGallery {
       const dataUrl = await this.reducir(fichero);
       this.formImagen.set(dataUrl);
       this.formImagenUrl.set(null);
+      this.formImagenAutor.set(null);
+      this.formImagenLicencia.set(null);
     } catch {
       this.guardarError.set('No se ha podido leer esa imagen.');
     }
@@ -257,6 +265,8 @@ export class ExerciseGallery {
   quitarImagen(): void {
     this.formImagen.set(null);
     this.formImagenUrl.set(null);
+    this.formImagenAutor.set(null);
+    this.formImagenLicencia.set(null);
   }
 
   buscarImagenes(): void {
@@ -279,11 +289,21 @@ export class ExerciseGallery {
     });
   }
 
-  elegirCandidata(url: string): void {
-    this.formImagenUrl.set(url);
+  elegirCandidata(candidata: FreeExerciseImage): void {
+    this.formImagenUrl.set(candidata.image);
+    this.formImagenAutor.set(candidata.author);
+    this.formImagenLicencia.set(candidata.license);
     this.formImagen.set(null);
     this.candidatos.set([]);
   }
+
+  /** Crédito que acompaña a la imagen; CC-BY-SA obliga a citar al autor. */
+  readonly creditoImagen = computed(() => {
+    const autor = this.formImagenAutor();
+    const licencia = this.formImagenLicencia();
+    if (!autor && !licencia) return null;
+    return [autor, licencia].filter(Boolean).join(' · ');
+  });
 
   /* --- Guardar ---------------------------------------------------------------- */
 
@@ -366,6 +386,8 @@ export class ExerciseGallery {
       .saveProfile(exerciseId, {
         imageData: this.formImagen(),
         imageUrl: this.formImagenUrl(),
+        imageAuthor: this.formImagenAutor(),
+        imageLicense: this.formImagenLicencia(),
         videoUrl: this.formVideo().trim() || null,
         description: this.formDescripcion().trim() || null,
         tips: this.formConsejos().trim() || null,

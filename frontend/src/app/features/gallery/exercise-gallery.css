@@ -316,9 +316,14 @@
 .gal-candidate {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--s-2);
   flex-shrink: 0;
-  width: 168px;
+  width: 132px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .gal-candidate-name {
@@ -327,15 +332,10 @@
   line-height: 1.35;
 }
 
-.gal-candidate-shots {
-  display: flex;
-  gap: var(--s-2);
-}
-
 .gal-candidate-shot {
-  width: 78px;
-  height: 78px;
-  padding: 0;
+  display: block;
+  width: 132px;
+  height: 132px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   background: #ffffff;
@@ -343,8 +343,18 @@
   transition: border-color var(--dur) var(--ease-out);
 }
 
-.gal-candidate-shot:hover {
+.gal-candidate:hover .gal-candidate-shot {
   border-color: var(--accent-solid);
+}
+
+.gal-candidate-author {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.gal-credit {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
 }
 
 .gal-candidate-shot img {

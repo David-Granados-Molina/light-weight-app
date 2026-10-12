@@ -17,6 +17,8 @@ const profileSchema = z.object({
     .nullable()
     .or(z.literal('')),
   imageUrl: z.string().url().max(500).optional().nullable().or(z.literal('')),
+  imageAuthor: z.string().max(120).optional().nullable(),
+  imageLicense: z.string().max(60).optional().nullable(),
   videoUrl: z.string().url().max(500).optional().nullable().or(z.literal('')),
   description: z.string().max(2000).optional().nullable(),
   tips: z.string().max(2000).optional().nullable(),
@@ -43,6 +45,8 @@ exerciseProfilesRouter.put('/:exerciseId', asyncHandler(async (req, res) => {
   const datos = {
     imageData: vacioANull(parsed.data.imageData),
     imageUrl: vacioANull(parsed.data.imageUrl),
+    imageAuthor: vacioANull(parsed.data.imageAuthor),
+    imageLicense: vacioANull(parsed.data.imageLicense),
     videoUrl: vacioANull(parsed.data.videoUrl),
     description: vacioANull(parsed.data.description),
     tips: vacioANull(parsed.data.tips),

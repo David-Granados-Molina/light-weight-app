@@ -163,6 +163,10 @@
             </div>
           </div>
 
+          @if (creditoImagen(); as credito) {
+            <p class="gal-credit">Imagen de {{ credito }}, vía wger.de</p>
+          }
+
           @if (sinCandidatos()) {
             <p class="gal-hint">Sin resultados. El catálogo libre está en inglés: prueba con otro término («bench press», «squat»…) o sube tu imagen.</p>
           }
@@ -170,19 +174,18 @@
           @if (candidatos().length) {
             <div class="gal-candidates app-scroll">
               @for (c of candidatos(); track c.id) {
-                <div class="gal-candidate">
+                <button type="button" class="gal-candidate" (click)="elegirCandidata(c)">
+                  <span class="gal-candidate-shot">
+                    <img [src]="c.thumbnail" [alt]="c.name" loading="lazy" />
+                  </span>
                   <span class="gal-candidate-name">{{ c.name }}</span>
-                  <div class="gal-candidate-shots">
-                    @for (url of c.images; track url) {
-                      <button type="button" class="gal-candidate-shot" (click)="elegirCandidata(url)">
-                        <img [src]="url" [alt]="c.name" loading="lazy" />
-                      </button>
-                    }
-                  </div>
-                </div>
+                  @if (c.author) {
+                    <span class="gal-candidate-author">{{ c.author }} · {{ c.license }}</span>
+                  }
+                </button>
               }
             </div>
-            <p class="gal-hint">Imágenes de free-exercise-db, de dominio público. Se guarda el enlace, no una copia.</p>
+            <p class="gal-hint">Imágenes de wger.de, bajo Creative Commons. Se guarda el enlace y la autoría, no una copia.</p>
           }
         </section>
 
