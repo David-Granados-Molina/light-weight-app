@@ -1,0 +1,349 @@
+<div class="lw-page lw-page-wide gal">
+  <header class="gal-head">
+    <h1 class="lw-title">Galería de ejercicios</h1>
+    <button type="button" class="lw-btn-primary gal-new" (click)="nuevo()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Nuevo ejercicio
+    </button>
+  </header>
+
+  <div class="gal-filters">
+    <div class="lw-chips">
+      @for (chip of filtroChips; track chip.key) {
+        <button
+          type="button"
+          class="lw-chip"
+          [class.is-active]="filtro() === chip.key"
+          [class.is-gym]="chip.key === 'gym'"
+          [class.is-cali]="chip.key === 'calistenia'"
+          [attr.aria-pressed]="filtro() === chip.key"
+          (click)="selectFiltro(chip.key)"
+        >
+          {{ chip.label }}
+        </button>
+      }
+    </div>
+
+    <input
+      class="lw-input gal-search"
+      type="search"
+      placeholder="Buscar ejercicio…"
+      aria-label="Buscar ejercicio"
+      [value]="busqueda()"
+      (input)="onBuscar($event)"
+    />
+  </div>
+
+  @if (borrarError()) {
+    <div class="lw-error" role="alert">{{ borrarError() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="gal-grid" aria-busy="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="lw-skel gal-skel"></div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="lw-error" role="alert">No se ha podido cargar el catálogo de ejercicios.</div>
+  } @else {
+    <p class="gal-count lw-num">
+      {{ tarjetas().length }} {{ tarjetas().length === 1 ? 'ejercicio' : 'ejercicios' }} · {{ conImagen() }} con imagen
+    </p>
+
+    <div class="gal-grid">
+      @for (t of tarjetas(); track t.exercise.id) {
+        <article class="gal-card" [style.border-left-color]="categoryColor[t.exercise.category]">
+          <button type="button" class="gal-card-main" (click)="abrir(t)">
+            <span class="gal-thumb" [class.has-image]="!!t.imagen">
+              @if (t.imagen) {
+                <img [src]="t.imagen" [alt]="t.exercise.name" loading="lazy" />
+              } @else {
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
+                </svg>
+              }
+            </span>
+
+            <span class="gal-card-text">
+              <span class="gal-card-name">{{ t.exercise.name }}</span>
+              <span class="gal-card-meta" [style.color]="categoryColor[t.exercise.category]">
+                <span class="lw-dot" [style.background]="categoryColor[t.exercise.category]"></span>
+                {{ categoryLabel[t.exercise.category] }} · {{ typeLabel[t.exercise.type] }}
+              </span>
+              @if (t.profile?.videoUrl || t.profile?.description) {
+                <span class="gal-card-badges">
+                  @if (t.profile?.videoUrl) {
+                    <span class="gal-badge">Vídeo</span>
+                  }
+                  @if (t.profile?.description) {
+                    <span class="gal-badge">Cómo hacerlo</span>
+                  }
+                </span>
+              }
+            </span>
+          </button>
+
+          @if (isAdmin()) {
+            <button
+              type="button"
+              class="gal-card-delete"
+              [attr.aria-label]="'Eliminar ' + t.exercise.name + ' del catálogo'"
+              (click)="pedirBorrado(t.exercise, $event)"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          }
+        </article>
+      } @empty {
+        <div class="lw-empty gal-empty">
+          <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <p class="lw-empty-title">Ningún ejercicio con esos filtros</p>
+          <p class="lw-empty-text">Prueba con otra categoría o borra el texto de búsqueda.</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (abierta() || creando()) {
+  <div class="lw-overlay gal-overlay" (click)="cerrar()">
+    <div class="lw-sheet gal-sheet" (click)="$event.stopPropagation()">
+      <header class="gal-sheet-head">
+        <h2 class="gal-sheet-title">{{ creando() ? 'Nuevo ejercicio' : abierta()!.exercise.name }}</h2>
+        <button type="button" class="lw-icon-btn" aria-label="Cerrar" (click)="cerrar()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="gal-sheet-body app-scroll">
+        <!-- Imagen -->
+        <section class="gal-block">
+          <span class="lw-label">Imagen de la tarjeta</span>
+          <div class="gal-image-row">
+            <span class="gal-image-preview" [class.has-image]="!!imagenPrevia()">
+              @if (imagenPrevia()) {
+                <img [src]="imagenPrevia()!" alt="" />
+              } @else {
+                <span class="gal-image-empty">Sin imagen</span>
+              }
+            </span>
+
+            <div class="gal-image-actions">
+              <label class="lw-btn-secondary gal-upload">
+                Subir imagen
+                <input type="file" accept="image/*" (change)="onImagenElegida($event)" hidden />
+              </label>
+              <div class="gal-search-image">
+                <input
+                  class="lw-input"
+                  type="search"
+                  aria-label="Buscar imagen en el catálogo libre"
+                  placeholder="Buscar imagen…"
+                  [ngModel]="consultaImagen()"
+                  (ngModelChange)="consultaImagen.set($event)"
+                  (keydown.enter)="buscarImagenes()"
+                />
+                <button type="button" class="lw-btn-secondary" [disabled]="buscandoImagen()" (click)="buscarImagenes()">
+                  {{ buscandoImagen() ? 'Buscando…' : 'Buscar' }}
+                </button>
+              </div>
+              @if (imagenPrevia()) {
+                <button type="button" class="lw-btn-ghost" (click)="quitarImagen()">Quitar</button>
+              }
+            </div>
+          </div>
+
+          @if (sinCandidatos()) {
+            <p class="gal-hint">Sin resultados. El catálogo libre está en inglés: prueba con otro término («bench press», «squat»…) o sube tu imagen.</p>
+          }
+
+          @if (candidatos().length) {
+            <div class="gal-candidates app-scroll">
+              @for (c of candidatos(); track c.id) {
+                <div class="gal-candidate">
+                  <span class="gal-candidate-name">{{ c.name }}</span>
+                  <div class="gal-candidate-shots">
+                    @for (url of c.images; track url) {
+                      <button type="button" class="gal-candidate-shot" (click)="elegirCandidata(url)">
+                        <img [src]="url" [alt]="c.name" loading="lazy" />
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <p class="gal-hint">Imágenes de free-exercise-db, de dominio público. Se guarda el enlace, no una copia.</p>
+          }
+        </section>
+
+        <!-- Catálogo compartido -->
+        <section class="gal-block">
+          <span class="lw-label">Ficha del catálogo</span>
+          @if (!creando() && !isAdmin()) {
+            <p class="gal-hint">Estos datos son comunes a todos los usuarios y solo los cambia quien administra.</p>
+          }
+
+          <label class="lw-field">
+            <span class="lw-label">Nombre</span>
+            <input
+              class="lw-input"
+              type="text"
+              [disabled]="!creando() && !isAdmin()"
+              [ngModel]="formNombre()"
+              (ngModelChange)="formNombre.set($event)"
+            />
+          </label>
+
+          <div class="gal-grid-fields">
+            <label class="lw-field">
+              <span class="lw-label">Categoría</span>
+              <select
+                class="lw-select"
+                [disabled]="!creando() && !isAdmin()"
+                [ngModel]="formCategoria()"
+                (ngModelChange)="formCategoria.set($event)"
+              >
+                @for (c of categorias; track c) {
+                  <option [value]="c">{{ categoryLabel[c] }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="lw-field">
+              <span class="lw-label">Tipo</span>
+              <select
+                class="lw-select"
+                [disabled]="!creando() && !isAdmin()"
+                [ngModel]="formTipo()"
+                (ngModelChange)="formTipo.set($event)"
+              >
+                @for (t of tipos; track t) {
+                  <option [value]="t">{{ typeLabel[t] }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="lw-field">
+              <span class="lw-label">Modo de registro</span>
+              <select
+                class="lw-select"
+                [disabled]="!creando() && !isAdmin()"
+                [ngModel]="formModo()"
+                (ngModelChange)="formModo.set($event)"
+              >
+                @for (m of modos; track m) {
+                  <option [value]="m">{{ inputTypeLabel[m] }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <!-- Ficha personal -->
+        <section class="gal-block">
+          <span class="lw-label">Tu ficha</span>
+          <p class="gal-hint">Esto es tuyo: otra persona puede tener su propio vídeo y sus propias notas del mismo ejercicio.</p>
+
+          <label class="lw-field">
+            <span class="lw-label">Vídeo</span>
+            <input
+              class="lw-input"
+              type="url"
+              placeholder="YouTube, TikTok o Instagram"
+              [ngModel]="formVideo()"
+              (ngModelChange)="formVideo.set($event)"
+            />
+          </label>
+
+          @if (videoEmbed(); as embed) {
+            <div class="lw-video gal-video">
+              <iframe [src]="embed" title="Vídeo del ejercicio" allowfullscreen loading="lazy"></iframe>
+            </div>
+          } @else if (formVideo().trim()) {
+            <p class="gal-hint">Ese enlace no se puede ver aquí dentro; se guardará igual y se abrirá fuera.</p>
+          }
+
+          <label class="lw-field">
+            <span class="lw-label">Cómo hacerlo</span>
+            <textarea
+              class="lw-textarea"
+              rows="3"
+              [ngModel]="formDescripcion()"
+              (ngModelChange)="formDescripcion.set($event)"
+            ></textarea>
+          </label>
+
+          <label class="lw-field">
+            <span class="lw-label">Consejos de ejecución</span>
+            <textarea
+              class="lw-textarea"
+              rows="3"
+              placeholder="Errores típicos, señales de que va bien…"
+              [ngModel]="formConsejos()"
+              (ngModelChange)="formConsejos.set($event)"
+            ></textarea>
+          </label>
+
+          <div class="gal-grid-fields">
+            <label class="lw-field">
+              <span class="lw-label">Material</span>
+              <input
+                class="lw-input"
+                type="text"
+                placeholder="Barra, mancuernas, anillas…"
+                [ngModel]="formMaterial()"
+                (ngModelChange)="formMaterial.set($event)"
+              />
+            </label>
+
+            <label class="lw-field">
+              <span class="lw-label">Dificultad</span>
+              <select class="lw-select" [ngModel]="formDificultad()" (ngModelChange)="formDificultad.set($event)">
+                <option value="">Sin indicar</option>
+                @for (d of dificultades; track d.value) {
+                  <option [value]="d.value">{{ d.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        </section>
+
+        @if (guardarError()) {
+          <p class="lw-error" role="alert">{{ guardarError() }}</p>
+        }
+      </div>
+
+      <footer class="gal-sheet-foot">
+        <button type="button" class="lw-btn-secondary" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="lw-btn-primary" [disabled]="guardando()" (click)="guardar()">
+          {{ guardando() ? 'Guardando…' : creando() ? 'Crear ejercicio' : 'Guardar' }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}
+
+@if (borrarTarget(); as target) {
+  <app-confirm-dialog
+    title="Eliminar del catálogo"
+    [message]="
+      'Se eliminará «' +
+      target.name +
+      '» del catálogo compartido, para todos los usuarios. Solo se puede si no lo usa ningún entreno ni ninguna rutina.'
+    "
+    confirmText="Eliminar"
+    cancelText="Dejarlo"
+    (confirmed)="confirmarBorrado()"
+    (cancelled)="cancelarBorrado()"
+  />
+}

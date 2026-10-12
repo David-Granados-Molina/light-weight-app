@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { authRouter } from './routes/auth';
+import { exerciseImagesRouter } from './routes/exercise-images';
+import { exerciseProfilesRouter } from './routes/exercise-profiles';
 import { exercisesRouter } from './routes/exercises';
 import { routinesRouter } from './routes/routines';
 import { sessionsRouter } from './routes/sessions';
@@ -45,6 +47,8 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRouter);
 
 app.use('/api/exercises', requireAuth, exercisesRouter);
+app.use('/api/exercise-profiles', requireAuth, exerciseProfilesRouter);
+app.use('/api/exercise-images', requireAuth, exerciseImagesRouter);
 app.use('/api/routines', requireAuth, routinesRouter);
 app.use('/api/sessions', requireAuth, sessionsRouter);
 app.use('/api/dashboard', requireAuth, dashboardRouter);

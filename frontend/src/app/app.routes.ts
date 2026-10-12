@@ -24,6 +24,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/history/history').then((m) => m.History),
   },
   {
+    path: 'galeria',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/gallery/exercise-gallery').then((m) => m.ExerciseGallery),
+  },
+  {
     path: 'progreso',
     canActivate: [authGuard],
     loadComponent: () => import('./features/progress/progress').then((m) => m.Progress),

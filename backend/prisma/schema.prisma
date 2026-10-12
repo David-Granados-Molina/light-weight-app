@@ -39,6 +39,7 @@ model User {
   sessions   WorkoutSession[]
   loginCodes LoginCode[]
   diet       Diet?
+  exerciseProfiles ExerciseProfile[]
 }
 
 /// Código de un solo uso que se envía por email para entrar. Sustituye a la
@@ -193,6 +194,37 @@ model ShoppingItem {
   @@index([dietId, category, order])
 }
 
+/// Ficha personal de un ejercicio del catálogo: lo que cada usuario apunta sobre
+/// él. El catálogo es compartido porque su id enlaza entrenos, rutinas y
+/// progreso; esto es la capa de cada uno, y dos personas pueden tener vídeos,
+/// imágenes o consejos distintos del mismo ejercicio.
+model ExerciseProfile {
+  id         String     @id @default(uuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  /// Imagen subida por el usuario, como data URL ya reducida en el navegador.
+  imageData  String?
+  /// Imagen externa (catálogo libre): se guarda el enlace, no una copia.
+  imageUrl   String?
+  videoUrl   String?
+  description String?
+  tips       String?
+  equipment  String?
+  difficulty Difficulty?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
+
+  @@unique([userId, exerciseId])
+}
+
+enum Difficulty {
+  iniciacion
+  intermedio
+  avanzado
+}
+
 model Exercise {
   id               String            @id @default(uuid())
   name             String            @unique
@@ -207,6 +239,7 @@ model Exercise {
   createdAt        DateTime          @default(now())
   routineExercises RoutineExercise[]
   sessionExercises SessionExercise[]
+  profiles         ExerciseProfile[]
 }
 
 model Routine {

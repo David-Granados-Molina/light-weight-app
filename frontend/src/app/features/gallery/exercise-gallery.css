@@ -1,0 +1,367 @@
+.gal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 599px) {
+  .gal-new {
+    width: 100%;
+  }
+}
+
+.gal-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.gal-count {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+@media (min-width: 900px) {
+  .gal-filters {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-5);
+    padding: var(--s-5);
+  }
+
+  .gal-search {
+    flex: 1;
+    min-width: 220px;
+  }
+}
+
+/* --- Rejilla de tarjetas ---------------------------------------------------- */
+
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--s-3);
+}
+
+.gal-skel {
+  height: 104px;
+  border-radius: var(--r-md);
+}
+
+.gal-card {
+  position: relative;
+  display: flex;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease-out);
+}
+
+.gal-card:hover {
+  border-color: var(--line-strong);
+}
+
+.gal-card-main {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-3);
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.gal-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  overflow: hidden;
+}
+
+/* Blanco fijo en los dos temas solo cuando hay foto: las del catálogo libre
+   vienen sobre fondo claro y sobre un plano oscuro se recortan en un cuadrado
+   sucio. Vacío, ese blanco sería una mancha. */
+.gal-thumb.has-image {
+  background: #ffffff;
+}
+
+.gal-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gal-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gal-card-name {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.gal-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.gal-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin-top: 2px;
+}
+
+.gal-badge {
+  padding: 2px var(--s-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: var(--t-xs);
+}
+
+.gal-card-delete {
+  position: absolute;
+  top: var(--s-2);
+  right: var(--s-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-muted);
+  transition:
+    background var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out);
+}
+
+.gal-card-delete:hover {
+  background: var(--surface-hover);
+  color: var(--color-negative);
+}
+
+.gal-empty {
+  grid-column: 1 / -1;
+}
+
+/* --- Ficha ------------------------------------------------------------------- */
+
+.gal-overlay {
+  align-items: flex-end;
+}
+
+.gal-sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100%);
+  max-height: 92dvh;
+  padding: 0;
+}
+
+.gal-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.gal-sheet-title {
+  font-size: var(--t-title);
+  font-weight: 650;
+  letter-spacing: -0.016em;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.gal-sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  padding: var(--s-4);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.gal-sheet-foot {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4) var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+.gal-sheet-foot > * {
+  flex: 1;
+}
+
+.gal-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.gal-hint {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+}
+
+.gal-grid-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-3);
+}
+
+@media (min-width: 600px) {
+  .gal-grid-fields {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+.gal-image-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--s-3);
+}
+
+@media (min-width: 560px) {
+  .gal-image-row {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-4);
+  }
+}
+
+.gal-image-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108px;
+  height: 108px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.gal-image-preview.has-image {
+  background: #ffffff;
+}
+
+.gal-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gal-image-empty {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+}
+
+.gal-image-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.gal-upload {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.gal-candidates {
+  display: flex;
+  gap: var(--s-3);
+  padding-bottom: var(--s-2);
+}
+
+.gal-candidate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  flex-shrink: 0;
+  width: 168px;
+}
+
+.gal-candidate-name {
+  font-size: var(--t-xs);
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.gal-candidate-shots {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.gal-candidate-shot {
+  width: 78px;
+  height: 78px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease-out);
+}
+
+.gal-candidate-shot:hover {
+  border-color: var(--accent-solid);
+}
+
+.gal-candidate-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gal-video {
+  margin-top: var(--s-1);
+}
+
+.gal-search-image {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.gal-search-image .lw-input {
+  min-width: 0;
+}

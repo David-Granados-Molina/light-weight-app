@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
+import { requireAdmin } from '../middleware/requireAdmin';
 
 export const exercisesRouter = Router();
 
@@ -48,7 +49,7 @@ exercisesRouter.post('/', asyncHandler(async (req, res) => {
   }
 }));
 
-exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
+exercisesRouter.put('/:id', requireAdmin, asyncHandler(async (req, res) => {
   const parsed = exerciseSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
@@ -63,11 +64,20 @@ exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
   }
 }));
 
-exercisesRouter.delete('/:id', asyncHandler(async (req, res) => {
-  try {
-    await prisma.exercise.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch {
-    res.status(404).json({ error: 'Ejercicio no encontrado' });
+exercisesRouter.delete('/:id', requireAdmin, asyncHandler(async (req, res) => {
+  const exercise = await prisma.exercise.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
+
+  // Borrarlo dejaría entrenos y rutinas apuntando al vacío, así que se dice
+  // cuántos lo usan en vez de fallar con un error de clave ajena.
+  const [enEntrenos, enRutinas] = await Promise.all([
+    prisma.sessionExercise.count({ where: { exerciseId: exercise.id } }),
+    prisma.routineExercise.count({ where: { exerciseId: exercise.id } }),
+  ]);
+  if (enEntrenos || enRutinas) {
+    return res.status(409).json({ error: 'El ejercicio está en uso', enEntrenos, enRutinas });
   }
+
+  await prisma.exercise.delete({ where: { id: exercise.id } });
+  res.status(204).send();
 }));

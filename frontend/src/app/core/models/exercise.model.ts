@@ -26,3 +26,32 @@ export interface ExerciseInput {
   primaryMuscles?: string[];
   secondaryMuscles?: string[];
 }
+
+export type Difficulty = 'iniciacion' | 'intermedio' | 'avanzado';
+
+/** Lo que cada usuario apunta sobre un ejercicio del catálogo compartido. */
+export interface ExerciseProfile {
+  id: string;
+  exerciseId: string;
+  /** Imagen subida, como data URL ya reducida en el navegador. */
+  imageData: string | null;
+  /** Imagen del catálogo libre: se guarda el enlace, no una copia. */
+  imageUrl: string | null;
+  videoUrl: string | null;
+  description: string | null;
+  tips: string | null;
+  equipment: string | null;
+  difficulty: Difficulty | null;
+}
+
+export type ExerciseProfileInput = Omit<ExerciseProfile, 'id' | 'exerciseId'>;
+
+/** Candidato del catálogo libre (free-exercise-db, dominio público). */
+export interface FreeExerciseImage {
+  id: string;
+  name: string;
+  equipment: string | null;
+  level: string | null;
+  primaryMuscles: string[];
+  images: string[];
+}

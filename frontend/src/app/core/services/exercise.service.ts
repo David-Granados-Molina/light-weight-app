@@ -2,7 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
-import { Category, Exercise, ExerciseInput } from '../models/exercise.model';
+import {
+  Category,
+  Exercise,
+  ExerciseInput,
+  ExerciseProfile,
+  ExerciseProfileInput,
+  FreeExerciseImage,
+} from '../models/exercise.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExerciseService {
@@ -26,5 +33,23 @@ export class ExerciseService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /* --- Ficha propia de cada ejercicio -------------------------------------- */
+
+  getProfiles(): Observable<ExerciseProfile[]> {
+    return this.http.get<ExerciseProfile[]>(`${API_BASE_URL}/exercise-profiles`);
+  }
+
+  saveProfile(exerciseId: string, input: ExerciseProfileInput): Observable<ExerciseProfile> {
+    return this.http.put<ExerciseProfile>(`${API_BASE_URL}/exercise-profiles/${exerciseId}`, input);
+  }
+
+  clearProfile(exerciseId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/exercise-profiles/${exerciseId}`);
+  }
+
+  searchFreeImages(q: string): Observable<FreeExerciseImage[]> {
+    return this.http.get<FreeExerciseImage[]>(`${API_BASE_URL}/exercise-images`, { params: { q } });
   }
 }
