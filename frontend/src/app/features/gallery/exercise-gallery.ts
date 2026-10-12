@@ -15,6 +15,7 @@ import {
 import { CATEGORY_COLOR, CATEGORY_LABEL, INPUT_TYPE_LABEL, TYPE_LABEL } from '../../core/models/labels';
 import { videoEmbedUrl } from '../../core/utils/video';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
+import { ImageLightbox } from '../../shared/components/image-lightbox/image-lightbox';
 
 type Filtro = 'todos' | Category;
 
@@ -36,7 +37,7 @@ const CALIDAD = 0.72;
 
 @Component({
   selector: 'app-exercise-gallery',
-  imports: [FormsModule, ConfirmDialog],
+  imports: [FormsModule, ConfirmDialog, ImageLightbox],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './exercise-gallery.html',
   styleUrl: './exercise-gallery.css',
@@ -83,6 +84,40 @@ export class ExerciseGallery {
   });
 
   readonly conImagen = computed(() => this.tarjetas().filter((t) => t.imagen).length);
+
+  /* --- Imagen ampliada ------------------------------------------------------- */
+
+  readonly lightbox = signal<{ src: string; alt: string; credit: string | null } | null>(null);
+
+  ampliar(tarjeta: Tarjeta, event: Event): void {
+    event.stopPropagation();
+    if (!tarjeta.imagen) return;
+    this.lightbox.set({
+      src: tarjeta.imagen,
+      alt: tarjeta.exercise.name,
+      credit: this.credito(tarjeta.profile?.imageAuthor ?? null, tarjeta.profile?.imageLicense ?? null),
+    });
+  }
+
+  /** La de la ficha abierta, que puede ser una recién elegida y aún sin guardar. */
+  ampliarPrevia(): void {
+    const src = this.imagenPrevia();
+    if (!src) return;
+    this.lightbox.set({
+      src,
+      alt: this.formNombre(),
+      credit: this.credito(this.formImagenAutor(), this.formImagenLicencia()),
+    });
+  }
+
+  cerrarLightbox(): void {
+    this.lightbox.set(null);
+  }
+
+  private credito(autor: string | null, licencia: string | null): string | null {
+    if (!autor && !licencia) return null;
+    return `Imagen de ${[autor, licencia].filter(Boolean).join(' · ')}, vía wger.de`;
+  }
 
   /* --- Ficha abierta -------------------------------------------------------- */
 
@@ -298,12 +333,7 @@ export class ExerciseGallery {
   }
 
   /** Crédito que acompaña a la imagen; CC-BY-SA obliga a citar al autor. */
-  readonly creditoImagen = computed(() => {
-    const autor = this.formImagenAutor();
-    const licencia = this.formImagenLicencia();
-    if (!autor && !licencia) return null;
-    return [autor, licencia].filter(Boolean).join(' · ');
-  });
+  readonly creditoImagen = computed(() => this.credito(this.formImagenAutor(), this.formImagenLicencia()));
 
   /* --- Guardar ---------------------------------------------------------------- */
 

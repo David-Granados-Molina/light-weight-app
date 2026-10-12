@@ -82,6 +82,8 @@
 }
 
 .gal-thumb {
+  padding: 0;
+  border: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,6 +101,11 @@
    sucio. Vacío, ese blanco sería una mancha. */
 .gal-thumb.has-image {
   background: #ffffff;
+  cursor: zoom-in;
+}
+
+.gal-card-main {
+  padding-left: 0;
 }
 
 .gal-thumb img {
@@ -279,6 +286,8 @@
 
 .gal-image-preview.has-image {
   background: #ffffff;
+  padding: 0;
+  cursor: zoom-in;
 }
 
 .gal-image-preview img {

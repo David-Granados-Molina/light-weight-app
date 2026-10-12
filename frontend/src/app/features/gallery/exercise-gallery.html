@@ -56,17 +56,26 @@
     <div class="gal-grid">
       @for (t of tarjetas(); track t.exercise.id) {
         <article class="gal-card" [style.border-left-color]="categoryColor[t.exercise.category]">
-          <button type="button" class="gal-card-main" (click)="abrir(t)">
-            <span class="gal-thumb" [class.has-image]="!!t.imagen">
-              @if (t.imagen) {
-                <img [src]="t.imagen" [alt]="t.exercise.name" loading="lazy" />
-              } @else {
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
-                </svg>
-              }
+          <!-- La miniatura va fuera del botón de la tarjeta: un botón dentro de
+               otro no es HTML válido ni es navegable con teclado. -->
+          @if (t.imagen; as imagen) {
+            <button
+              type="button"
+              class="gal-thumb has-image"
+              [attr.aria-label]="'Ver la imagen de ' + t.exercise.name + ' ampliada'"
+              (click)="ampliar(t, $event)"
+            >
+              <img [src]="imagen" [alt]="t.exercise.name" loading="lazy" />
+            </button>
+          } @else {
+            <span class="gal-thumb" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 4v16M18 4v16M3 9h6M15 9h6M3 15h6M15 15h6" />
+              </svg>
             </span>
+          }
 
+          <button type="button" class="gal-card-main" (click)="abrir(t)">
             <span class="gal-card-text">
               <span class="gal-card-name">{{ t.exercise.name }}</span>
               <span class="gal-card-meta" [style.color]="categoryColor[t.exercise.category]">
@@ -130,13 +139,20 @@
         <section class="gal-block">
           <span class="lw-label">Imagen de la tarjeta</span>
           <div class="gal-image-row">
-            <span class="gal-image-preview" [class.has-image]="!!imagenPrevia()">
-              @if (imagenPrevia()) {
-                <img [src]="imagenPrevia()!" alt="" />
-              } @else {
+            @if (imagenPrevia(); as previa) {
+              <button
+                type="button"
+                class="gal-image-preview has-image"
+                aria-label="Ver la imagen ampliada"
+                (click)="ampliarPrevia()"
+              >
+                <img [src]="previa" alt="" />
+              </button>
+            } @else {
+              <span class="gal-image-preview">
                 <span class="gal-image-empty">Sin imagen</span>
-              }
-            </span>
+              </span>
+            }
 
             <div class="gal-image-actions">
               <label class="lw-btn-secondary gal-upload">
@@ -164,7 +180,7 @@
           </div>
 
           @if (creditoImagen(); as credito) {
-            <p class="gal-credit">Imagen de {{ credito }}, vía wger.de</p>
+            <p class="gal-credit">{{ credito }}</p>
           }
 
           @if (sinCandidatos()) {
@@ -348,5 +364,14 @@
     cancelText="Dejarlo"
     (confirmed)="confirmarBorrado()"
     (cancelled)="cancelarBorrado()"
+  />
+}
+
+@if (lightbox(); as vista) {
+  <app-image-lightbox
+    [src]="vista.src"
+    [alt]="vista.alt"
+    [credit]="vista.credit"
+    (closed)="cerrarLightbox()"
   />
 }
