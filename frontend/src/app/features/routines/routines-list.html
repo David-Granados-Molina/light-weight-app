@@ -41,30 +41,51 @@
               <span class="cell-count lw-num">{{ r.count }}</span>
             </a>
 
-            @if (isAdmin()) {
+            <div class="row-tools">
               <button
                 type="button"
-                class="row-copy"
-                [attr.aria-label]="'Copiar la rutina ' + r.name + ' a otra cuenta'"
-                (click)="askCopy(r.id, r.name, $event)"
+                class="row-tool"
+                [attr.aria-label]="'Copiar la rutina ' + r.name + ' al portapapeles'"
+                (click)="copyToClipboard(r.id, $event)"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="9" y="9" width="11" height="11" rx="2" />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                @if (copiedId() === r.id) {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                } @else {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                }
+              </button>
+
+              @if (isAdmin()) {
+                <button
+                  type="button"
+                  class="row-tool"
+                  [attr.aria-label]="'Copiar la rutina ' + r.name + ' a otra cuenta'"
+                  (click)="askCopy(r.id, r.name, $event)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M19 8v6M22 11h-6" />
+                  </svg>
+                </button>
+              }
+
+              <button
+                type="button"
+                class="row-tool is-danger"
+                [attr.aria-label]="'Eliminar la rutina ' + r.name"
+                (click)="askDeleteRoutine(r.id, $event)"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
               </button>
-            }
-
-            <button
-              type="button"
-              class="row-delete"
-              [attr.aria-label]="'Eliminar la rutina ' + r.name"
-              (click)="askDeleteRoutine(r.id, $event)"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
+            </div>
           </article>
         } @empty {
           <div class="sheet-empty">

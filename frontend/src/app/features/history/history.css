@@ -273,7 +273,7 @@
   }
 
   .sheet-cols {
-    padding: var(--s-3) calc(104px + var(--s-4)) var(--s-3) var(--s-5);
+    padding: var(--s-3) calc(156px + var(--s-4)) var(--s-3) var(--s-5);
     border-bottom: 1px solid var(--line-strong);
     background: var(--chrome);
     font-size: var(--t-label);

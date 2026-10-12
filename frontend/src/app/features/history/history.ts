@@ -6,9 +6,10 @@ import { AdminService } from '../../core/services/admin.service';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { Category } from '../../core/models/exercise.model';
-import { WorkoutSession } from '../../core/models/session.model';
+import { SessionExercise, WorkoutSession } from '../../core/models/session.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL, sessionTypeLabel } from '../../core/models/labels';
 import { dayPhrase, effectiveInputType, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { workoutShareText } from '../../core/utils/share';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 
 type HistFilter = 'todos' | Category;
@@ -132,6 +133,19 @@ export class History {
 
   toggleExpand(id: string): void {
     this.expandedId.update((current) => (current === id ? null : id));
+  }
+
+  readonly copiedId = signal<string | null>(null);
+
+  async copyRow(row: { id: string; date: string; exercises: SessionExercise[] }, event: Event): Promise<void> {
+    event.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(workoutShareText(row.date, row.exercises));
+      this.copiedId.set(row.id);
+      setTimeout(() => this.copiedId.update((id) => (id === row.id ? null : id)), 2000);
+    } catch {
+      // clipboard no disponible
+    }
   }
 
   askDelete(row: { id: string; when: string; typeLabel: string }, event: Event): void {

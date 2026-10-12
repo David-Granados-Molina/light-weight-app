@@ -83,6 +83,11 @@
   min-height: 46px;
 }
 
+.sheet-skel {
+  height: 46px;
+  border-radius: var(--r-sm);
+}
+
 .sheet-date-value {
   display: inline-block;
   flex: 1;

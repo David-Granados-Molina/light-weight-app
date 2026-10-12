@@ -13,6 +13,7 @@ import { SessionInput, SessionSet, WorkoutSession } from '../../core/models/sess
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, INPUT_TYPE_LABEL, sessionTypeLabel, TYPE_LABEL } from '../../core/models/labels';
 import { effectiveInputType, formatSet, formatSets, relativeDayLabel } from '../../core/utils/format';
+import { workoutShareText } from '../../core/utils/share';
 import { AddedExercise, SetEntry, WorkoutDraftStore } from '../../core/services/workout-draft.store';
 import { parseVideoUrl, VIDEO_PROVIDER_LABEL, videoEmbedUrl } from '../../core/utils/video';
 import { NumberWheel } from '../../shared/components/number-wheel/number-wheel';
@@ -344,20 +345,7 @@ export class RegisterWorkout {
 
 
 
-  readonly shareText = computed(() => {
-    const added = this.added();
-    if (!added.length) return '';
-    const date = this.selectedDate() ?? this.todayIso;
-    const dateLabel = new Date(`${date}T00:00:00`).toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-    const capitalized = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
-    const type = sessionTypeLabel(added.map((a) => a.exercise.type));
-    const lines = added.map((a) => `${a.exercise.name}: ${formatSets(a.sets, effectiveInputType(a))}`);
-    return `💪 Entreno · ${capitalized} (${type})\n\n${lines.join('\n')}\n\n— Light Weight`;
-  });
+  readonly shareText = computed(() => workoutShareText(this.selectedDate() ?? this.todayIso, this.added()));
 
   constructor() {
     this.exerciseService.getAll().subscribe((list) => this.catalog.set(list));

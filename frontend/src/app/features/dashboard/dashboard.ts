@@ -4,12 +4,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutDraftStore } from '../../core/services/workout-draft.store';
-import { DashboardSummary, WeekBar } from '../../core/models/dashboard.model';
+import { DashboardSummary, RecentSession, WeekBar } from '../../core/models/dashboard.model';
 import { CategoryTag } from '../../shared/components/category-tag/category-tag';
 import { AppAvatar } from '../../shared/components/avatar/avatar';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { sessionTypeLabel } from '../../core/models/labels';
 import { dayLetter, dayPhrase, effectiveInputType, formatSets, relativeDayLabel, todayLabel } from '../../core/utils/format';
+import { workoutShareText } from '../../core/utils/share';
 
 interface WeekCheckView extends WeekBar {
   letter: string;
@@ -121,6 +122,19 @@ export class Dashboard {
     this.draft.selectedDate.set(iso);
     this.draft.pendingEditDate.set(iso);
     this.router.navigate(['/registrar']);
+  }
+
+  readonly copiedId = signal<string | null>(null);
+
+  async copySession(session: RecentSession, event: Event): Promise<void> {
+    event.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(workoutShareText(session.date, session.exercises));
+      this.copiedId.set(session.id);
+      setTimeout(() => this.copiedId.update((id) => (id === session.id ? null : id)), 2000);
+    } catch {
+      // clipboard no disponible
+    }
   }
 
   askDelete(session: { id: string; date: string; typeLabel: string }, event: Event): void {

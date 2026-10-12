@@ -66,7 +66,12 @@
         />
       </div>
 
-      @if (!loadingRoutines() && routines().length > 0) {
+      @if (loadingRoutines()) {
+        <div class="sheet-field">
+          <span class="lw-label">Rutina</span>
+          <div class="lw-skel sheet-skel" aria-hidden="true"></div>
+        </div>
+      } @else if (routines().length > 0) {
         <div class="sheet-field">
           <span class="lw-label">Rutina</span>
           <app-routine-select

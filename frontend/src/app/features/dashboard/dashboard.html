@@ -130,6 +130,25 @@
                     <button
                       type="button"
                       class="dash-session-action"
+                      [attr.aria-label]="'Copiar el entreno del ' + relativeDayLabel(s.date) + ' al portapapeles'"
+                      (click)="copySession(s, $event)"
+                    >
+                      @if (copiedId() === s.id) {
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="dash-session-action-text">Copiado</span>
+                      } @else {
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <rect x="9" y="9" width="11" height="11" rx="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span class="dash-session-action-text">Copiar</span>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="dash-session-action"
                       [attr.aria-label]="'Editar el entreno del ' + relativeDayLabel(s.date)"
                       (click)="editSession(s.date, $event)"
                     >

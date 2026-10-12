@@ -53,7 +53,7 @@
   flex-direction: column;
   gap: var(--s-2);
   width: 100%;
-  padding: var(--s-4) var(--s-10) var(--s-4) var(--s-4);
+  padding: var(--s-4) 116px var(--s-4) var(--s-4);
   transition: background var(--dur) var(--ease-out);
 }
 
@@ -99,33 +99,15 @@
   content: ' ejercicios';
 }
 
-.row-delete {
+.row-tools {
   position: absolute;
   top: var(--s-3);
   right: var(--s-3);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: var(--r-xs);
-  background: transparent;
-  color: var(--text-muted);
-  transition:
-    background var(--dur) var(--ease-out),
-    color var(--dur) var(--ease-out);
+  gap: var(--s-1);
 }
 
-.row-delete:hover {
-  background: var(--surface-hover);
-  color: var(--color-negative);
-}
-
-.row-copy {
-  position: absolute;
-  top: var(--s-3);
-  right: calc(var(--s-3) + 32px + var(--s-1));
+.row-tool {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -140,9 +122,13 @@
     color var(--dur) var(--ease-out);
 }
 
-.row-copy:hover {
+.row-tool:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+
+.row-tool.is-danger:hover {
+  color: var(--color-negative);
 }
 
 .sheet-empty {
@@ -169,7 +155,7 @@
   }
 
   .sheet-cols {
-    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    padding: var(--s-3) 124px var(--s-3) var(--s-5);
     border-bottom: 1px solid var(--line-strong);
     background: var(--chrome);
     font-size: var(--t-label);
@@ -180,7 +166,7 @@
   }
 
   .row-main {
-    padding: var(--s-3) 60px var(--s-3) var(--s-5);
+    padding: var(--s-3) 124px var(--s-3) var(--s-5);
     min-height: 60px;
   }
 
@@ -202,7 +188,7 @@
     text-align: right;
   }
 
-  .row-delete {
+  .row-tools {
     top: 50%;
     right: var(--s-4);
     transform: translateY(-50%);

@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
 import { CATEGORY_COLOR, CATEGORY_LABEL } from '../../core/models/labels';
+import { routineShareText } from '../../core/utils/share';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { RoutineCopyDialog } from '../../shared/components/routine-copy-dialog/routine-copy-dialog';
 
@@ -27,6 +28,22 @@ export class RoutinesList {
 
   readonly isAdmin = computed(() => this.authService.currentUser()?.isAdmin ?? false);
   readonly copyTarget = signal<{ id: string; name: string } | null>(null);
+
+  readonly copiedId = signal<string | null>(null);
+
+  async copyToClipboard(id: string, event: Event): Promise<void> {
+    event.preventDefault();
+    event.stopPropagation();
+    const routine = this.routines().find((r) => r.id === id);
+    if (!routine) return;
+    try {
+      await navigator.clipboard.writeText(routineShareText(routine));
+      this.copiedId.set(id);
+      setTimeout(() => this.copiedId.update((actual) => (actual === id ? null : actual)), 2000);
+    } catch {
+      // clipboard no disponible
+    }
+  }
 
   askCopy(id: string, name: string, event: Event): void {
     event.preventDefault();
