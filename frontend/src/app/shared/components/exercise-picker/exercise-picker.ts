@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FilterService } from 'primeng/api';
@@ -88,12 +89,21 @@ export class ExercisePicker {
   /** Muestra el botón de añadir ejercicio nuevo. */
   readonly allowCreate = input(false, { transform: booleanAttribute });
 
+  /**
+   * Cierra el desplegable al elegir. En la hoja de registro se deja abierto a
+   * propósito, porque se añaden varios ejercicios seguidos; donde solo se elige
+   * uno —el progreso por ejercicio— quedarse abierto tapa el resultado.
+   */
+  readonly closeOnPick = input(false, { transform: booleanAttribute });
+
   readonly picked = output<Exercise>();
 
   /** El usuario quiere dar de alta un ejercicio nuevo; el padre abre el formulario. */
   readonly createRequested = output<void>();
 
   readonly selection = signal<Exercise[]>([]);
+
+  private readonly multiselect = viewChild<MultiSelect>(MultiSelect);
 
   constructor() {
     this.filterService.register(FLEXIBLE_MATCH_MODE, flexibleMatch);
@@ -110,6 +120,7 @@ export class ExercisePicker {
   onSelectionChange(value: Exercise[]): void {
     for (const exercise of value) this.picked.emit(exercise);
     this.selection.set([]);
+    if (this.closeOnPick() && value.length) this.multiselect()?.hide();
   }
 
   dotColor(exercise: Exercise): string {

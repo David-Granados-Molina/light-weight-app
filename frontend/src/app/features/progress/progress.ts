@@ -8,10 +8,19 @@ import { AuthService } from '../../core/services/auth.service';
 import { ProgressService } from '../../core/services/progress.service';
 import { RoutineService } from '../../core/services/routine.service';
 import { Routine } from '../../core/models/routine.model';
-import { ProgressPoint, ProgressStat, RoutineProgressData, RoutineProgressItem } from '../../core/models/progress.model';
+import {
+  ProgressData,
+  ProgressPoint,
+  ProgressSession,
+  ProgressStat,
+  RoutineProgressData,
+  RoutineProgressItem,
+} from '../../core/models/progress.model';
+import { Exercise } from '../../core/models/exercise.model';
 import { CATEGORY_COLOR, INPUT_TYPE_UNIT } from '../../core/models/labels';
-import { formatNumber, shortDateLabel } from '../../core/utils/format';
+import { effectiveInputType, formatNumber, formatSet, relativeDayLabel, shortDateLabel } from '../../core/utils/format';
 import { ExerciseLoader } from '../../shared/components/exercise-loader/exercise-loader';
+import { ExercisePicker } from '../../shared/components/exercise-picker/exercise-picker';
 import { RoutineSelect } from '../../shared/components/routine-select/routine-select';
 
 
@@ -59,7 +68,7 @@ function liftLightness(hex: string): [number, number, number] {
 
 @Component({
   selector: 'app-progress',
-  imports: [ChartModule, ExerciseLoader, RoutineSelect, RouterLink],
+  imports: [ChartModule, ExerciseLoader, ExercisePicker, RoutineSelect, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './progress.html',
   styleUrl: './progress.css',
@@ -94,6 +103,79 @@ export class Progress {
   readonly timeRanges = signal<Record<string, '3M' | '1A'>>({});
   readonly data = signal<RoutineProgressData | null>(null);
   readonly loading = signal(true);
+
+  /* --- Progreso de un ejercicio suelto --------------------------------------
+     La pantalla nació agrupando por rutina, pero un ejercicio se hace en varias
+     rutinas y muchas veces suelto, así que su historia completa no se veía. */
+
+  readonly modo = signal<'rutina' | 'ejercicio'>('rutina');
+  readonly trackedExercises = signal<Exercise[]>([]);
+  readonly selectedExercise = signal<Exercise | null>(null);
+  readonly exerciseData = signal<ProgressData | null>(null);
+  readonly loadingExercise = signal(false);
+  readonly relativeDayLabel = relativeDayLabel;
+  readonly formatSet = formatSet;
+  readonly effectiveInputType = effectiveInputType;
+
+  /** Lo que pinta la rejilla: los ejercicios de la rutina, o el ejercicio suelto. */
+  readonly items = computed<RoutineProgressItem[]>(() => {
+    if (this.modo() === 'rutina') return this.data()?.items ?? [];
+    const suelto = this.exerciseData();
+    return suelto ? [suelto] : [];
+  });
+
+  selectModo(modo: 'rutina' | 'ejercicio'): void {
+    if (this.modo() === modo) return;
+    this.modo.set(modo);
+    if (modo === 'ejercicio' && !this.trackedExercises().length) this.loadTracked();
+  }
+
+  private loadTracked(): void {
+    this.progressService.getTrackedExercises().subscribe({
+      next: (lista) => this.trackedExercises.set(lista),
+      error: () => this.trackedExercises.set([]),
+    });
+  }
+
+  selectExercise(exercise: Exercise): void {
+    this.selectedExercise.set(exercise);
+    this.loadingExercise.set(true);
+    this.exerciseData.set(null);
+    this.progressService.getProgress(exercise.id).subscribe({
+      next: (data) => {
+        this.exerciseData.set(data);
+        this.loadingExercise.set(false);
+      },
+      error: () => this.loadingExercise.set(false),
+    });
+  }
+
+  /** Series de ese día, ya formateadas: "80kg×8 · 85kg×6". */
+  sessionSets(session: ProgressSession): string {
+    const exercise = this.selectedExercise();
+    if (!exercise) return '';
+    const inputType = session.inputTypeOverride ?? exercise.inputType;
+    return session.sets.map((s) => formatSet(s, inputType)).join(' · ');
+  }
+
+  sessionResumen(session: ProgressSession): string {
+    const exercise = this.selectedExercise();
+    const inputType = session.inputTypeOverride ?? exercise?.inputType ?? 'peso';
+    const partes = [session.series === 1 ? '1 serie' : `${session.series} series`];
+
+    if (inputType === 'peso') {
+      if (session.maxWeight) partes.push(`máx ${formatNumber(session.maxWeight)} kg`);
+      if (session.totalReps) partes.push(`${session.totalReps} reps`);
+      if (session.volume) partes.push(`volumen ${formatNumber(session.volume)} kg`);
+    } else if (inputType === 'tiempo' || inputType === 'min' || inputType === 'emom') {
+      if (session.totalTime) partes.push(`${formatNumber(session.totalTime)} ${inputType === 'min' ? 'min' : 's'}`);
+      if (session.totalReps) partes.push(`${session.totalReps} reps`);
+    } else {
+      if (session.totalReps) partes.push(`${session.totalReps} reps`);
+    }
+
+    return partes.join(' · ');
+  }
 
   constructor() {
     effect(() => {

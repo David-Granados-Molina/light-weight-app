@@ -10,44 +10,106 @@
     }
   </header>
 
-  @if (loading() && !data()) {
-    <app-exercise-loader text="Cargando tu progreso…" />
-  } @else if (!routines().length) {
-    <div class="lw-empty">
-      <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 19V5M4 19h16" />
-        <path d="M8 15l3.5-4 3 2.5L21 7" />
-      </svg>
-      @if (targetUserId()) {
-        <p class="lw-empty-title">Esta persona todavía no tiene rutinas</p>
-        <p class="lw-empty-text">El progreso se agrupa por rutina, así que aquí no hay nada que mostrar aún.</p>
-      } @else {
-        <p class="lw-empty-title">Aún no hay nada que medir</p>
-        <p class="lw-empty-text">
-          El progreso se agrupa por rutina. Crea una, regístrala unas cuantas veces y aquí verás cómo evoluciona cada
-          ejercicio.
-        </p>
-        <a routerLink="/rutinas/nueva" class="lw-btn-secondary">Crear una rutina</a>
+  <div class="lw-chips prog-modes" role="group" aria-label="Agrupar el progreso">
+    <button
+      type="button"
+      class="lw-chip"
+      [class.is-active]="modo() === 'rutina'"
+      [attr.aria-pressed]="modo() === 'rutina'"
+      (click)="selectModo('rutina')"
+    >
+      Por rutina
+    </button>
+    <button
+      type="button"
+      class="lw-chip"
+      [class.is-active]="modo() === 'ejercicio'"
+      [attr.aria-pressed]="modo() === 'ejercicio'"
+      (click)="selectModo('ejercicio')"
+    >
+      Por ejercicio
+    </button>
+  </div>
+
+  @if (modo() === 'rutina') {
+    @if (loading() && !data()) {
+      <app-exercise-loader text="Cargando tu progreso…" />
+    } @else if (!routines().length) {
+      <div class="lw-empty">
+        <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19V5M4 19h16" />
+          <path d="M8 15l3.5-4 3 2.5L21 7" />
+        </svg>
+        @if (targetUserId()) {
+          <p class="lw-empty-title">Esta persona todavía no tiene rutinas</p>
+          <p class="lw-empty-text">Prueba a mirar su progreso por ejercicio, que no depende de las rutinas.</p>
+        } @else {
+          <p class="lw-empty-title">Aún no tienes rutinas</p>
+          <p class="lw-empty-text">
+            Crea una y regístrala unas cuantas veces, o mira el progreso por ejercicio, que no depende de ellas.
+          </p>
+          <a routerLink="/rutinas/nueva" class="lw-btn-secondary">Crear una rutina</a>
+        }
+      </div>
+    } @else {
+      <div class="lw-field prog-picker">
+        <span class="lw-label">Rutina</span>
+        <app-routine-select
+          [routines]="routines()"
+          [selectedId]="selectedRoutineId()"
+          (changed)="onRoutineChanged($event)"
+        />
+      </div>
+
+      @if (loading()) {
+        <div class="prog-grid" aria-busy="true">
+          <div class="lw-skel prog-skel"></div>
+          <div class="lw-skel prog-skel"></div>
+        </div>
+      } @else if (!items().length) {
+        <div class="lw-empty prog-empty">
+          <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19V5M4 19h16" />
+            <path d="M8 15l3.5-4 3 2.5L21 7" />
+          </svg>
+          <p class="lw-empty-title">Esta rutina no tiene entrenos registrados</p>
+          <p class="lw-empty-text">
+            Regístrala en un entreno y a partir del segundo aquí verás la evolución de cada ejercicio.
+          </p>
+        </div>
       }
-    </div>
+    }
   } @else {
     <div class="lw-field prog-picker">
-      <span class="lw-label">Rutina</span>
-      <app-routine-select
-        [routines]="routines()"
-        [selectedId]="selectedRoutineId()"
-        (changed)="onRoutineChanged($event)"
+      <span class="lw-label">Ejercicio</span>
+      <app-exercise-picker
+        [catalog]="trackedExercises()"
+        placeholder="Buscar ejercicio…"
+        closeOnPick
+        (picked)="selectExercise($event)"
       />
     </div>
 
-    @if (loading()) {
-      <div class="prog-grid" aria-busy="true">
-        <div class="lw-skel prog-skel"></div>
-        <div class="lw-skel prog-skel"></div>
+    @if (loadingExercise()) {
+      <app-exercise-loader text="Cargando el progreso del ejercicio…" />
+    } @else if (!exerciseData()) {
+      <div class="lw-empty prog-empty">
+        <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" />
+        </svg>
+        <p class="lw-empty-title">Busca un ejercicio</p>
+        <p class="lw-empty-text">
+          Aquí sale su evolución completa, con todas las veces que lo has hecho —series, pesos, repeticiones, tiempo y
+          fecha—, venga de la rutina que venga o de ninguna.
+        </p>
       </div>
-    } @else {
-      <div class="prog-grid">
-        @for (item of data()?.items ?? []; track item.exercise.id) {
+    }
+  }
+
+  @if (items().length) {
+    <div class="prog-grid">
+      @for (item of items(); track item.exercise.id) {
           <section class="lw-card prog-item">
             <header class="prog-item-head">
               <div class="prog-item-title">
@@ -123,19 +185,33 @@
               }
             </div>
           </section>
+      }
+    </div>
+  }
+
+  @if (modo() === 'ejercicio' && exerciseData(); as item) {
+    <section class="lw-card prog-sessions">
+      <h2 class="prog-sessions-title">Entrenos con este ejercicio</h2>
+      <p class="prog-sessions-sub lw-num">
+        {{ item.sessions?.length ?? 0 }} {{ (item.sessions?.length ?? 0) === 1 ? 'entreno' : 'entrenos' }}
+      </p>
+
+      <ul class="prog-sessions-list">
+        @for (s of item.sessions ?? []; track s.sessionId) {
+          <li class="prog-session">
+            <div class="prog-session-top">
+              <span class="prog-session-date lw-num">{{ relativeDayLabel(s.date) }}</span>
+              <span class="prog-session-resumen lw-num">{{ sessionResumen(s) }}</span>
+            </div>
+            <p class="prog-session-sets lw-num">{{ sessionSets(s) }}</p>
+            @if (s.note) {
+              <p class="prog-session-note">{{ s.note }}</p>
+            }
+          </li>
         } @empty {
-          <div class="lw-empty prog-empty">
-            <svg class="lw-empty-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 19V5M4 19h16" />
-              <path d="M8 15l3.5-4 3 2.5L21 7" />
-            </svg>
-            <p class="lw-empty-title">Esta rutina no tiene entrenos registrados</p>
-            <p class="lw-empty-text">
-              Regístrala en un entreno y a partir del segundo aquí verás la evolución de cada ejercicio.
-            </p>
-          </div>
+          <li class="prog-session-empty">Todavía no has registrado este ejercicio.</li>
         }
-      </div>
-    }
+      </ul>
+    </section>
   }
 </div>

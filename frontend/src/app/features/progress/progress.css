@@ -171,3 +171,89 @@
 .prog-empty {
   grid-column: 1 / -1;
 }
+
+/* --- Progreso de un ejercicio suelto ---------------------------------------- */
+
+.prog-modes {
+  flex-wrap: wrap;
+}
+
+.prog-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+}
+
+.prog-sessions-title {
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+
+.prog-sessions-sub {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.prog-sessions-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prog-session {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.prog-session:last-child {
+  border-bottom: 0;
+}
+
+.prog-session-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+.prog-session-date {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.prog-session-date::first-letter {
+  text-transform: uppercase;
+}
+
+.prog-session-resumen {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+.prog-session-sets {
+  font-size: var(--t-sm);
+  color: var(--text-secondary);
+}
+
+.prog-session-note {
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--line-strong);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+}
+
+.prog-session-empty {
+  padding: var(--s-4) 0;
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}

@@ -102,6 +102,36 @@ progressRouter.get('/routine/:routineId', asyncHandler(async (req, res) => {
   res.json({ routine: { id: routine.id, name: routine.name, category: routine.category }, items });
 }));
 
+/**
+ * Un entreno por fila: lo que se hizo ese día en ese ejercicio. La gráfica
+ * resume una cifra por sesión, y esto es lo que hay detrás —series, pesos,
+ * repeticiones y tiempo— para poder mirar un día concreto.
+ */
+async function buildExerciseSessions(userId: string, exerciseId: string) {
+  const sessionExercises = await prisma.sessionExercise.findMany({
+    where: { exerciseId, session: { userId } },
+    include: { session: true, sets: { orderBy: { setNumber: 'asc' } } },
+    orderBy: { session: { date: 'desc' } },
+  });
+
+  return sessionExercises.map((se) => {
+    const sets = se.sets.map((s) => ({ setNumber: s.setNumber, weight: s.weight, reps: s.reps, time: s.time }));
+    return {
+      sessionId: se.sessionId,
+      date: se.session.date.toISOString(),
+      inputTypeOverride: se.inputTypeOverride,
+      note: se.note,
+      sets,
+      series: sets.length,
+      totalReps: sets.reduce((total, s) => total + (s.reps ?? 0), 0),
+      totalTime: sets.reduce((total, s) => total + (s.time ?? 0), 0),
+      maxWeight: sets.reduce((max, s) => Math.max(max, s.weight ?? 0), 0),
+      // Volumen clásico: la suma de peso por repeticiones de cada serie.
+      volume: sets.reduce((total, s) => total + (s.weight ?? 0) * (s.reps ?? 0), 0),
+    };
+  });
+}
+
 // GET /api/progress/:exerciseId
 progressRouter.get('/:exerciseId', asyncHandler(async (req, res) => {
   const userId = req.userId!;
@@ -109,6 +139,10 @@ progressRouter.get('/:exerciseId', asyncHandler(async (req, res) => {
   const exercise = await prisma.exercise.findUnique({ where: { id: req.params.exerciseId } });
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
 
-  const data = await buildProgressData(userId, exercise);
-  res.json({ exercise, ...data });
+  const [data, sessions] = await Promise.all([
+    buildProgressData(userId, exercise),
+    buildExerciseSessions(userId, exercise.id),
+  ]);
+
+  res.json({ exercise, ...data, sessions });
 }));
