@@ -167,20 +167,14 @@
                 Subir imagen
                 <input type="file" accept="image/*" (change)="onImagenElegida($event)" hidden />
               </label>
-              <div class="gal-search-image">
-                <input
-                  class="lw-input"
-                  type="search"
-                  aria-label="Buscar imagen en el catálogo libre"
-                  placeholder="Buscar imagen…"
-                  [ngModel]="consultaImagen()"
-                  (ngModelChange)="consultaImagen.set($event)"
-                  (keydown.enter)="buscarImagenes()"
-                />
-                <button type="button" class="lw-btn-secondary" [disabled]="buscandoImagen()" (click)="buscarImagenes()">
-                  {{ buscandoImagen() ? 'Buscando…' : 'Buscar' }}
-                </button>
-              </div>
+              <input
+                class="lw-input gal-search-image"
+                type="search"
+                aria-label="Buscar imagen en el catálogo libre"
+                placeholder="Buscar imagen…"
+                [ngModel]="consultaImagen()"
+                (ngModelChange)="onConsultaImagen($event)"
+              />
               @if (puedeQuitarImagen()) {
                 <button type="button" class="lw-btn-ghost" (click)="quitarImagen()">{{ textoQuitar() }}</button>
               }
@@ -197,6 +191,10 @@
 
           @if (quitandoDelCatalogo()) {
             <p class="gal-hint">Se quitará la imagen del catálogo al guardar.</p>
+          }
+
+          @if (buscandoImagen()) {
+            <p class="gal-hint">Buscando…</p>
           }
 
           @if (sinCandidatos()) {

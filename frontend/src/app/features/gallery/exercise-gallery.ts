@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { ExerciseService } from '../../core/services/exercise.service';
@@ -185,6 +187,8 @@ export class ExerciseGallery {
 
   /* --- Buscador de imágenes libres ------------------------------------------ */
 
+  private readonly tecleado = new Subject<string>();
+
   readonly consultaImagen = signal('');
   readonly buscandoImagen = signal(false);
   readonly candidatos = signal<FreeExerciseImage[]>([]);
@@ -205,6 +209,25 @@ export class ExerciseGallery {
   });
 
   constructor() {
+    // Se busca mientras se escribe: el debounce evita una petición por tecla y
+    // switchMap tira la respuesta de lo que ya no se está buscando.
+    this.tecleado
+      .pipe(
+        debounceTime(350),
+        distinctUntilChanged(),
+        switchMap((consulta) =>
+          consulta.length < 2
+            ? of(null)
+            : this.exerciseService.searchFreeImages(consulta).pipe(catchError(() => of([] as FreeExerciseImage[]))),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((lista) => {
+        this.buscandoImagen.set(false);
+        this.candidatos.set(lista ?? []);
+        this.sinCandidatos.set(lista !== null && lista.length === 0);
+      });
+
     this.cargar();
   }
 
@@ -351,31 +374,20 @@ export class ExerciseGallery {
     if (!tenia && this.imagenDelCatalogo() && this.puedeEditarAbierto()) this.quitandoDelCatalogo.set(true);
   }
 
-  readonly textoQuitar = computed(() => (this.imagenEsDelCatalogo() ? 'Quitar la del catálogo' : 'Quitar'));
+  readonly textoQuitar = computed(() => (this.imagenEsDelCatalogo() ? 'Eliminar imagen' : 'Quitar'));
 
   readonly puedeQuitarImagen = computed(() => {
     if (this.formImagen() || this.formImagenUrl()) return true;
     return !!this.imagenDelCatalogo() && this.puedeEditarAbierto();
   });
 
-  buscarImagenes(): void {
-    const consulta = (this.consultaImagen().trim() || this.formNombre()).trim();
-    if (consulta.length < 2) return;
+  onConsultaImagen(valor: string): void {
+    this.consultaImagen.set(valor);
 
-    this.buscandoImagen.set(true);
+    const consulta = valor.trim();
+    this.buscandoImagen.set(consulta.length >= 2);
     this.sinCandidatos.set(false);
-    this.exerciseService.searchFreeImages(consulta).subscribe({
-      next: (lista) => {
-        this.candidatos.set(lista);
-        this.sinCandidatos.set(lista.length === 0);
-        this.buscandoImagen.set(false);
-      },
-      error: () => {
-        this.candidatos.set([]);
-        this.sinCandidatos.set(true);
-        this.buscandoImagen.set(false);
-      },
-    });
+    this.tecleado.next(consulta);
   }
 
   elegirCandidata(candidata: FreeExerciseImage): void {

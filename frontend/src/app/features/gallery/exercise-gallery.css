@@ -382,10 +382,6 @@
 }
 
 .gal-search-image {
-  display: flex;
-  gap: var(--s-2);
-}
-
-.gal-search-image .lw-input {
+  width: 100%;
   min-width: 0;
 }
