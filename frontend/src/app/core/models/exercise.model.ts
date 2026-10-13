@@ -16,6 +16,10 @@ export interface Exercise {
   secondaryMuscles?: string[];
   /** Quién lo dio de alta; vacío en los del catálogo base. */
   createdById?: string | null;
+  /** Imagen por defecto del catálogo, con su autoría. La ficha personal manda sobre ella. */
+  imageUrl?: string | null;
+  imageAuthor?: string | null;
+  imageLicense?: string | null;
   createdAt: string;
 }
 

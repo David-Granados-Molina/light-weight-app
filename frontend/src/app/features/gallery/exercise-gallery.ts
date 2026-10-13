@@ -105,7 +105,11 @@ export class ExerciseGallery {
       .filter((e) => (texto ? e.name.toLowerCase().includes(texto) : true))
       .map((exercise) => {
         const profile = porEjercicio.get(exercise.id) ?? null;
-        return { exercise, profile, imagen: profile?.imageData ?? profile?.imageUrl ?? null };
+        return {
+          exercise,
+          profile,
+          imagen: profile?.imageData ?? profile?.imageUrl ?? exercise.imageUrl ?? null,
+        };
       });
   });
 
@@ -166,7 +170,12 @@ export class ExerciseGallery {
     return embed ? this.sanitizer.bypassSecurityTrustResourceUrl(embed) : null;
   });
 
-  readonly imagenPrevia = computed(() => this.formImagen() ?? this.formImagenUrl());
+  /** La del catálogo, que se ve mientras no haya una propia. */
+  readonly imagenDelCatalogo = computed(() => (this.creando() ? null : this.abierta()?.exercise.imageUrl ?? null));
+
+  readonly imagenPrevia = computed(() => this.formImagen() ?? this.formImagenUrl() ?? this.imagenDelCatalogo());
+
+  readonly imagenEsDelCatalogo = computed(() => !this.formImagen() && !this.formImagenUrl() && !!this.imagenDelCatalogo());
 
   /* --- Buscador de imágenes libres ------------------------------------------ */
 

@@ -56,7 +56,7 @@
 
     <div class="gal-grid">
       @for (t of tarjetas(); track t.exercise.id) {
-        <article class="gal-card" [style.border-left-color]="categoryColor[t.exercise.category]">
+        <article class="gal-card" [style.border-left-color]="categoryColor[t.exercise.category]" (click)="abrir(t)">
           <!-- La miniatura va fuera del botón de la tarjeta: un botón dentro de
                otro no es HTML válido ni es navegable con teclado. -->
           @if (t.imagen; as imagen) {
@@ -76,7 +76,7 @@
             </span>
           }
 
-          <button type="button" class="gal-card-main" (click)="abrir(t)">
+          <button type="button" class="gal-card-main">
             <span class="gal-card-text">
               <span class="gal-card-name">{{ t.exercise.name }}</span>
               <span class="gal-card-meta" [style.color]="categoryColor[t.exercise.category]">
@@ -181,12 +181,16 @@
                   {{ buscandoImagen() ? 'Buscando…' : 'Buscar' }}
                 </button>
               </div>
-              @if (imagenPrevia()) {
+              @if (formImagen() || formImagenUrl()) {
                 <button type="button" class="lw-btn-ghost" (click)="quitarImagen()">Quitar</button>
               }
             </div>
           </div>
 
+
+          @if (imagenEsDelCatalogo()) {
+            <p class="gal-hint">Es la imagen del catálogo. Sube una o busca otra si quieres la tuya.</p>
+          }
 
           @if (sinCandidatos()) {
             <p class="gal-hint">Sin resultados. El catálogo libre está en inglés: prueba con otro término («bench press», «squat»…) o sube tu imagen.</p>

@@ -245,6 +245,11 @@ model Exercise {
   muscleGroup      String?
   primaryMuscles   String[]          @default([])
   secondaryMuscles String[]          @default([])
+  /// Imagen por defecto, del catálogo libre de wger: se guarda el enlace y a
+  /// quién hay que citar, nunca una copia. La ficha personal la pisa.
+  imageUrl         String?
+  imageAuthor      String?
+  imageLicense     String?
   createdAt        DateTime          @default(now())
   routineExercises RoutineExercise[]
   sessionExercises SessionExercise[]
