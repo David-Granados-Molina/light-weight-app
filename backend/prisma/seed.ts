@@ -20,7 +20,7 @@ export const CATALOG: {
   { name: 'Press militar', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Hombro', primaryMuscles: ['Hombro'], secondaryMuscles: ['Tríceps', 'Core'] },
   { name: 'Press inclinado', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho', primaryMuscles: ['Pecho'], secondaryMuscles: ['Hombro', 'Tríceps'] },
   { name: 'Aperturas en máquina', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho', primaryMuscles: ['Pecho'], secondaryMuscles: ['Hombro'] },
-  { name: 'Fondos lastrados', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho/Tríceps', primaryMuscles: ['Pecho', 'Tríceps'], secondaryMuscles: ['Hombro'] },
+  { name: 'Fondos lastrados', category: 'calistenia', type: 'empuje', inputType: 'peso', muscleGroup: 'Pecho/Tríceps', primaryMuscles: ['Pecho', 'Tríceps'], secondaryMuscles: ['Hombro'] },
   { name: 'Extensión tríceps', category: 'gym', type: 'empuje', inputType: 'peso', muscleGroup: 'Tríceps', primaryMuscles: ['Tríceps'], secondaryMuscles: [] },
   { name: 'Sentadilla', category: 'gym', type: 'pierna', inputType: 'peso', muscleGroup: 'Pierna', primaryMuscles: ['Cuádriceps', 'Glúteo'], secondaryMuscles: ['Femoral', 'Core', 'Espalda baja'] },
   { name: 'Hip thrust', category: 'gym', type: 'pierna', inputType: 'peso', muscleGroup: 'Glúteo', primaryMuscles: ['Glúteo'], secondaryMuscles: ['Femoral', 'Core'] },
