@@ -272,20 +272,12 @@
   gap: var(--s-3);
 }
 
-@media (min-width: 560px) {
-  .gal-image-row {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--s-4);
-  }
-}
-
 .gal-image-preview {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 108px;
-  height: 108px;
+  width: 100%;
+  height: 220px;
   flex-shrink: 0;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -302,7 +294,9 @@
 .gal-image-preview img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Entera, no recortada: estas imágenes son figuras y recortarlas les quita
+     la cabeza o los pies. */
+  object-fit: contain;
 }
 
 .gal-image-empty {
