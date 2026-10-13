@@ -95,7 +95,7 @@
             </span>
           </button>
 
-          @if (isAdmin()) {
+          @if (puedeGestionar(t.exercise)) {
             <button
               type="button"
               class="gal-card-delete"
@@ -206,8 +206,10 @@
         <!-- Catálogo compartido -->
         <section class="gal-block">
           <span class="lw-label">Ficha del catálogo</span>
-          @if (!creando() && !isAdmin()) {
-            <p class="gal-hint">Estos datos son comunes a todos los usuarios y solo los cambia quien administra.</p>
+          @if (!creando() && !puedeEditarAbierto()) {
+            <p class="gal-hint">
+              Estos datos son comunes a todos los usuarios: los cambia quien administra o quien creó el ejercicio.
+            </p>
           }
 
           <label class="lw-field">
@@ -215,7 +217,7 @@
             <input
               class="lw-input"
               type="text"
-              [disabled]="!creando() && !isAdmin()"
+              [disabled]="!puedeEditarAbierto()"
               [ngModel]="formNombre()"
               (ngModelChange)="formNombre.set($event)"
             />
@@ -226,7 +228,7 @@
               <span class="lw-label">Categoría</span>
               <select
                 class="lw-select"
-                [disabled]="!creando() && !isAdmin()"
+                [disabled]="!puedeEditarAbierto()"
                 [ngModel]="formCategoria()"
                 (ngModelChange)="formCategoria.set($event)"
               >
@@ -240,7 +242,7 @@
               <span class="lw-label">Tipo</span>
               <select
                 class="lw-select"
-                [disabled]="!creando() && !isAdmin()"
+                [disabled]="!puedeEditarAbierto()"
                 [ngModel]="formTipo()"
                 (ngModelChange)="formTipo.set($event)"
               >
@@ -254,7 +256,7 @@
               <span class="lw-label">Modo de registro</span>
               <select
                 class="lw-select"
-                [disabled]="!creando() && !isAdmin()"
+                [disabled]="!puedeEditarAbierto()"
                 [ngModel]="formModo()"
                 (ngModelChange)="formModo.set($event)"
               >

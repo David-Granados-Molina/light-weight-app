@@ -40,6 +40,7 @@ model User {
   loginCodes LoginCode[]
   diet       Diet?
   exerciseProfiles ExerciseProfile[]
+  exercisesCreated Exercise[]        @relation("ExercisesCreated")
 }
 
 /// Código de un solo uso que se envía por email para entrar. Sustituye a la
@@ -231,6 +232,10 @@ enum Difficulty {
 model Exercise {
   id               String            @id @default(uuid())
   name             String            @unique
+  /// Quién lo dio de alta. Vacío en los del catálogo base: esos los administra
+  /// quien tenga ADMIN_EMAIL. Quien crea uno nuevo puede editarlo y borrarlo.
+  createdById      String?
+  createdBy        User?             @relation("ExercisesCreated", fields: [createdById], references: [id], onDelete: SetNull)
   category         Category
   type             ExerciseType
   inputType        InputType

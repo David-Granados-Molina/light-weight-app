@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
-import { requireAdmin } from '../middleware/requireAdmin';
+import { isAdminEmail } from '../lib/accounts';
 
 export const exercisesRouter = Router();
 
@@ -37,21 +37,39 @@ exercisesRouter.get('/:id', asyncHandler(async (req, res) => {
   res.json(exercise);
 }));
 
+/**
+ * Quién puede tocar un ejercicio del catálogo compartido: quien administra, y
+ * quien lo creó. Los del catálogo base no tienen autor, así que son solo del
+ * administrador.
+ */
+async function puedeGestionar(userId: string, exercise: { createdById: string | null }): Promise<boolean> {
+  if (exercise.createdById === userId) return true;
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+  return !!user && isAdminEmail(user.email);
+}
+
 exercisesRouter.post('/', asyncHandler(async (req, res) => {
   const parsed = exerciseSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   try {
-    const exercise = await prisma.exercise.create({ data: parsed.data });
+    const exercise = await prisma.exercise.create({ data: { ...parsed.data, createdById: req.userId! } });
     res.status(201).json(exercise);
   } catch {
     res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
   }
 }));
 
-exercisesRouter.put('/:id', requireAdmin, asyncHandler(async (req, res) => {
+exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
   const parsed = exerciseSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const actual = await prisma.exercise.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, createdById: true },
+  });
+  if (!actual) return res.status(404).json({ error: 'Ejercicio no encontrado' });
+  if (!(await puedeGestionar(req.userId!, actual))) return res.status(403).json({ error: 'No autorizado' });
 
   try {
     const exercise = await prisma.exercise.update({
@@ -64,9 +82,13 @@ exercisesRouter.put('/:id', requireAdmin, asyncHandler(async (req, res) => {
   }
 }));
 
-exercisesRouter.delete('/:id', requireAdmin, asyncHandler(async (req, res) => {
-  const exercise = await prisma.exercise.findUnique({ where: { id: req.params.id }, select: { id: true } });
+exercisesRouter.delete('/:id', asyncHandler(async (req, res) => {
+  const exercise = await prisma.exercise.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, createdById: true },
+  });
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
+  if (!(await puedeGestionar(req.userId!, exercise))) return res.status(403).json({ error: 'No autorizado' });
 
   // Borrarlo dejaría entrenos y rutinas apuntando al vacío, así que se dice
   // cuántos lo usan en vez de fallar con un error de clave ajena.

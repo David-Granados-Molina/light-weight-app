@@ -55,6 +55,22 @@ export class ExerciseGallery {
 
   readonly isAdmin = computed(() => this.authService.currentUser()?.isAdmin ?? false);
 
+  /**
+   * Quién puede tocar la parte común de un ejercicio: quien administra, y quien
+   * lo creó. Los del catálogo base no tienen autor, así que son del
+   * administrador.
+   */
+  puedeGestionar(exercise: Exercise): boolean {
+    return this.isAdmin() || (!!exercise.createdById && exercise.createdById === this.authService.currentUser()?.id);
+  }
+
+  /** El del ejercicio abierto; al crear uno nuevo, siempre se puede. */
+  readonly puedeEditarAbierto = computed(() => {
+    if (this.creando()) return true;
+    const abierta = this.abierta();
+    return !!abierta && this.puedeGestionar(abierta.exercise);
+  });
+
   readonly catalog = signal<Exercise[]>([]);
   readonly profiles = signal<ExerciseProfile[]>([]);
   readonly loading = signal(true);
@@ -360,7 +376,7 @@ export class ExerciseGallery {
     if (!abierta) return;
     this.guardando.set(true);
 
-    if (this.isAdmin() && this.catalogoCambiado(abierta.exercise)) {
+    if (this.puedeGestionar(abierta.exercise) && this.catalogoCambiado(abierta.exercise)) {
       this.exerciseService
         .update(abierta.exercise.id, {
           name: this.formNombre().trim(),

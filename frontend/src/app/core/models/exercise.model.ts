@@ -14,6 +14,8 @@ export interface Exercise {
      interfaz tiene que aguantarlo sin romperse. */
   primaryMuscles?: string[];
   secondaryMuscles?: string[];
+  /** Quién lo dio de alta; vacío en los del catálogo base. */
+  createdById?: string | null;
   createdAt: string;
 }
 
