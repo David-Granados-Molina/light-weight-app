@@ -181,8 +181,8 @@
                   {{ buscandoImagen() ? 'Buscando…' : 'Buscar' }}
                 </button>
               </div>
-              @if (formImagen() || formImagenUrl()) {
-                <button type="button" class="lw-btn-ghost" (click)="quitarImagen()">Quitar</button>
+              @if (puedeQuitarImagen()) {
+                <button type="button" class="lw-btn-ghost" (click)="quitarImagen()">{{ textoQuitar() }}</button>
               }
             </div>
           </div>
@@ -190,6 +190,13 @@
 
           @if (imagenEsDelCatalogo()) {
             <p class="gal-hint">Es la imagen del catálogo. Sube una o busca otra si quieres la tuya.</p>
+            @if (puedeEditarAbierto()) {
+              <p class="gal-hint">Quitarla la deja sin imagen para todos.</p>
+            }
+          }
+
+          @if (quitandoDelCatalogo()) {
+            <p class="gal-hint">Se quitará la imagen del catálogo al guardar.</p>
           }
 
           @if (sinCandidatos()) {

@@ -31,6 +31,9 @@ export interface ExerciseInput {
   muscleGroup?: string | null;
   primaryMuscles?: string[];
   secondaryMuscles?: string[];
+  imageUrl?: string | null;
+  imageAuthor?: string | null;
+  imageLicense?: string | null;
 }
 
 export type Difficulty = 'iniciacion' | 'intermedio' | 'avanzado';

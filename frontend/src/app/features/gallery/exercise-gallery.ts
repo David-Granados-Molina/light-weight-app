@@ -170,8 +170,14 @@ export class ExerciseGallery {
     return embed ? this.sanitizer.bypassSecurityTrustResourceUrl(embed) : null;
   });
 
+  /** Puesta a true, el guardado borra la imagen del catálogo de ese ejercicio. */
+  readonly quitandoDelCatalogo = signal(false);
+
   /** La del catálogo, que se ve mientras no haya una propia. */
-  readonly imagenDelCatalogo = computed(() => (this.creando() ? null : this.abierta()?.exercise.imageUrl ?? null));
+  readonly imagenDelCatalogo = computed(() => {
+    if (this.creando() || this.quitandoDelCatalogo()) return null;
+    return this.abierta()?.exercise.imageUrl ?? null;
+  });
 
   readonly imagenPrevia = computed(() => this.formImagen() ?? this.formImagenUrl() ?? this.imagenDelCatalogo());
 
@@ -234,6 +240,7 @@ export class ExerciseGallery {
   abrir(tarjeta: Tarjeta): void {
     this.abierta.set(tarjeta);
     this.creando.set(false);
+    this.quitandoDelCatalogo.set(false);
     this.guardarError.set(null);
     this.candidatos.set([]);
     this.sinCandidatos.set(false);
@@ -258,6 +265,7 @@ export class ExerciseGallery {
   nuevo(): void {
     this.abierta.set(null);
     this.creando.set(true);
+    this.quitandoDelCatalogo.set(false);
     this.guardarError.set(null);
     this.candidatos.set([]);
     this.sinCandidatos.set(false);
@@ -294,6 +302,7 @@ export class ExerciseGallery {
 
     try {
       const dataUrl = await this.reducir(fichero);
+      this.quitandoDelCatalogo.set(false);
       this.formImagen.set(dataUrl);
       this.formImagenUrl.set(null);
       this.formImagenAutor.set(null);
@@ -330,12 +339,24 @@ export class ExerciseGallery {
     });
   }
 
+  /** Quita primero la tuya; si no tenías y puedes administrar, la del catálogo. */
   quitarImagen(): void {
+    const tenia = !!this.formImagen() || !!this.formImagenUrl();
+
     this.formImagen.set(null);
     this.formImagenUrl.set(null);
     this.formImagenAutor.set(null);
     this.formImagenLicencia.set(null);
+
+    if (!tenia && this.imagenDelCatalogo() && this.puedeEditarAbierto()) this.quitandoDelCatalogo.set(true);
   }
+
+  readonly textoQuitar = computed(() => (this.imagenEsDelCatalogo() ? 'Quitar la del catálogo' : 'Quitar'));
+
+  readonly puedeQuitarImagen = computed(() => {
+    if (this.formImagen() || this.formImagenUrl()) return true;
+    return !!this.imagenDelCatalogo() && this.puedeEditarAbierto();
+  });
 
   buscarImagenes(): void {
     const consulta = (this.consultaImagen().trim() || this.formNombre()).trim();
@@ -358,6 +379,7 @@ export class ExerciseGallery {
   }
 
   elegirCandidata(candidata: FreeExerciseImage): void {
+    this.quitandoDelCatalogo.set(false);
     this.formImagenUrl.set(candidata.image);
     this.formImagenAutor.set(candidata.author);
     this.formImagenLicencia.set(candidata.license);
@@ -404,19 +426,21 @@ export class ExerciseGallery {
     if (!abierta) return;
     this.guardando.set(true);
 
-    if (this.puedeGestionar(abierta.exercise) && this.catalogoCambiado(abierta.exercise)) {
+    if (this.puedeGestionar(abierta.exercise) && (this.catalogoCambiado(abierta.exercise) || this.quitandoDelCatalogo())) {
       this.exerciseService
         .update(abierta.exercise.id, {
           name: this.formNombre().trim(),
           category: this.formCategoria(),
           type: this.formTipo(),
           inputType: this.formModo(),
+          ...(this.quitandoDelCatalogo() ? { imageUrl: null, imageAuthor: null, imageLicense: null } : {}),
         })
         .subscribe({
           next: (exercise) => {
             this.catalog.update((lista) =>
               lista.map((e) => (e.id === exercise.id ? exercise : e)).sort((a, b) => a.name.localeCompare(b.name, 'es')),
             );
+            this.quitandoDelCatalogo.set(false);
             this.guardarFicha(abierta.exercise.id);
           },
           error: (e) => {

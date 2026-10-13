@@ -14,7 +14,13 @@ const exerciseSchema = z.object({
   muscleGroup: z.string().optional().nullable(),
   primaryMuscles: z.array(z.string().min(1).max(40)).max(8).optional(),
   secondaryMuscles: z.array(z.string().min(1).max(40)).max(8).optional(),
+  imageUrl: z.string().url().max(500).optional().nullable().or(z.literal('')),
+  imageAuthor: z.string().max(120).optional().nullable(),
+  imageLicense: z.string().max(60).optional().nullable(),
 });
+
+const vacioANull = <T>(valor: T | '' | undefined): T | null | undefined =>
+  valor === '' ? null : valor;
 
 // GET /api/exercises?category=gym|calistenia&q=texto
 exercisesRouter.get('/', asyncHandler(async (req, res) => {
@@ -51,7 +57,9 @@ exercisesRouter.post('/', asyncHandler(async (req, res) => {
   if (repetido) return res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
 
   try {
-    const exercise = await prisma.exercise.create({ data: { ...parsed.data, createdById: req.userId! } });
+    const exercise = await prisma.exercise.create({
+      data: { ...parsed.data, imageUrl: vacioANull(parsed.data.imageUrl) ?? null, createdById: req.userId! },
+    });
     res.status(201).json(exercise);
   } catch {
     res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
@@ -74,10 +82,17 @@ exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
     if (repetido) return res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
   }
 
+  const { imageUrl, imageAuthor, imageLicense, ...resto } = parsed.data;
+
   try {
     const exercise = await prisma.exercise.update({
       where: { id: actual.id },
-      data: parsed.data,
+      data: {
+        ...resto,
+        ...(imageUrl !== undefined ? { imageUrl: vacioANull(imageUrl) } : {}),
+        ...(imageAuthor !== undefined ? { imageAuthor } : {}),
+        ...(imageLicense !== undefined ? { imageLicense } : {}),
+      },
     });
     res.json(exercise);
   } catch {
