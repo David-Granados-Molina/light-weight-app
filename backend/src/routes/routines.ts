@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
+import { ejercicioParaUsuario, ejerciciosVisibles } from '../lib/exercise-scope';
 
 export const routinesRouter = Router();
 
@@ -93,6 +94,11 @@ export async function copyRoutineTo(routineId: string, targetUserId: string) {
   ]);
   if (!source || !target) return null;
 
+  const paraElDestino = new Map<string, string>();
+  for (const e of source.exercises) {
+    paraElDestino.set(e.exerciseId, await ejercicioParaUsuario(target.id, e.exerciseId));
+  }
+
   return createRoutineFor(target.id, {
     name: source.name,
     category: source.category,
@@ -100,7 +106,7 @@ export async function copyRoutineTo(routineId: string, targetUserId: string) {
     warmupDescription: source.warmupDescription,
     warmupVideoUrl: source.warmupVideoUrl,
     exercises: source.exercises.map((e) => ({
-      exerciseId: e.exerciseId,
+      exerciseId: paraElDestino.get(e.exerciseId) ?? e.exerciseId,
       targetSets: e.targetSets,
       targetRepsMin: e.targetRepsMin,
       targetRepsMax: e.targetRepsMax,
@@ -146,12 +152,20 @@ routinesRouter.post('/', asyncHandler(async (req, res) => {
   const parsed = routineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
+  if (!(await ejerciciosVisibles(req.userId!, parsed.data.exercises.map((e) => e.exerciseId)))) {
+    return res.status(400).json({ error: 'Hay ejercicios que no están en tu galería' });
+  }
+
   res.status(201).json(await createRoutineFor(req.userId!, parsed.data));
 }));
 
 routinesRouter.put('/:id', asyncHandler(async (req, res) => {
   const parsed = routineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  if (!(await ejerciciosVisibles(req.userId!, parsed.data.exercises.map((e) => e.exerciseId)))) {
+    return res.status(400).json({ error: 'Hay ejercicios que no están en tu galería' });
+  }
 
   // El 404 solo se da cuando la rutina de verdad no está o no es de quien pide;
   // cualquier otro fallo sube al middleware de error como un 500 legible. Antes

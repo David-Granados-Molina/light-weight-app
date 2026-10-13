@@ -17,7 +17,7 @@ import { videoEmbedUrl } from '../../core/utils/video';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import { ImageLightbox } from '../../shared/components/image-lightbox/image-lightbox';
 
-type Filtro = 'todos' | Category;
+type Filtro = 'todos' | 'mios' | Category;
 
 interface Tarjeta {
   exercise: Exercise;
@@ -55,13 +55,17 @@ export class ExerciseGallery {
 
   readonly isAdmin = computed(() => this.authService.currentUser()?.isAdmin ?? false);
 
+  /** Los que ha creado este usuario: no los ve nadie más y los lleva él. */
+  esMio(exercise: Exercise): boolean {
+    return !!exercise.createdById && exercise.createdById === this.authService.currentUser()?.id;
+  }
+
   /**
-   * Quién puede tocar la parte común de un ejercicio: quien administra, y quien
-   * lo creó. Los del catálogo base no tienen autor, así que son del
-   * administrador.
+   * Quién puede cambiar o borrar un ejercicio: su autor, y los del catálogo
+   * común —que no tienen autor— quien administra.
    */
   puedeGestionar(exercise: Exercise): boolean {
-    return this.isAdmin() || (!!exercise.createdById && exercise.createdById === this.authService.currentUser()?.id);
+    return exercise.createdById ? this.esMio(exercise) : this.isAdmin();
   }
 
   /** El del ejercicio abierto; al crear uno nuevo, siempre se puede. */
@@ -69,6 +73,11 @@ export class ExerciseGallery {
     if (this.creando()) return true;
     const abierta = this.abierta();
     return !!abierta && this.puedeGestionar(abierta.exercise);
+  });
+
+  readonly esMioAbierto = computed(() => {
+    const abierta = this.abierta();
+    return !!abierta && this.esMio(abierta.exercise);
   });
 
   readonly catalog = signal<Exercise[]>([]);
@@ -83,6 +92,7 @@ export class ExerciseGallery {
     { key: 'todos', label: 'Todos' },
     { key: 'gym', label: 'Gym' },
     { key: 'calistenia', label: 'Calistenia' },
+    { key: 'mios', label: 'Míos' },
   ];
 
   readonly tarjetas = computed<Tarjeta[]>(() => {
@@ -91,7 +101,7 @@ export class ExerciseGallery {
     const texto = this.busqueda().trim().toLowerCase();
 
     return this.catalog()
-      .filter((e) => (filtro === 'todos' ? true : e.category === filtro))
+      .filter((e) => (filtro === 'todos' ? true : filtro === 'mios' ? this.esMio(e) : e.category === filtro))
       .filter((e) => (texto ? e.name.toLowerCase().includes(texto) : true))
       .map((exercise) => {
         const profile = porEjercicio.get(exercise.id) ?? null;
@@ -100,6 +110,8 @@ export class ExerciseGallery {
   });
 
   readonly conImagen = computed(() => this.tarjetas().filter((t) => t.imagen).length);
+
+  readonly mios = computed(() => this.catalog().filter((e) => this.esMio(e)).length);
 
   /* --- Imagen ampliada ------------------------------------------------------- */
 
@@ -168,6 +180,14 @@ export class ExerciseGallery {
   readonly creando = signal(false);
   readonly borrarTarget = signal<Exercise | null>(null);
   readonly borrarError = signal<string | null>(null);
+
+  readonly borrarMensaje = computed(() => {
+    const target = this.borrarTarget();
+    if (!target) return '';
+    return this.esMio(target)
+      ? `Se eliminará «${target.name}» de tu galería. Solo se puede si no lo usa ningún entreno ni ninguna rutina tuyos.`
+      : `Se eliminará «${target.name}» del catálogo común, para todos los usuarios. Solo se puede si no lo usa ningún entreno ni ninguna rutina.`;
+  });
 
   constructor() {
     this.cargar();
@@ -336,7 +356,6 @@ export class ExerciseGallery {
     this.candidatos.set([]);
   }
 
-  /** Crédito que acompaña a la imagen; CC-BY-SA obliga a citar al autor. */
   /* --- Guardar ---------------------------------------------------------------- */
 
   guardar(): void {

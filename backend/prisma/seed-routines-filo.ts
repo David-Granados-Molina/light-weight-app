@@ -134,7 +134,10 @@ async function main() {
 
     const exerciseIds: string[] = [];
     for (const item of routine.exercises) {
-      let exercise = await prisma.exercise.findUnique({ where: { name: item.catalog }, select: { id: true } });
+      let exercise = await prisma.exercise.findFirst({
+        where: { name: item.catalog, createdById: null },
+        select: { id: true },
+      });
 
       if (!exercise) {
         if (!item.create) throw new Error(`"${item.catalog}" no está en el catálogo y no se indicó cómo crearlo`);

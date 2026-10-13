@@ -184,11 +184,13 @@ async function main() {
   console.log('Seed: creando catálogo de ejercicios...');
   const exerciseByName = new Map<string, string>();
   for (const ex of CATALOG) {
-    const created = await prisma.exercise.upsert({
-      where: { name: ex.name },
-      update: { inputType: ex.inputType },
-      create: ex,
+    const existente = await prisma.exercise.findFirst({
+      where: { name: ex.name, createdById: null },
+      select: { id: true },
     });
+    const created = existente
+      ? await prisma.exercise.update({ where: { id: existente.id }, data: { inputType: ex.inputType } })
+      : await prisma.exercise.create({ data: ex });
     exerciseByName.set(ex.name, created.id);
   }
 

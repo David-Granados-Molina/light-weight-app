@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { addDays, startOfDay } from '../lib/dateUtils';
 import { prisma } from '../lib/prisma';
+import { ejerciciosVisibles } from '../lib/exercise-scope';
 
 export const sessionsRouter = Router();
 
@@ -132,6 +133,10 @@ sessionsRouter.post('/', asyncHandler(async (req, res) => {
   const userId = req.userId!;
   const { exercises, date, ...rest } = parsed.data;
 
+  if (!(await ejerciciosVisibles(userId, exercises.map((e) => e.exerciseId)))) {
+    return res.status(400).json({ error: 'Hay ejercicios que no están en tu galería' });
+  }
+
   const session = await prisma.workoutSession.create({
     data: {
       ...rest,
@@ -167,6 +172,10 @@ sessionsRouter.put('/:id', asyncHandler(async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
   const { exercises, date, ...rest } = parsed.data;
+
+  if (!(await ejerciciosVisibles(req.userId!, exercises.map((e) => e.exerciseId)))) {
+    return res.status(400).json({ error: 'Hay ejercicios que no están en tu galería' });
+  }
 
   const owned = await prisma.workoutSession.findFirst({
     where: { id: req.params.id, userId: req.userId! },

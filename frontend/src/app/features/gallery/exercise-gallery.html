@@ -50,7 +50,8 @@
     <div class="lw-error" role="alert">No se ha podido cargar el catálogo de ejercicios.</div>
   } @else {
     <p class="gal-count lw-num">
-      {{ tarjetas().length }} {{ tarjetas().length === 1 ? 'ejercicio' : 'ejercicios' }} · {{ conImagen() }} con imagen
+      {{ tarjetas().length }} {{ tarjetas().length === 1 ? 'ejercicio' : 'ejercicios' }} · {{ conImagen() }} con imagen ·
+      {{ mios() }} {{ mios() === 1 ? 'tuyo' : 'tuyos' }}
     </p>
 
     <div class="gal-grid">
@@ -82,8 +83,11 @@
                 <span class="lw-dot" [style.background]="categoryColor[t.exercise.category]"></span>
                 {{ categoryLabel[t.exercise.category] }} · {{ typeLabel[t.exercise.type] }}
               </span>
-              @if (t.profile?.videoUrl || t.profile?.description) {
+              @if (esMio(t.exercise) || t.profile?.videoUrl || t.profile?.description) {
                 <span class="gal-card-badges">
+                  @if (esMio(t.exercise)) {
+                    <span class="gal-badge is-mine">Mío</span>
+                  }
                   @if (t.profile?.videoUrl) {
                     <span class="gal-badge">Vídeo</span>
                   }
@@ -99,7 +103,7 @@
             <button
               type="button"
               class="gal-card-delete"
-              [attr.aria-label]="'Eliminar ' + t.exercise.name + ' del catálogo'"
+              [attr.aria-label]="'Eliminar ' + t.exercise.name + (esMio(t.exercise) ? ' de tu galería' : ' del catálogo')"
               (click)="pedirBorrado(t.exercise, $event)"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
@@ -205,11 +209,15 @@
 
         <!-- Catálogo compartido -->
         <section class="gal-block">
-          <span class="lw-label">Ficha del catálogo</span>
-          @if (!creando() && !puedeEditarAbierto()) {
-            <p class="gal-hint">
-              Estos datos son comunes a todos los usuarios: los cambia quien administra o quien creó el ejercicio.
-            </p>
+          <span class="lw-label">Ficha del ejercicio</span>
+          @if (creando()) {
+            <p class="gal-hint">El ejercicio que crees es solo tuyo: no aparece en la galería de los demás.</p>
+          } @else if (esMioAbierto()) {
+            <p class="gal-hint">Este ejercicio es tuyo: solo lo ves tú, y lo puedes cambiar o borrar cuando quieras.</p>
+          } @else if (puedeEditarAbierto()) {
+            <p class="gal-hint">Es del catálogo común: lo que cambies aquí lo verán todos los usuarios.</p>
+          } @else {
+            <p class="gal-hint">Es del catálogo común a todos los usuarios: solo lo cambia quien administra.</p>
           }
 
           <label class="lw-field">
@@ -271,7 +279,9 @@
         <!-- Ficha personal -->
         <section class="gal-block">
           <span class="lw-label">Tu ficha</span>
-          <p class="gal-hint">Esto es tuyo: otra persona puede tener su propio vídeo y sus propias notas del mismo ejercicio.</p>
+          @if (!esMioAbierto()) {
+            <p class="gal-hint">Esto es tuyo: otra persona puede tener su propio vídeo y sus propias notas del mismo ejercicio.</p>
+          }
 
           <label class="lw-field">
             <span class="lw-label">Vídeo</span>
@@ -354,12 +364,8 @@
 
 @if (borrarTarget(); as target) {
   <app-confirm-dialog
-    title="Eliminar del catálogo"
-    [message]="
-      'Se eliminará «' +
-      target.name +
-      '» del catálogo compartido, para todos los usuarios. Solo se puede si no lo usa ningún entreno ni ninguna rutina.'
-    "
+    [title]="esMio(target) ? 'Eliminar de tu galería' : 'Eliminar del catálogo'"
+    [message]="borrarMensaje()"
     confirmText="Eliminar"
     cancelText="Dejarlo"
     (confirmed)="confirmarBorrado()"

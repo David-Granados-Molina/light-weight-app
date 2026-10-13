@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
-import { isAdminEmail } from '../lib/accounts';
+import { ejercicioVisible, puedeGestionar, visiblePara } from '../lib/exercise-scope';
 
 export const exercisesRouter = Router();
 
@@ -22,6 +22,7 @@ exercisesRouter.get('/', asyncHandler(async (req, res) => {
 
   const exercises = await prisma.exercise.findMany({
     where: {
+      ...visiblePara(req.userId!),
       ...(category ? { category: category as 'gym' | 'calistenia' } : {}),
       ...(q ? { name: { contains: String(q) } } : {}),
     },
@@ -32,25 +33,22 @@ exercisesRouter.get('/', asyncHandler(async (req, res) => {
 }));
 
 exercisesRouter.get('/:id', asyncHandler(async (req, res) => {
-  const exercise = await prisma.exercise.findUnique({ where: { id: req.params.id } });
+  const exercise = await ejercicioVisible(req.userId!, req.params.id);
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
   res.json(exercise);
 }));
 
-/**
- * Quién puede tocar un ejercicio del catálogo compartido: quien administra, y
- * quien lo creó. Los del catálogo base no tienen autor, así que son solo del
- * administrador.
- */
-async function puedeGestionar(userId: string, exercise: { createdById: string | null }): Promise<boolean> {
-  if (exercise.createdById === userId) return true;
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
-  return !!user && isAdminEmail(user.email);
-}
-
 exercisesRouter.post('/', asyncHandler(async (req, res) => {
   const parsed = exerciseSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  // El nombre solo choca con los que ya ve este usuario: los suyos y los del
+  // catálogo base.
+  const repetido = await prisma.exercise.findFirst({
+    where: { name: parsed.data.name, ...visiblePara(req.userId!) },
+    select: { id: true },
+  });
+  if (repetido) return res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
 
   try {
     const exercise = await prisma.exercise.create({ data: { ...parsed.data, createdById: req.userId! } });
@@ -64,16 +62,21 @@ exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
   const parsed = exerciseSchema.partial().safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const actual = await prisma.exercise.findUnique({
-    where: { id: req.params.id },
-    select: { id: true, createdById: true },
-  });
+  const actual = await ejercicioVisible(req.userId!, req.params.id);
   if (!actual) return res.status(404).json({ error: 'Ejercicio no encontrado' });
   if (!(await puedeGestionar(req.userId!, actual))) return res.status(403).json({ error: 'No autorizado' });
 
+  if (parsed.data.name && parsed.data.name !== actual.name) {
+    const repetido = await prisma.exercise.findFirst({
+      where: { name: parsed.data.name, id: { not: actual.id }, ...visiblePara(req.userId!) },
+      select: { id: true },
+    });
+    if (repetido) return res.status(409).json({ error: 'Ya existe un ejercicio con ese nombre' });
+  }
+
   try {
     const exercise = await prisma.exercise.update({
-      where: { id: req.params.id },
+      where: { id: actual.id },
       data: parsed.data,
     });
     res.json(exercise);
@@ -83,10 +86,7 @@ exercisesRouter.put('/:id', asyncHandler(async (req, res) => {
 }));
 
 exercisesRouter.delete('/:id', asyncHandler(async (req, res) => {
-  const exercise = await prisma.exercise.findUnique({
-    where: { id: req.params.id },
-    select: { id: true, createdById: true },
-  });
+  const exercise = await ejercicioVisible(req.userId!, req.params.id);
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
   if (!(await puedeGestionar(req.userId!, exercise))) return res.status(403).json({ error: 'No autorizado' });
 

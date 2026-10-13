@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
+import { ejercicioVisible } from '../lib/exercise-scope';
 
 export const progressRouter = Router();
 
@@ -136,7 +137,7 @@ async function buildExerciseSessions(userId: string, exerciseId: string) {
 progressRouter.get('/:exerciseId', asyncHandler(async (req, res) => {
   const userId = req.userId!;
 
-  const exercise = await prisma.exercise.findUnique({ where: { id: req.params.exerciseId } });
+  const exercise = await ejercicioVisible(userId, req.params.exerciseId);
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
 
   const [data, sessions] = await Promise.all([

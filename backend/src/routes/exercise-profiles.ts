@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
+import { ejercicioVisible } from '../lib/exercise-scope';
 
 export const exerciseProfilesRouter = Router();
 
@@ -39,7 +40,7 @@ exerciseProfilesRouter.put('/:exerciseId', asyncHandler(async (req, res) => {
   const parsed = profileSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const exercise = await prisma.exercise.findUnique({ where: { id: req.params.exerciseId }, select: { id: true } });
+  const exercise = await ejercicioVisible(req.userId!, req.params.exerciseId);
   if (!exercise) return res.status(404).json({ error: 'Ejercicio no encontrado' });
 
   const datos = {

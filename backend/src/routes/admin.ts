@@ -2,12 +2,14 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../lib/async-handler';
 import { prisma } from '../lib/prisma';
+import { ejercicioParaUsuario } from '../lib/exercise-scope';
 import { buildProgressData } from './progress';
 import {
   copyRoutineTo,
   createRoutineFor,
   deleteRoutineFor,
   routineInclude,
+  type RoutineInput,
   routineSchema,
   updateRoutineFor,
 } from './routines';
@@ -75,6 +77,16 @@ adminRouter.get('/users/:userId/routines/:routineId', asyncHandler(async (req, r
    con el dueño como parámetro: lo único que cambia es de quién es la rutina. El
    `requireAdmin` que monta este router en `index.ts` es lo que autoriza. */
 
+/* Quien administra monta la rutina con su propia galería, que no es la del
+   destinatario: los ejercicios privados se copian a su nombre para que los vea. */
+async function paraLaGaleriaDe(userId: string, data: RoutineInput): Promise<RoutineInput> {
+  const exercises = [];
+  for (const e of data.exercises) {
+    exercises.push({ ...e, exerciseId: await ejercicioParaUsuario(userId, e.exerciseId) });
+  }
+  return { ...data, exercises };
+}
+
 // POST /api/admin/users/:userId/routines
 adminRouter.post('/users/:userId/routines', asyncHandler(async (req, res) => {
   const parsed = routineSchema.safeParse(req.body);
@@ -83,7 +95,7 @@ adminRouter.post('/users/:userId/routines', asyncHandler(async (req, res) => {
   const target = await prisma.user.findUnique({ where: { id: req.params.userId }, select: { id: true } });
   if (!target) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-  res.status(201).json(await createRoutineFor(target.id, parsed.data));
+  res.status(201).json(await createRoutineFor(target.id, await paraLaGaleriaDe(target.id, parsed.data)));
 }));
 
 // PUT /api/admin/users/:userId/routines/:routineId
@@ -91,7 +103,11 @@ adminRouter.put('/users/:userId/routines/:routineId', asyncHandler(async (req, r
   const parsed = routineSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
-  const routine = await updateRoutineFor(req.params.userId, req.params.routineId, parsed.data);
+  const routine = await updateRoutineFor(
+    req.params.userId,
+    req.params.routineId,
+    await paraLaGaleriaDe(req.params.userId, parsed.data),
+  );
   if (!routine) return res.status(404).json({ error: 'Rutina no encontrada' });
 
   res.json(routine);

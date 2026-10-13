@@ -155,6 +155,12 @@
   font-size: var(--t-xs);
 }
 
+.gal-badge.is-mine {
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+  color: var(--accent-text);
+}
+
 .gal-card-delete {
   position: absolute;
   top: var(--s-2);

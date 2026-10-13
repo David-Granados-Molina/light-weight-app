@@ -14,11 +14,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log(`Sincronizando ${CATALOG.length} ejercicios...`);
   for (const ex of CATALOG) {
-    await prisma.exercise.upsert({
-      where: { name: ex.name },
-      update: { primaryMuscles: ex.primaryMuscles, secondaryMuscles: ex.secondaryMuscles },
-      create: ex,
+    const existente = await prisma.exercise.findFirst({
+      where: { name: ex.name, createdById: null },
+      select: { id: true },
     });
+    if (existente) {
+      await prisma.exercise.update({
+        where: { id: existente.id },
+        data: { primaryMuscles: ex.primaryMuscles, secondaryMuscles: ex.secondaryMuscles },
+      });
+    } else {
+      await prisma.exercise.create({ data: ex });
+    }
   }
   console.log('Listo.');
 }
