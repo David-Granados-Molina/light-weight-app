@@ -57,6 +57,12 @@
 .gal-card {
   position: relative;
   display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  /* El relleno vive en la tarjeta y no en el botón de dentro: la miniatura es
+     ahora un hermano suyo, y sin esto se pegaba al borde y se salía por la
+     esquina redondeada. */
+  padding: var(--s-3);
   border: 1px solid var(--line);
   border-left: 3px solid var(--line-strong);
   border-radius: var(--r-md);
@@ -72,10 +78,9 @@
 .gal-card-main {
   display: flex;
   align-items: center;
-  gap: var(--s-3);
   flex: 1;
   min-width: 0;
-  padding: var(--s-3);
+  padding: 0;
   background: transparent;
   border: 0;
   text-align: left;
@@ -102,10 +107,6 @@
 .gal-thumb.has-image {
   background: #ffffff;
   cursor: zoom-in;
-}
-
-.gal-card-main {
-  padding-left: 0;
 }
 
 .gal-thumb img {
