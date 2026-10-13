@@ -119,6 +119,10 @@
         </div>
       }
     </div>
+
+    @if (conImagen()) {
+      <p class="gal-attribution">Imágenes de ejercicios de wger.de, bajo licencia CC-BY-SA.</p>
+    }
   }
 </div>
 
@@ -179,9 +183,6 @@
             </div>
           </div>
 
-          @if (creditoImagen(); as credito) {
-            <p class="gal-credit">{{ credito }}</p>
-          }
 
           @if (sinCandidatos()) {
             <p class="gal-hint">Sin resultados. El catálogo libre está en inglés: prueba con otro término («bench press», «squat»…) o sube tu imagen.</p>
@@ -195,13 +196,10 @@
                     <img [src]="c.thumbnail" [alt]="c.name" loading="lazy" />
                   </span>
                   <span class="gal-candidate-name">{{ c.name }}</span>
-                  @if (c.author) {
-                    <span class="gal-candidate-author">{{ c.author }} · {{ c.license }}</span>
-                  }
                 </button>
               }
             </div>
-            <p class="gal-hint">Imágenes de wger.de, bajo Creative Commons. Se guarda el enlace y la autoría, no una copia.</p>
+            <p class="gal-hint">Se guarda el enlace a la imagen, no una copia.</p>
           }
         </section>
 
@@ -371,7 +369,6 @@
   <app-image-lightbox
     [src]="vista.src"
     [alt]="vista.alt"
-    [credit]="vista.credit"
     (closed)="cerrarLightbox()"
   />
 }

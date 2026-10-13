@@ -357,14 +357,10 @@
   border-color: var(--accent-solid);
 }
 
-.gal-candidate-author {
-  font-size: var(--t-xs);
-  color: var(--text-muted);
-}
-
-.gal-credit {
+.gal-attribution {
   color: var(--text-muted);
   font-size: var(--t-xs);
+  text-align: center;
 }
 
 .gal-candidate-shot img {

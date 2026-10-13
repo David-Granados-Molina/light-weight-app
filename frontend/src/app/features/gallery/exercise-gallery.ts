@@ -87,37 +87,25 @@ export class ExerciseGallery {
 
   /* --- Imagen ampliada ------------------------------------------------------- */
 
-  readonly lightbox = signal<{ src: string; alt: string; credit: string | null } | null>(null);
+  readonly lightbox = signal<{ src: string; alt: string } | null>(null);
 
   ampliar(tarjeta: Tarjeta, event: Event): void {
     event.stopPropagation();
     if (!tarjeta.imagen) return;
-    this.lightbox.set({
-      src: tarjeta.imagen,
-      alt: tarjeta.exercise.name,
-      credit: this.credito(tarjeta.profile?.imageAuthor ?? null, tarjeta.profile?.imageLicense ?? null),
-    });
+    this.lightbox.set({ src: tarjeta.imagen, alt: tarjeta.exercise.name });
   }
 
   /** La de la ficha abierta, que puede ser una recién elegida y aún sin guardar. */
   ampliarPrevia(): void {
     const src = this.imagenPrevia();
     if (!src) return;
-    this.lightbox.set({
-      src,
-      alt: this.formNombre(),
-      credit: this.credito(this.formImagenAutor(), this.formImagenLicencia()),
-    });
+    this.lightbox.set({ src, alt: this.formNombre() });
   }
 
   cerrarLightbox(): void {
     this.lightbox.set(null);
   }
 
-  private credito(autor: string | null, licencia: string | null): string | null {
-    if (!autor && !licencia) return null;
-    return `Imagen de ${[autor, licencia].filter(Boolean).join(' · ')}, vía wger.de`;
-  }
 
   /* --- Ficha abierta -------------------------------------------------------- */
 
@@ -333,8 +321,6 @@ export class ExerciseGallery {
   }
 
   /** Crédito que acompaña a la imagen; CC-BY-SA obliga a citar al autor. */
-  readonly creditoImagen = computed(() => this.credito(this.formImagenAutor(), this.formImagenLicencia()));
-
   /* --- Guardar ---------------------------------------------------------------- */
 
   guardar(): void {
