@@ -6,6 +6,12 @@ import { ejercicioVisible, puedeGestionar, visiblePara } from '../lib/exercise-s
 
 export const exercisesRouter = Router();
 
+// Una URL de fuera o la ruta de la copia local, que empieza por barra.
+const imagenUrl = z
+  .string()
+  .max(500)
+  .refine((valor) => /^https?:\/\//.test(valor) || valor.startsWith('/'), 'Tiene que ser una URL o una ruta local');
+
 const exerciseSchema = z.object({
   name: z.string().min(2),
   category: z.enum(['gym', 'calistenia']),
@@ -14,7 +20,7 @@ const exerciseSchema = z.object({
   muscleGroup: z.string().optional().nullable(),
   primaryMuscles: z.array(z.string().min(1).max(40)).max(8).optional(),
   secondaryMuscles: z.array(z.string().min(1).max(40)).max(8).optional(),
-  imageUrl: z.string().url().max(500).optional().nullable().or(z.literal('')),
+  imageUrl: imagenUrl.optional().nullable().or(z.literal('')),
   imageAuthor: z.string().max(120).optional().nullable(),
   imageLicense: z.string().max(60).optional().nullable(),
 });
