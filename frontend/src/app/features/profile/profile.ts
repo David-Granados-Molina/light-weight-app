@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeMode, ThemeService } from '../../core/services/theme.service';
@@ -71,15 +71,27 @@ export class Profile implements OnDestroy {
   readonly error = signal<string | null>(null);
   readonly success = signal(false);
 
-  readonly canSave = computed(() => this.name().trim().length >= 2 && !this.saving());
+  /**
+   * No se guarda un perfil que no se ha llegado a leer: si el servidor no ha
+   * contestado todavía, los campos están vacíos y guardarlos borraría el avatar
+   * y el color de verdad.
+   */
+  readonly canSave = computed(() => !!this.user() && this.name().trim().length >= 2 && !this.saving());
+
+  /** Una vez tocado el formulario, lo que llegue del servidor ya no lo pisa. */
+  private readonly tocado = signal(false);
 
   private blobUrl: string | null = null;
 
   constructor() {
-    const user = this.user();
-    this.name.set(user?.name ?? '');
-    this.avatarId.set(user?.avatarUrl ?? null);
-    this.themeColor.set(user?.themeColor ?? '#ffbf00');
+    effect(() => {
+      const user = this.user();
+      if (!user || this.tocado()) return;
+
+      this.name.set(user.name);
+      this.avatarId.set(user.avatarUrl);
+      this.themeColor.set(user.themeColor ?? '#ffbf00');
+    });
   }
 
   ngOnDestroy(): void {
@@ -87,6 +99,7 @@ export class Profile implements OnDestroy {
   }
 
   onNameInput(event: Event): void {
+    this.tocado.set(true);
     this.name.set((event.target as HTMLInputElement).value);
     this.success.set(false);
   }
@@ -102,12 +115,14 @@ export class Profile implements OnDestroy {
   }
 
   selectAvatar(id: string | null): void {
+    this.tocado.set(true);
     this.avatarId.set(id);
     this.avatarMenuOpen.set(false);
     this.success.set(false);
   }
 
   selectColor(color: string): void {
+    this.tocado.set(true);
     this.themeColor.set(color);
     this.themeMenuOpen.set(false);
     this.success.set(false);

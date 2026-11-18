@@ -19,6 +19,13 @@ export interface AuthResponse {
 }
 
 /**
+ * Lo que devuelve `GET /auth/me`. `tokenRenovado` llega cuando al token le
+ * queda poco: el servidor lo cambia por uno nuevo sin que nadie tenga que
+ * volver a entrar.
+ */
+export type MeResponse = AuthUser & { tokenRenovado?: string };
+
+/**
  * Respuesta al pedir un código.
  *
  * `delivered` es `false` cuando el servidor no tiene el correo configurado: el

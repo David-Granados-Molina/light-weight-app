@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { isAdminEmail, TEST_USER_EMAIL } from '../lib/accounts';
 import { asyncHandler } from '../lib/async-handler';
-import { compareLoginCode, hashLoginCode, signToken } from '../lib/auth';
+import { compareLoginCode, hashLoginCode, signToken, tocaRenovar, tokenDeLaPeticion } from '../lib/auth';
 import { CodeDelivery, sendLoginCodeEmail } from '../lib/mailer';
 import { prisma } from '../lib/prisma';
 import { requireAuth } from '../middleware/requireAuth';
@@ -163,7 +163,12 @@ authRouter.post('/test-login', asyncHandler(async (_req, res) => {
 authRouter.get('/me', requireAuth, asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId! } });
   if (!user) return res.status(401).json({ error: 'No autenticado' });
-  res.json(toPublicUser(user));
+
+  // La sesión que se usa no caduca: se renueva sola antes de llegar al final.
+  const token = tokenDeLaPeticion(req.header('authorization'));
+  const tokenRenovado = token && tocaRenovar(token) ? signToken(user.id) : undefined;
+
+  res.json({ ...toPublicUser(user), ...(tokenRenovado ? { tokenRenovado } : {}) });
 }));
 
 const updateMeSchema = z.object({

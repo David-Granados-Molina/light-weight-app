@@ -7,6 +7,11 @@
   @if (step() === 'email') {
     <h1 class="auth-title">Iniciar sesión</h1>
     <p class="auth-subtitle">Escribe tu email y te enviamos un código de acceso.</p>
+    @if (sesionRechazada()) {
+      <p class="auth-notice is-warning">
+        Tu sesión caducó y hay que volver a entrar.@if (entrenoAMedias()) { El entreno que tenías a medias sigue guardado. }
+      </p>
+    }
 
     <div class="auth-form">
       <div class="lw-field">

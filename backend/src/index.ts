@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { authRouter } from './routes/auth';
 import { exerciseImagesRouter } from './routes/exercise-images';
 import { exerciseProfilesRouter } from './routes/exercise-profiles';
@@ -38,11 +39,43 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 
+// Render termina el TLS en su proxy: sin esto todas las peticiones llegarían
+// con la misma IP y los límites de abajo echarían a todo el mundo a la vez.
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:4200' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+
+/**
+ * Las rutas de entrada son las únicas sin autenticar, y cada código cuesta un
+ * bcrypt y un correo. Sin tope, cualquiera puede dejar sin acceso a los de
+ * casa —cada código nuevo quema el anterior—, agotar la cuota de correo y
+ * tumbar la API a base de hashes. Los topes son holgados: entrar un par de
+ * veces seguidas nunca los roza.
+ */
+const limite = (minutos: number, maximo: number) =>
+  rateLimit({
+    windowMs: minutos * 60 * 1000,
+    limit: maximo,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Demasiados intentos seguidos. Espera un momento y vuelve a probar.' },
+  });
+
+// El token renovado viaja en la respuesta de GET /me: que no se quede en
+// ninguna caché por el camino, ni se sirva la de un usuario a otro.
+app.use('/api/auth', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('Vary', 'Authorization');
+  next();
+});
+
+app.use('/api/auth/request-code', limite(15, 10));
+app.use('/api/auth/verify-code', limite(15, 30));
+app.use('/api/auth/test-login', limite(60, 30));
 
 app.use('/api/auth', authRouter);
 

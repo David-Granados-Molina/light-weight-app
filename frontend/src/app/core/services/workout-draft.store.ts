@@ -29,6 +29,7 @@ export interface AddedExercise {
 }
 
 interface DraftSnapshot {
+  ownerId: string | null;
   selectedDate: string | null;
   added: AddedExercise[];
   selectedRoutineId: string | null;
@@ -61,6 +62,13 @@ export class WorkoutDraftStore {
 
   readonly committed = signal(false);
 
+  /**
+   * De quién es el borrador. Lo marca la sesión al entrar: si quien entra es
+   * otra persona, el entreno a medias se descarta; si es la misma, se conserva
+   * aunque por el camino se haya cerrado la sesión.
+   */
+  readonly ownerId = signal<string | null>(null);
+
   /** Hay ejercicios añadidos sin guardar: el registro de un entreno está a medias. */
   readonly hasInProgress = computed(() => this.added().length > 0 && !this.committed());
 
@@ -69,12 +77,18 @@ export class WorkoutDraftStore {
 
     effect(() => {
       this.persist({
+        ownerId: this.ownerId(),
         selectedDate: this.selectedDate(),
         added: this.added(),
         selectedRoutineId: this.selectedRoutineId(),
         editingSessionId: this.editingSessionId(),
       });
     });
+  }
+
+  adoptar(userId: string): void {
+    if (this.ownerId() && this.ownerId() !== userId) this.resetAll();
+    this.ownerId.set(userId);
   }
 
   reset(): void {
@@ -95,6 +109,7 @@ export class WorkoutDraftStore {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const snapshot: DraftSnapshot = JSON.parse(raw);
+      this.ownerId.set(snapshot.ownerId ?? null);
       this.selectedDate.set(snapshot.selectedDate ?? null);
       this.added.set(snapshot.added ?? []);
       this.selectedRoutineId.set(snapshot.selectedRoutineId ?? null);

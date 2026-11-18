@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { WorkoutDraftStore } from '../../../core/services/workout-draft.store';
 import { ExerciseLoader } from '../../../shared/components/exercise-loader/exercise-loader';
 
 /** `email` pide el código; `code` lo verifica. No hay contraseña en ningún punto. */
@@ -20,6 +21,16 @@ export class Login {
   private readonly router = inject(Router);
 
   readonly codeInput = viewChild<ElementRef<HTMLInputElement>>('codeInput');
+
+  /**
+   * Por qué se cerró la última sesión. Solo se dice cuando la cerró el
+   * servidor: aterrizar aquí sin explicación, a mitad de un entreno, parece un
+   * fallo de la aplicación.
+   */
+  readonly sesionRechazada = signal(this.authService.motivoDelCierre() === 'rechazada');
+
+  /** Solo se promete lo que hay: el aviso del entreno guardado, si lo hay. */
+  readonly entrenoAMedias = inject(WorkoutDraftStore).hasInProgress;
 
   readonly step = signal<Step>('email');
   readonly email = signal('');
@@ -41,6 +52,9 @@ export class Login {
   readonly canVerify = computed(() => this.code().length === CODE_LENGTH && !this.loading());
 
   constructor() {
+    // Dicho una vez, ya está dicho: no vuelve a salir en la siguiente visita.
+    this.authService.olvidarMotivo();
+
     // Al llegar el código, el foco va al campo: es lo único que queda por hacer.
     effect(() => {
       if (this.step() === 'code') this.codeInput()?.nativeElement.focus();
