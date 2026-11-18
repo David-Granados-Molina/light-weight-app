@@ -1,0 +1,17 @@
+<dialog #dialog class="dialog" (cancel)="onCancelEvent($event)" (click)="onBackdropClick($event)">
+  <div class="dialog-body">
+    <h2 class="dialog-title">Nueva actualización</h2>
+
+    @for (novedad of novedades(); track novedad.version) {
+      <ul class="notas-lista">
+        @for (punto of novedad.puntos; track punto) {
+          <li class="notas-punto">{{ punto }}</li>
+        }
+      </ul>
+    }
+
+    <div class="dialog-actions">
+      <button type="button" class="lw-btn-primary" autofocus (click)="cerrado.emit()">Entendido</button>
+    </div>
+  </div>
+</dialog>

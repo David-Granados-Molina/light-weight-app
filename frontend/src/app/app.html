@@ -19,3 +19,7 @@
 @if (!isAuthRoute()) {
   <app-tab-bar />
 }
+
+@if (novedades().length) {
+  <app-release-notes [novedades]="novedades()" (cerrado)="cerrarNovedades()" />
+}
